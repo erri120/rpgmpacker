@@ -27,6 +27,7 @@ CPMAddPackage (
         "GHC_FILESYSTEM_BUILD_TESTING Off"
         "GHC_FILESYSTEM_BUILD_EXAMPLES Off"
         "GHC_FILESYSTEM_WITH_INSTALL Off"
+        "GHC_WITH_EXCEPTIONS Off"
 )
 
 add_executable(RPGMPacker src/main.cpp)
