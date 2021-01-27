@@ -1,0 +1,6 @@
+{
+    "cmake.cmakePath": "cmake",
+    "cmake.configureSettings": {
+        "CMAKE_TOOLCHAIN_FILE": ""
+    },
+}
