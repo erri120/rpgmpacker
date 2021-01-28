@@ -30,7 +30,7 @@ CPMAddPackage (
         "GHC_WITH_EXCEPTIONS Off"
 )
 
-add_executable(RPGMPacker src/main.cpp)
+add_executable(RPGMPacker src/platform.hpp src/formatters.hpp src/utility.hpp src/main.cpp)
 
 target_link_libraries(RPGMPacker cxxopts)
 target_link_libraries(RPGMPacker spdlog)

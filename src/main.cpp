@@ -8,58 +8,11 @@
 #include <string>
 #include <numeric>
 
+#include "platform.hpp"
+#include "formatters.hpp"
+#include "utility.hpp"
+
 #define RPGMPACKER_TESTING
-
-enum class Platform {
-    Windows = 0,
-    OSX = 1,
-    Linux = 2,
-    Browser = 3,
-    Mobile = 4
-};
-
-static const std::string PlatformNames[] = { std::string("Windows"), std::string("OSX"), std::string("Linux"), std::string("Browser"), std::string("Mobile") };
-static const std::string PlatformFolders[] = { std::string("nwjs-win"), std::string("nwjs-osx-unsigned"), std::string("nwjs-lnx"), std::string(""), std::string("") };
-
-bool isValidDirectory(std::string directory, std::string name, std::shared_ptr<spdlog::logger> errorLogger);
-bool ensureDirectory(ghc::filesystem::path path, std::shared_ptr<spdlog::logger> errorLogger);
-bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platforms, std::shared_ptr<spdlog::logger> errorLogger);
-
-template <>
-struct fmt::formatter<ghc::filesystem::path> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.end();
-    }
-
-    template <typename FormatContext>
-    auto format(const ghc::filesystem::path& p, FormatContext& ctx) {
-        return format_to(ctx.out(), "{}", p.c_str());
-    }
-};
-
-template <>
-struct fmt::formatter<std::error_code> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.end();
-    }
-
-    template <typename FormatContext>
-    auto format(const std::error_code& ec, FormatContext& ctx) {
-        return format_to(ctx.out(), "[{}]({}): {}", ec.category().name(), ec.value(), ec.message());
-    }
-};
-
-template <>
-struct fmt::formatter<Platform> {
-    constexpr auto parse(format_parse_context& ctx) {
-        return ctx.end();
-    }
-
-    template <typename FormatContext>
-    auto format(const Platform& p, FormatContext& ctx) {
-        return format_to(ctx.out(), "{}", PlatformNames[(int)p]);
-    }
-};
 
 int main(int argc, char** argv) {
     auto logger = spdlog::stdout_color_mt("console");
@@ -83,7 +36,7 @@ int main(int argc, char** argv) {
 
     try {
         auto result = options.parse(argc, argv);
-        
+
         if (result.count("help")) {
             std::cout << options.help() << std::endl;
             return 0;
@@ -105,19 +58,19 @@ int main(int argc, char** argv) {
         platformNames.emplace_back("linux");
         platformNames.emplace_back("browser");
 #else
-    input = result["input"].as<std::string>();
-    output = result["output"].as<std::string>();
-    rpgmaker = result["rpgmaker"].as<std::string>();
-    encryptImages = result["encryptImages"].as<bool>();
-    encryptAudio = result["encryptImages"].as<bool>();
-    debug = result["debug"].as<bool>();
+        input = result["input"].as<std::string>();
+        output = result["output"].as<std::string>();
+        rpgmaker = result["rpgmaker"].as<std::string>();
+        encryptImages = result["encryptImages"].as<bool>();
+        encryptAudio = result["encryptImages"].as<bool>();
+        debug = result["debug"].as<bool>();
 
-    if (encryptImages || encryptAudio)
-        encryptionKey = result["encryptionKey"].as<std::string>();
-    else
-        encryptionKey = std::string("");
+        if (encryptImages || encryptAudio)
+            encryptionKey = result["encryptionKey"].as<std::string>();
+        else
+            encryptionKey = std::string("");
 
-    platformNames = result["platforms"].as<std::vector<std::string>>();
+        platformNames = result["platforms"].as<std::vector<std::string>>();
 #endif
     } catch (const cxxopts::OptionException& e) {
         errorLogger->error(e.what());
@@ -152,7 +105,7 @@ int main(int argc, char** argv) {
     std::vector<Platform> platforms;
     if (!getPlatforms(&platformNames, &platforms, errorLogger))
         return -1;
-    
+
     auto inputPath = ghc::filesystem::path(input);
     auto outputPath = ghc::filesystem::path(output);
     auto rpgmakerPath = ghc::filesystem::path(rpgmaker);
@@ -171,7 +124,7 @@ int main(int argc, char** argv) {
     ghc::filesystem::create_directory(outputPath, ec);
     if (!ensureDirectory(outputPath, errorLogger))
         return 1;
-    
+
     logger->info("Building output for {} platforms", platforms.size());
     for (auto platform : platforms) {
         spdlog::stopwatch sw;
@@ -187,7 +140,7 @@ int main(int argc, char** argv) {
                 errorLogger->error("The template directory at {} does not exist!", templateFolderPath);
                 return 1;
             }
-            
+
             logger->debug("Template Folder: {}", templateFolderPath);
             logger->info("Copying files from {} to {}", templateFolderPath, platformOutputPath);
             for (auto p : ghc::filesystem::directory_iterator(templateFolderPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
@@ -208,7 +161,7 @@ int main(int argc, char** argv) {
                 } else if (p.is_regular_file(ec)) {
                     auto filename = path.filename();
                     auto outputFilePath = ghc::filesystem::path(platformOutputPath).append(filename);
-                    
+
                     logger->debug("Copying file from {} to {}", path, outputFilePath);
                     auto result = ghc::filesystem::copy_file(path, outputFilePath, ghc::filesystem::copy_options::overwrite_existing, ec);
                     if (ec) {
@@ -278,7 +231,7 @@ int main(int argc, char** argv) {
                 if (extension == ".rpgproject") continue;
 
                 auto outputFilePath = ghc::filesystem::path(wwwPath).append(filename);
-                
+
                 logger->debug("Copying file from {} to {}", path, outputFilePath);
                 auto result = ghc::filesystem::copy_file(path, outputFilePath, ghc::filesystem::copy_options::overwrite_existing, ec);
                 if (ec) {
@@ -291,65 +244,4 @@ int main(int argc, char** argv) {
     }
 
     return 0;
-}
-
-bool isValidDirectory(std::string directory, std::string name, std::shared_ptr<spdlog::logger> errorLogger) {
-    if (!ghc::filesystem::exists(directory)) {
-        errorLogger->error("{} Folder does not exist!", name);
-        return false;
-    }
-
-    if (!ghc::filesystem::is_directory(directory)) {
-        errorLogger->error("{} Folder is not a directory!", name);
-        return false;
-    }
-
-    return true;
-}
-
-bool ensureDirectory(ghc::filesystem::path path, std::shared_ptr<spdlog::logger> errorLogger) {
-    std::error_code ec;
-    if (ghc::filesystem::exists(path, ec)) return true;
-    if (ec) return false;
-
-    if (ghc::filesystem::create_directory(path, ec)) return true;
-    errorLogger->error("Unable to create directory {} {}", path, ec);
-    return false;
-}
-
-bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platforms, std::shared_ptr<spdlog::logger> errorLogger) {
-    for (auto i = 0; i < names->size(); i++) {
-        auto current = names->at(i);
-        if (current == "win") {
-            platforms->emplace_back(Platform::Windows);
-            continue;
-        }
-
-        if (current == "osx") {
-            platforms->emplace_back(Platform::OSX);
-            continue;
-        }
-
-        if (current == "linux") {
-            platforms->emplace_back(Platform::Linux);
-            continue;
-        }
-
-        if (current == "browser") {
-            platforms->emplace_back(Platform::Browser);
-            continue;
-        }
-
-        if (current == "mobile") {
-            //platforms->emplace_back(Platform::Mobile);
-            //continue;
-            errorLogger->error("Mobile is not supported at the moment!");
-            return false;
-        }
-
-        errorLogger->error("Unknown platform: {}", current);
-        return false;
-    }
-
-    return true;
 }
