@@ -12,7 +12,7 @@
 #include "formatters.hpp"
 #include "utility.hpp"
 
-#define RPGMPACKER_TESTING
+//#define RPGMPACKER_TESTING
 
 int main(int argc, char** argv) {
     auto logger = spdlog::stdout_color_mt("console");
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
         output = result["output"].as<std::string>();
         rpgmaker = result["rpgmaker"].as<std::string>();
         encryptImages = result["encryptImages"].as<bool>();
-        encryptAudio = result["encryptImages"].as<bool>();
+        encryptAudio = result["encryptAudio"].as<bool>();
         debug = result["debug"].as<bool>();
         useHardlinks = result["hardlinks"].as<bool>();
 
@@ -77,6 +77,11 @@ int main(int argc, char** argv) {
 #endif
     } catch (const cxxopts::OptionException& e) {
         errorLogger->error(e.what());
+        std::cout << options.help() << std::endl;
+        return -1;
+    } catch (const std::exception& e) {
+        errorLogger->error("Exception while parsing arguments: {}", e.what());
+        std::cout << options.help() << std::endl;
         return -1;
     }
 
