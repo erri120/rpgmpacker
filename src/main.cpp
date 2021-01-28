@@ -96,7 +96,8 @@ int main(int argc, char** argv) {
         encryptImages = false;
         encryptAudio = false;
         encryptionKey = std::string("");
-        debug = true;
+        //debug = true;
+        debug = false;
 
         platformNames = std::vector<std::string>();
         platformNames.emplace_back("win");
@@ -173,6 +174,7 @@ int main(int argc, char** argv) {
     
     logger->info("Building output for {} platforms", platforms.size());
     for (auto platform : platforms) {
+        spdlog::stopwatch sw;
         logger->debug("Platform {}", platform);
         auto platformOutputPath = ghc::filesystem::path(outputPath).append(PlatformNames[(int)platform]);
         if (!ensureDirectory(platformOutputPath, errorLogger))
@@ -230,17 +232,49 @@ int main(int argc, char** argv) {
             if (p.is_directory(ec)) {
                 auto dirname = path.filename();
                 auto outputDirPath = ghc::filesystem::path(wwwPath).append(dirname);
+                if (!ensureDirectory(outputDirPath, errorLogger))
+                    return 1;
 
                 logger->debug("Copying folder from {} to {}", path, outputDirPath);
-                ghc::filesystem::copy(path, outputDirPath, ghc::filesystem::copy_options::recursive |
-                    ghc::filesystem::copy_options::overwrite_existing, ec);
-                if (ec) {
-                    errorLogger->error("Unable to copy folder from {} to {}! {}", path, outputDirPath, ec);
-                    ec.clear();
+                for (auto f : ghc::filesystem::recursive_directory_iterator(path, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
+                    if (f.is_directory(ec)) {
+                        auto dirpath = f.path();
+                        auto dirOutputPath = ghc::filesystem::path(outputDirPath).append(
+                            std::string(dirpath.c_str())
+                            .substr(std::string(path.c_str()).length()+1));
+                        if (!ensureDirectory(dirOutputPath, errorLogger))
+                            return 1;
+
+                        continue;
+                    }
+                    auto filepath = f.path();
+                    auto filename = filepath.filename();
+                    auto extension = filepath.extension();
+
+                    //Desktop: only ogg
+                    //Mobile: only m4a
+                    //Browser: both
+                    if (platform == Platform::Mobile && extension == ".ogg") continue;
+                    if (extension == ".m4a" && platform != Platform::Mobile && platform != Platform::Browser) continue;
+
+                    auto outputFilePath = ghc::filesystem::path(outputDirPath).append(
+                        std::string(filepath.c_str())
+                        .substr(std::string(path.c_str()).length()+1));
+                    auto outputFileDirectory = outputFilePath.parent_path();
+                    if (!ensureDirectory(outputFileDirectory, errorLogger))
+                        return 1;
+
+                    logger->debug("Copying file from {} to {}", filepath, outputFilePath);
+                    auto result = ghc::filesystem::copy_file(filepath, outputFilePath, ghc::filesystem::copy_options::overwrite_existing, ec);
+                    if (ec) {
+                        errorLogger->error("Unable to copy file from {} to {}! {}", filepath, outputFilePath, ec);
+                        return 1;
+                    }
                 }
             } else if (p.is_regular_file(ec)) {
                 auto filename = path.filename();
                 auto extension = path.extension();
+                //don't ship project files, maybe also skip package.json
                 if (extension == ".rpgproject") continue;
 
                 auto outputFilePath = ghc::filesystem::path(wwwPath).append(filename);
@@ -249,12 +283,11 @@ int main(int argc, char** argv) {
                 auto result = ghc::filesystem::copy_file(path, outputFilePath, ghc::filesystem::copy_options::overwrite_existing, ec);
                 if (ec) {
                     errorLogger->error("Unable to copy file from {} to {}! {}", path, outputFilePath, ec);
-                    ec.clear();
+                    return 1;
                 }
             }
         }
-        //TODO: stopwatch
-        logger->info("Finished copying files for {}", platform);
+        logger->info("Finished copying files for {} in {} seconds", platform, sw);
     }
 
     return 0;
