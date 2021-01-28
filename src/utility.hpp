@@ -64,3 +64,44 @@ bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platfo
 
     return true;
 }
+
+bool copyFile(ghc::filesystem::path from, ghc::filesystem::path to, bool useHardlinks, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<spdlog::logger> errorLogger) {
+    if (useHardlinks) {
+        logger->debug("Creating hardlink from {} to {}", from , to);
+    } else {
+        logger->debug("Copying file from {} to {}", from , to);
+    }
+
+    std::error_code ec;
+    auto options = ghc::filesystem::copy_options::none;
+    if (useHardlinks) {
+        options |= ghc::filesystem::copy_options::create_hard_links;
+    } else {
+        options |= ghc::filesystem::copy_options::update_existing;
+    }
+
+    if (useHardlinks) {
+        if (ghc::filesystem::exists(to, ec)) {
+            if (ghc::filesystem::is_regular_file(to, ec)) {
+                auto result = ghc::filesystem::remove(to, ec);
+                if (ec || !result) {
+                    errorLogger->error("Unable to delete file for hardlink at {}! {}", to, ec);
+                    return false;
+                }
+            }
+        }
+    }
+
+    ghc::filesystem::copy(from, to, options, ec);
+    if (ec) {
+        if (useHardlinks) {
+            errorLogger->error("Unable to create hardlink from {} to {}! {}", from, to, ec);
+        } else {
+            errorLogger->error("Unable to copy file from {} to {}! {}", from, to, ec);
+        }
+
+        return false;
+    }
+
+    return true;
+}

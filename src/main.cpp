@@ -26,12 +26,13 @@ int main(int argc, char** argv) {
         ("p,platforms", "Platforms to build for, this can take a list of platforms delimited with a comma or just one value. Possible values: win, osx, linux, browser, mobile", cxxopts::value<std::vector<std::string>>())
         ("encryptImages", "Enable Image Encryption using encryptionKey", cxxopts::value<bool>()->default_value("false"))
         ("encryptAudio", "Enable Audio Encryption using encryptionKey", cxxopts::value<bool>()->default_value("false"))
-        ("encryptionKey", "", cxxopts::value<std::string>())
+        ("encryptionKey", "Encryption Key for Images or Audio, encryptImages or encryptAudio has to be set", cxxopts::value<std::string>())
+        ("hardlinks", "Use hardlinks instead of creating copies", cxxopts::value<bool>()->default_value("false"))
         ("d,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false"))
         ("h,help", "Print usage");
 
     std::string input, output, rpgmaker, encryptionKey;
-    bool encryptImages, encryptAudio, debug;
+    bool encryptImages, encryptAudio, debug, useHardlinks;
     std::vector<std::string> platformNames;
 
     try {
@@ -51,12 +52,13 @@ int main(int argc, char** argv) {
         encryptionKey = std::string("");
         //debug = true;
         debug = false;
+        useHardlinks = true;
 
         platformNames = std::vector<std::string>();
         platformNames.emplace_back("win");
-        platformNames.emplace_back("osx");
-        platformNames.emplace_back("linux");
-        platformNames.emplace_back("browser");
+        //platformNames.emplace_back("osx");
+        //platformNames.emplace_back("linux");
+        //platformNames.emplace_back("browser");
 #else
         input = result["input"].as<std::string>();
         output = result["output"].as<std::string>();
@@ -64,6 +66,7 @@ int main(int argc, char** argv) {
         encryptImages = result["encryptImages"].as<bool>();
         encryptAudio = result["encryptImages"].as<bool>();
         debug = result["debug"].as<bool>();
+        useHardlinks = result["hardlinks"].as<bool>();
 
         if (encryptImages || encryptAudio)
             encryptionKey = result["encryptionKey"].as<std::string>();
@@ -82,6 +85,7 @@ int main(int argc, char** argv) {
         errorLogger->set_level(spdlog::level::debug);
     }
 
+    //input dump
     logger->info("Input: {}", input);
     logger->info("Output: {}", output);
     logger->info("RPG Maker: {}", rpgmaker);
@@ -96,6 +100,8 @@ int main(int argc, char** argv) {
     };
     auto platformsStr = std::accumulate(std::next(platformNames.begin()), platformNames.end(), platformNames.at(0), strReduce);
     logger->info("Platforms: {}", platformsStr);
+    logger->info("Debug: {}", debug);
+    logger->info("Use Hardlinks: {}", useHardlinks);
 
     if (!isValidDirectory(input, "Input", errorLogger))
         return -1;
@@ -109,6 +115,13 @@ int main(int argc, char** argv) {
     auto inputPath = ghc::filesystem::path(input);
     auto outputPath = ghc::filesystem::path(output);
     auto rpgmakerPath = ghc::filesystem::path(rpgmaker);
+
+    auto inputRootName = inputPath.root_name();
+    auto outputRootName = outputPath.root_name();
+    auto rpgmakerRootName = rpgmakerPath.root_name();
+
+    auto canUseHardlinksRPGMakerToOutput = useHardlinks && rpgmakerRootName == outputRootName;
+    auto canUseHardlinksInputToOutput = useHardlinks && inputRootName == outputRootName;
 
     std::error_code ec;
     if (ghc::filesystem::exists(outputPath, ec)) {
@@ -162,18 +175,14 @@ int main(int argc, char** argv) {
                     auto filename = path.filename();
                     auto outputFilePath = ghc::filesystem::path(platformOutputPath).append(filename);
 
-                    logger->debug("Copying file from {} to {}", path, outputFilePath);
-                    auto result = ghc::filesystem::copy_file(path, outputFilePath, ghc::filesystem::copy_options::overwrite_existing, ec);
-                    if (ec) {
-                        errorLogger->error("Unable to copy file from {} to {}! {}", path, outputFilePath, ec);
-                        ec.clear();
-                    }
+                    if(!copyFile(path, outputFilePath, canUseHardlinksRPGMakerToOutput, logger, errorLogger))
+                        return 1;
                 }
             }
         }
 
-        auto wwwPath = platform == Platform::OSX 
-            ? ghc::filesystem::path(platformOutputPath).append("Game.app/Contents/Resources/app.nw") 
+        auto wwwPath = platform == Platform::OSX
+            ? ghc::filesystem::path(platformOutputPath).append("Game.app/Contents/Resources/app.nw")
             : ghc::filesystem::path(platformOutputPath).append("www");
         if (!ensureDirectory(wwwPath, errorLogger))
             return 1;
@@ -217,12 +226,8 @@ int main(int argc, char** argv) {
                     if (!ensureDirectory(outputFileDirectory, errorLogger))
                         return 1;
 
-                    logger->debug("Copying file from {} to {}", filepath, outputFilePath);
-                    auto result = ghc::filesystem::copy_file(filepath, outputFilePath, ghc::filesystem::copy_options::overwrite_existing, ec);
-                    if (ec) {
-                        errorLogger->error("Unable to copy file from {} to {}! {}", filepath, outputFilePath, ec);
+                    if(!copyFile(filepath, outputFilePath, canUseHardlinksInputToOutput, logger, errorLogger))
                         return 1;
-                    }
                 }
             } else if (p.is_regular_file(ec)) {
                 auto filename = path.filename();
@@ -232,12 +237,8 @@ int main(int argc, char** argv) {
 
                 auto outputFilePath = ghc::filesystem::path(wwwPath).append(filename);
 
-                logger->debug("Copying file from {} to {}", path, outputFilePath);
-                auto result = ghc::filesystem::copy_file(path, outputFilePath, ghc::filesystem::copy_options::overwrite_existing, ec);
-                if (ec) {
-                    errorLogger->error("Unable to copy file from {} to {}! {}", path, outputFilePath, ec);
+                if(!copyFile(path, outputFilePath, canUseHardlinksInputToOutput, logger, errorLogger))
                     return 1;
-                }
             }
         }
         logger->info("Finished copying files for {} in {} seconds", platform, sw);
