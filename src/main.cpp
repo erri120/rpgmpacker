@@ -20,15 +20,15 @@ int main(int argc, char** argv) {
 
     cxxopts::Options options("RPGMPacker", "RPGMaker Games Packer for Continues Deployment.");
     options.add_options()
-        ("i,input", "Input folder containing the .rpgproj file", cxxopts::value<std::string>())
-        ("o,output", "Output folder", cxxopts::value<std::string>())
-        ("rpgmaker", "RPG Maker installation folder", cxxopts::value<std::string>())
-        ("p,platforms", "Platforms to build for, this can take a list of platforms delimited with a comma or just one value. Possible values: win, osx, linux, browser, mobile", cxxopts::value<std::vector<std::string>>())
-        ("encryptImages", "Enable Image Encryption using encryptionKey", cxxopts::value<bool>()->default_value("false"))
-        ("encryptAudio", "Enable Audio Encryption using encryptionKey", cxxopts::value<bool>()->default_value("false"))
-        ("encryptionKey", "Encryption Key for Images or Audio, encryptImages or encryptAudio has to be set", cxxopts::value<std::string>())
-        ("hardlinks", "Use hardlinks instead of creating copies", cxxopts::value<bool>()->default_value("false"))
-        ("d,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false"))
+        ("i,input", "(REQUIRED) Input folder containing the .rpgproj file", cxxopts::value<std::string>())
+        ("o,output", "(REQUIRED) Output folder", cxxopts::value<std::string>())
+        ("rpgmaker", "(REQUIRED) RPG Maker installation folder", cxxopts::value<std::string>())
+        ("p,platforms", "(REQUIRED) Platforms to build for, this can take a list of platforms delimited with a comma or just one value. Possible values: win, osx, linux, browser, mobile", cxxopts::value<std::vector<std::string>>())
+        ("encryptImages", "Enable Image Encryption using encryptionKey. Default: false", cxxopts::value<bool>()->default_value("false"))
+        ("encryptAudio", "Enable Audio Encryption using encryptionKey. Default: false", cxxopts::value<bool>()->default_value("false"))
+        ("encryptionKey", "Encryption Key for Images or Audio, either encryptImages or encryptAudio have to be set", cxxopts::value<std::string>())
+        ("hardlinks", "Use hardlinks instead of creating copies. Default: false", cxxopts::value<bool>()->default_value("false"))
+        ("d,debug", "Enable debugging. Default: false", cxxopts::value<bool>()->default_value("false"))
         ("h,help", "Print usage");
 
     std::string input, output, rpgmaker, encryptionKey;
