@@ -100,6 +100,7 @@ int main(int argc, char** argv) {
 
         platformNames = std::vector<std::string>();
         platformNames.emplace_back("win");
+        platformNames.emplace_back("osx");
         platformNames.emplace_back("linux");
         platformNames.emplace_back("browser");
 #else
@@ -186,7 +187,7 @@ int main(int argc, char** argv) {
             }
             
             logger->debug("Template Folder: {}", templateFolderPath);
-            logger->info("Copying files from {} to {}", templateFolderPath, outputPath);
+            logger->info("Copying files from {} to {}", templateFolderPath, platformOutputPath);
             for (auto p : ghc::filesystem::directory_iterator(templateFolderPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
                 auto path = p.path();
                 logger->debug("{}", path);
@@ -216,7 +217,9 @@ int main(int argc, char** argv) {
             }
         }
 
-        auto wwwPath = ghc::filesystem::path(platformOutputPath).append("www");
+        auto wwwPath = platform == Platform::OSX 
+            ? ghc::filesystem::path(platformOutputPath).append("Game.app/Contents/Resources/app.nw") 
+            : ghc::filesystem::path(platformOutputPath).append("www");
         if (!ensureDirectory(wwwPath, errorLogger))
             return 1;
 
