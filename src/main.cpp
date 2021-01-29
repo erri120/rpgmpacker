@@ -45,9 +45,11 @@ int main(int argc, char** argv) {
         }
 
 #ifdef RPGMPACKER_TESTING
-        input = "E:\\Projects\\RPGMakerTest\\src\\Project1";
+        //input = "E:\\Projects\\RPGMakerTest\\src\\Project1";
+        input = "E:\\Projects\\RPGMakerTest\\src\\MZProject1";
         output = "E:\\Projects\\RPGMakerTest\\out-c";
-        rpgmaker = "M:\\SteamLibrary\\steamapps\\common\\RPG Maker MV";
+        //rpgmaker = "M:\\SteamLibrary\\steamapps\\common\\RPG Maker MV";
+        rpgmaker = "C:\\Program Files\\KADOKAWA\\RPGMZ";
         encryptImages = true;
         encryptAudio = true;
         encryptionKey = std::string("1337");
@@ -136,6 +138,10 @@ int main(int argc, char** argv) {
 
     auto hash = stringToHexHash(encryptionHash);
 
+    auto rpgmakerVersion = getRPGMakerVersion(inputPath, logger, errorLogger);
+    if (rpgmakerVersion == RPGMakerVersion::None)
+        return -1;
+
     std::error_code ec;
     if (ghc::filesystem::exists(outputPath, ec)) {
         spdlog::stopwatch sw;
@@ -177,6 +183,10 @@ int main(int argc, char** argv) {
                     auto dirname = path.filename();
                     auto outputDirPath = ghc::filesystem::path(platformOutputPath).append(dirname);
 
+                    //MZ only: pnacl folder gets ignored
+                    if (rpgmakerVersion == RPGMakerVersion::MZ && dirname == "pnacl")
+                        continue;
+
                     logger->debug("Copying folder from {} to {}", path, outputDirPath);
                     ghc::filesystem::copy(path, outputDirPath, ghc::filesystem::copy_options::recursive |
                         ghc::filesystem::copy_options::overwrite_existing, ec);
@@ -186,7 +196,19 @@ int main(int argc, char** argv) {
                     }
                 } else if (p.is_regular_file(ec)) {
                     auto filename = path.filename();
+                    //MZ onyl: nw.exe gets renamed to Game.exe to reduce confusion for players
+                    if (rpgmakerVersion == RPGMakerVersion::MZ && filename == "nw.exe")
+                        filename = ghc::filesystem::path("Game.exe");
                     auto outputFilePath = ghc::filesystem::path(platformOutputPath).append(filename);
+
+                    //MZ only: those files get ignored
+                    if (rpgmakerVersion == RPGMakerVersion::MZ &&
+                        (filename == "chromedriver.exe"
+                            || filename == "nacl_irt_x86_64.nexe"
+                            || filename == "nw.exe"
+                            || filename == "nwjc.exe"
+                            || filename == "payload.exe"))
+                        continue;
 
                     if(!copyFile(path, outputFilePath, canUseHardlinksRPGMakerToOutput, logger, errorLogger))
                         return 1;
@@ -194,9 +216,12 @@ int main(int argc, char** argv) {
             }
         }
 
-        auto wwwPath = platform == Platform::OSX
-            ? ghc::filesystem::path(platformOutputPath).append("Game.app/Contents/Resources/app.nw")
-            : ghc::filesystem::path(platformOutputPath).append("www");
+        //MV has a www folder, MZ does not
+        auto wwwPath = rpgmakerVersion == RPGMakerVersion::MV
+            ? platform == Platform::OSX
+                ? ghc::filesystem::path(platformOutputPath).append("Game.app/Contents/Resources/app.nw")
+                : ghc::filesystem::path(platformOutputPath).append("www")
+            : ghc::filesystem::path(platformOutputPath);
         if (!ensureDirectory(wwwPath, errorLogger))
             return 1;
 
@@ -241,15 +266,30 @@ int main(int argc, char** argv) {
 
                     if (encryptAudio || encryptImages) {
                         if (encryptImages && extension == ".png") {
+                            auto dirname = filepath.parent_path().filename();
+                            auto parentdirname = filepath.parent_path().parent_path().filename();
+                            //MZ only: effects/Texture is not being encrypted
+                            if (rpgmakerVersion == RPGMakerVersion::MZ && parentdirname == "effects" && dirname == "Texture") {
+                                if(!copyFile(filepath, outputFilePath, canUseHardlinksInputToOutput, logger, errorLogger))
+                                    return 1;
+                                continue;
+                            }
+
+                            //MZ only: Window.png will also be encrypted, in MV this was not the case
+                            if (rpgmakerVersion == RPGMakerVersion::MZ && filename == "Window.png") {
+                                if (!encryptFile(filepath, outputFilePath, hash, rpgmakerVersion, logger, errorLogger))
+                                    return 1;
+                                continue;
+                            }
                             //icon.png, Loading.png and Window.png must not be encrypted because they are not
                             //getting decrypted
                             if (filename != "icon.png" && filename != "Loading.png" && filename != "Window.png") {
-                                if (!encryptFile(filepath, outputFilePath, hash, logger, errorLogger))
+                                if (!encryptFile(filepath, outputFilePath, hash, rpgmakerVersion, logger, errorLogger))
                                     return 1;
                                 continue;
                             }
                         } else if (encryptAudio && extension == ".ogg" || extension == ".m4a") {
-                            if (!encryptFile(filepath, outputFilePath, hash, logger, errorLogger))
+                            if (!encryptFile(filepath, outputFilePath, hash, rpgmakerVersion, logger, errorLogger))
                                 return 1;
                             continue;
                         }
@@ -270,6 +310,7 @@ int main(int argc, char** argv) {
                 auto extension = path.extension();
                 //don't ship project files, maybe also skip package.json
                 if (extension == ".rpgproject") continue;
+                if (extension == ".rmmzproject") continue;
 
                 auto outputFilePath = ghc::filesystem::path(wwwPath).append(filename);
 
@@ -280,5 +321,6 @@ int main(int argc, char** argv) {
         logger->info("Finished copying files for {} in {} seconds", platform, sw);
     }
 
+    delete[] hash;
     return 0;
 }

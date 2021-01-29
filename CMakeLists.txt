@@ -29,7 +29,7 @@ CPMAddPackage (
         "GHC_FILESYSTEM_WITH_INSTALL Off"
 )
 
-add_executable(RPGMPacker src/platform.hpp src/formatters.hpp src/utility.hpp src/hash.h src/md5.h src/md5.cpp src/main.cpp)
+add_executable(RPGMPacker src/platform.hpp src/formatters.hpp src/utility.hpp src/hash.h src/md5.h src/md5.cpp src/rpgmakerVersion.hpp src/main.cpp)
 
 target_link_libraries(RPGMPacker cxxopts)
 target_link_libraries(RPGMPacker spdlog)

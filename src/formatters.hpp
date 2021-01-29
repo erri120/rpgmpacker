@@ -3,6 +3,7 @@
 #include <ghc/filesystem.hpp>
 #include <iostream>
 #include "platform.hpp"
+#include "rpgmakerVersion.hpp"
 
 template <>
 struct fmt::formatter<ghc::filesystem::path> {
@@ -37,5 +38,17 @@ struct fmt::formatter<Platform> {
     template <typename FormatContext>
     auto format(const Platform& p, FormatContext& ctx) {
         return format_to(ctx.out(), "{}", PlatformNames[(int)p]);
+    }
+};
+
+template <>
+struct fmt::formatter<RPGMakerVersion> {
+    constexpr auto parse(format_parse_context& ctx) {
+        return ctx.end();
+    }
+
+    template <typename FormatContext>
+    auto format(const RPGMakerVersion& version, FormatContext& ctx) {
+        return format_to(ctx.out(), "{}", RPGMakerVersionNames[(int)version]);
     }
 };

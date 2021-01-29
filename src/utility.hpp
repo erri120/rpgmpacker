@@ -4,6 +4,7 @@
 #include <ghc/filesystem.hpp>
 
 #include "platform.hpp"
+#include "rpgmakerVersion.hpp"
 
 bool isValidDirectory(std::string directory, std::string name, std::shared_ptr<spdlog::logger> errorLogger) {
     if (!ghc::filesystem::exists(directory)) {
@@ -127,17 +128,26 @@ unsigned int* stringToHexHash(std::string encryptionHash) {
     return result;
 }
 
-bool encryptFile(ghc::filesystem::path from, ghc::filesystem::path to, unsigned int* encryptionHash, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<spdlog::logger> errorLogger) {
+bool encryptFile(ghc::filesystem::path from, ghc::filesystem::path to, unsigned int* encryptionHash, RPGMakerVersion version, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<spdlog::logger> errorLogger) {
     logger->debug("Encrypting file at {} to {}", from, to);
 
     auto extension = from.extension();
 
     if (extension == ".ogg") {
-        to.replace_extension(".rpgmvo");
+        if (version == RPGMakerVersion::MV)
+            to.replace_extension(".rpgmvo");
+        else
+            to.replace_extension(".ogg_");
     } else if (extension == ".m4a") {
-        to.replace_extension("rpgmvm");
+        if (version == RPGMakerVersion::MV)
+            to.replace_extension(".rpgmvm");
+        else
+            to.replace_extension(".m4a_");
     } else if (extension == ".png") {
-        to.replace_extension(".rpgmvp");
+        if (version == RPGMakerVersion::MV)
+            to.replace_extension(".rpgmvp");
+        else
+            to.replace_extension(".png_");
     } else {
         errorLogger->error("Unknown extension {} of file {}", extension, from);
         return false;
@@ -149,7 +159,7 @@ bool encryptFile(ghc::filesystem::path from, ghc::filesystem::path to, unsigned 
         return false;
     }
 
-    auto ofstream = ghc::filesystem::ofstream(to, std::ios_base::out);
+    auto ofstream = ghc::filesystem::ofstream(to, std::ios_base::out | std::ios_base::binary);
     if (!ofstream.is_open()){
         errorLogger->error("Unable to open file {}", to);
         ifstream.close();
@@ -250,4 +260,31 @@ bool updateSystemJson(ghc::filesystem::path from, ghc::filesystem::path to, bool
     ofstream.close();
 
     return true;
+}
+
+RPGMakerVersion getRPGMakerVersion(ghc::filesystem::path projectPath, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<spdlog::logger> errorLogger) {
+    logger->debug("Identifying RPGMaker Version");
+
+    std::error_code ec;
+    auto version = RPGMakerVersion::None;
+    for (auto p : ghc::filesystem::directory_iterator(projectPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
+        if (!p.is_regular_file()) continue;
+        auto extension = p.path().extension();
+
+        if (extension == ".rpgproject") {
+            version = RPGMakerVersion::MV;
+            break;
+        } else if (extension == ".rmmzproject") {
+            version = RPGMakerVersion::MZ;
+            break;
+        }
+    }
+
+    if (version == RPGMakerVersion::None) {
+        errorLogger->error("Unable to identify RPGMaker Version!");
+    } else {
+        logger->info("RPGMaker Version: {}", version);
+    }
+
+    return version;
 }
