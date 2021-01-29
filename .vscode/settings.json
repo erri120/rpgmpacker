@@ -78,7 +78,8 @@
         "thread": "cpp",
         "variant": "cpp",
         "filesystem": "cpp",
-        "numeric": "cpp"
+        "numeric": "cpp",
+        "complex": "cpp"
     },
     "cSpell.words": [
         "RPGM",

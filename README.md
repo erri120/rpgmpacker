@@ -54,7 +54,7 @@ The encryption method used by RPG Maker is a joke and only makes sense if you do
 
 RPG Maker starts by writing a new header:
 
-```hex
+```txt
 52 50 47 4D 56 00 00 00 00 03 01 00 00 00 00 00
 ```
 
@@ -79,3 +79,4 @@ Managed with [CPM](https://github.com/TheLartians/CPM.cmake).
 - [cxxopts](https://github.com/jarro2783/cxxopts) ([MIT](https://github.com/jarro2783/cxxopts/blob/master/LICENSE))
 - [spdlog](https://github.com/gabime/spdlog) ([MIT](https://github.com/gabime/spdlog/blob/v1.x/LICENSE))
 - [ghc::filesystem](https://github.com/gulrak/filesystem) ([MIT](https://github.com/gulrak/filesystem/blob/master/LICENSE))
+- MD5 hash functions from [stbrumme/hash-library](https://github.com/stbrumme/hash-library) ([zlib](https://github.com/stbrumme/hash-library/blob/master/LICENSE))

@@ -7,12 +7,13 @@
 #include <iostream>
 #include <string>
 #include <numeric>
+#include "md5.h"
 
 #include "platform.hpp"
 #include "formatters.hpp"
 #include "utility.hpp"
 
-//#define RPGMPACKER_TESTING
+#define RPGMPACKER_TESTING
 
 int main(int argc, char** argv) {
     auto logger = spdlog::stdout_color_mt("console");
@@ -47,9 +48,9 @@ int main(int argc, char** argv) {
         input = "E:\\Projects\\RPGMakerTest\\src\\Project1";
         output = "E:\\Projects\\RPGMakerTest\\out-c";
         rpgmaker = "M:\\SteamLibrary\\steamapps\\common\\RPG Maker MV";
-        encryptImages = false;
-        encryptAudio = false;
-        encryptionKey = std::string("");
+        encryptImages = true;
+        encryptAudio = true;
+        encryptionKey = std::string("1337");
         //debug = true;
         debug = false;
         useHardlinks = true;
@@ -127,6 +128,13 @@ int main(int argc, char** argv) {
 
     auto canUseHardlinksRPGMakerToOutput = useHardlinks && rpgmakerRootName == outputRootName;
     auto canUseHardlinksInputToOutput = useHardlinks && inputRootName == outputRootName;
+
+    MD5 md5;
+    std::string encryptionHash = std::string("");
+    if (encryptImages || encryptAudio)
+        encryptionHash = md5(encryptionKey);
+
+    auto hash = stringToHexHash(encryptionHash);
 
     std::error_code ec;
     if (ghc::filesystem::exists(outputPath, ec)) {
@@ -230,6 +238,29 @@ int main(int argc, char** argv) {
                     auto outputFileDirectory = outputFilePath.parent_path();
                     if (!ensureDirectory(outputFileDirectory, errorLogger))
                         return 1;
+
+                    if (encryptAudio || encryptImages) {
+                        if (encryptImages && extension == ".png") {
+                            //icon.png, Loading.png and Window.png must not be encrypted because they are not
+                            //getting decrypted
+                            if (filename != "icon.png" && filename != "Loading.png" && filename != "Window.png") {
+                                if (!encryptFile(filepath, outputFilePath, hash, logger, errorLogger))
+                                    return 1;
+                                continue;
+                            }
+                        } else if (encryptAudio && extension == ".ogg" || extension == ".m4a") {
+                            if (!encryptFile(filepath, outputFilePath, hash, logger, errorLogger))
+                                return 1;
+                            continue;
+                        }
+
+                        //updating System.json with the encryption data
+                        if (filename == "System.json") {
+                            if (!updateSystemJson(filepath, outputFilePath, encryptAudio, encryptImages, encryptionHash, logger, errorLogger))
+                                return 1;
+                            continue;
+                        }
+                    }
 
                     if(!copyFile(filepath, outputFilePath, canUseHardlinksInputToOutput, logger, errorLogger))
                         return 1;
