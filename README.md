@@ -4,7 +4,13 @@ Simple CLI program for packaging RPG Maker games to use in a CI/CD workflow.
 
 - Supported RPG Maker versions:
   - RPG Maker MV
+    - Windows
+    - OSX
+    - Linux
+    - Browser
+    - **Mobile is not supported at the moment!**
   - RPG Maker MZ
+    - Windows
 - Supported deployment features:
   - audio filtering depending on platform
   - image and audio encryption with an encryption key
