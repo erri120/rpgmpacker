@@ -52,7 +52,7 @@ It is recommended to use the hardlink option for faster speeds and less disk usa
 
 ## How it works
 
-RPG Maker has a very _simple_ way of deploying your game due to the fact that the game is in Javascript and no compilation is needed. What the program does is copy your project files as well as the runtime to the output directory. The runtime can be found in the RPG Maker installation folder (`nwjs-win`, `nwjs-lnx`, `nwjs-osx-unsigned`) and some project files are filtered out before copying (eg only `.ogg` audio files on Desktop).
+RPG Maker has a very _simple_ way of deploying your game due to the fact that the game is in Javascript and no compilation is needed. What the program does is copy your project files as well as the runtime to the output directory. The runtime can be found in the RPG Maker installation folder and some project files are filtered out before copying (eg only `.ogg` audio files on Desktop).
 
 ### Encryption
 
@@ -64,7 +64,7 @@ RPG Maker starts by writing a new header:
 52 50 47 4D 56 00 00 00 00 03 01 00 00 00 00 00
 ```
 
-The file signature is 8 bytes long: `52 50 47 4D 56 00 00 00 00` (`52 50 47 4D 56` = `RPGMV`), then 3 bytes for the version number: `00 03 01` and the rest is just filler.
+The file signature is 8 bytes long: `52 50 47 4D 56 00 00 00 00` (`52 50 47 4D 56` = `RPGMV`), then 3 bytes for the version number: `00 03 01` and the rest is just filler (This file signature is the same in MV and MZ for whatever reason).
 
 The provided encryption key will be run through an MD5 algorithm: `1337` -> `e48e13207341b6bffb7fb1622282247b` and the first 16 bytes of the file will be "encrypted" in an iteration with `buffer[i] = buffer[i] ^ key[i]`. This XOR operation is only applied on the first 16 bytes and the rest of the file stays the same.
 
