@@ -2,6 +2,12 @@ name: CI CMake Build
 
 on:
   push:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/**'
+      - 'CMakeLists.txt'
+      - '**.cmake'
     branches:
       - master
   pull_request:
