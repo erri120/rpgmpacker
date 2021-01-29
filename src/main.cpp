@@ -15,6 +15,15 @@
 
 #define RPGMPACKER_TESTING
 
+enum class FolderType {
+    RPGMaker,
+    Project
+};
+
+bool filterFolder(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderType folderType, RPGMakerVersion version);
+bool filterFile(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderType folderType, RPGMakerVersion version);
+bool shouldEncryptFile(ghc::filesystem::path* from, ghc::filesystem::path* to, bool encryptAudio, bool encryptImages, RPGMakerVersion version);
+
 int main(int argc, char** argv) {
     auto logger = spdlog::stdout_color_mt("console");
     auto errorLogger = spdlog::stderr_color_mt("stderr");
@@ -177,14 +186,12 @@ int main(int argc, char** argv) {
             logger->info("Copying files from {} to {}", templateFolderPath, platformOutputPath);
             for (auto p : ghc::filesystem::directory_iterator(templateFolderPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
                 auto path = p.path();
-                logger->debug("{}", path);
 
                 if (p.is_directory(ec)) {
                     auto dirname = path.filename();
                     auto outputDirPath = ghc::filesystem::path(platformOutputPath).append(dirname);
 
-                    //MZ only: pnacl folder gets ignored
-                    if (rpgmakerVersion == RPGMakerVersion::MZ && dirname == "pnacl")
+                    if (filterFolder(&path, &outputDirPath, FolderType::RPGMaker, rpgmakerVersion))
                         continue;
 
                     logger->debug("Copying folder from {} to {}", path, outputDirPath);
@@ -196,18 +203,9 @@ int main(int argc, char** argv) {
                     }
                 } else if (p.is_regular_file(ec)) {
                     auto filename = path.filename();
-                    //MZ onyl: nw.exe gets renamed to Game.exe to reduce confusion for players
-                    if (rpgmakerVersion == RPGMakerVersion::MZ && filename == "nw.exe")
-                        filename = ghc::filesystem::path("Game.exe");
                     auto outputFilePath = ghc::filesystem::path(platformOutputPath).append(filename);
 
-                    //MZ only: those files get ignored
-                    if (rpgmakerVersion == RPGMakerVersion::MZ &&
-                        (filename == "chromedriver.exe"
-                            || filename == "nacl_irt_x86_64.nexe"
-                            || filename == "nw.exe"
-                            || filename == "nwjc.exe"
-                            || filename == "payload.exe"))
+                    if (filterFile(&path, &outputFilePath, FolderType::RPGMaker, rpgmakerVersion))
                         continue;
 
                     if(!copyFile(path, outputFilePath, canUseHardlinksRPGMakerToOutput, logger, errorLogger))
@@ -265,30 +263,7 @@ int main(int argc, char** argv) {
                         return 1;
 
                     if (encryptAudio || encryptImages) {
-                        if (encryptImages && extension == ".png") {
-                            auto dirname = filepath.parent_path().filename();
-                            auto parentdirname = filepath.parent_path().parent_path().filename();
-                            //MZ only: effects/Texture is not being encrypted
-                            if (rpgmakerVersion == RPGMakerVersion::MZ && parentdirname == "effects" && dirname == "Texture") {
-                                if(!copyFile(filepath, outputFilePath, canUseHardlinksInputToOutput, logger, errorLogger))
-                                    return 1;
-                                continue;
-                            }
-
-                            //MZ only: Window.png will also be encrypted, in MV this was not the case
-                            if (rpgmakerVersion == RPGMakerVersion::MZ && filename == "Window.png") {
-                                if (!encryptFile(filepath, outputFilePath, hash, rpgmakerVersion, logger, errorLogger))
-                                    return 1;
-                                continue;
-                            }
-                            //icon.png, Loading.png and Window.png must not be encrypted because they are not
-                            //getting decrypted
-                            if (filename != "icon.png" && filename != "Loading.png" && filename != "Window.png") {
-                                if (!encryptFile(filepath, outputFilePath, hash, rpgmakerVersion, logger, errorLogger))
-                                    return 1;
-                                continue;
-                            }
-                        } else if (encryptAudio && extension == ".ogg" || extension == ".m4a") {
+                        if (shouldEncryptFile(&filepath, &outputFilePath, encryptAudio, encryptImages, rpgmakerVersion)) {
                             if (!encryptFile(filepath, outputFilePath, hash, rpgmakerVersion, logger, errorLogger))
                                 return 1;
                             continue;
@@ -307,12 +282,10 @@ int main(int argc, char** argv) {
                 }
             } else if (p.is_regular_file(ec)) {
                 auto filename = path.filename();
-                auto extension = path.extension();
-                //don't ship project files, maybe also skip package.json
-                if (extension == ".rpgproject") continue;
-                if (extension == ".rmmzproject") continue;
-
                 auto outputFilePath = ghc::filesystem::path(wwwPath).append(filename);
+
+                if (filterFile(&path, &outputFilePath, FolderType::Project, rpgmakerVersion))
+                    continue;
 
                 if(!copyFile(path, outputFilePath, canUseHardlinksInputToOutput, logger, errorLogger))
                     return 1;
@@ -323,4 +296,89 @@ int main(int argc, char** argv) {
 
     delete[] hash;
     return 0;
+}
+
+bool filterFolder(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderType folderType, RPGMakerVersion version) {
+    auto dirname = from->filename();
+
+    if (folderType == FolderType::RPGMaker) {
+        if (version == RPGMakerVersion::MZ) {
+            //pnacl is some sort of portable chromium client (https://www.chromium.org/nativeclient/pnacl/introduction-to-portable-native-client)
+            //TODO: Windows only?
+            if (dirname == "pnacl") return true;
+        }
+    }
+
+    return false;
+}
+
+bool filterFile(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderType folderType, RPGMakerVersion version) {
+    auto filename = from->filename();
+    auto extension = from->extension();
+
+    if (folderType == FolderType::RPGMaker) {
+        if (version == RPGMakerVersion::MZ) {
+            //nw.exe gets renamed to Game.exe to reduce confusion for players
+            if (filename == "nw.exe") {
+                to->replace_filename("Game.exe");
+                return false;
+            }
+
+            //chromium related files that are ignored
+            //TODO: Windows only?
+            if (filename == "chromedriver.exe") return true;
+            if (filename == "nacl_irt_x86_64.nexe") return true;
+            if (filename == "nw.exe") return true;
+            if (filename == "nwjc.exe") return true;
+            if (filename == "payload.exe") return true;
+        }
+    } else if (folderType == FolderType::Project) {
+        //skip project files
+        if (extension == ".rpgproject") return true;
+        if (extension == ".rmmzproject") return true;
+    }
+
+    return false;
+}
+
+bool shouldEncryptFile(ghc::filesystem::path* from, ghc::filesystem::path* to, bool encryptAudio, bool encryptImages, RPGMakerVersion version) {
+    auto filename = from->filename();
+    auto extension = from->extension();
+    auto parent = from->parent_path();
+    auto parentname = parent.filename();
+    auto grandparent = parent.parent_path();
+    auto grandparentname = grandparent.filename();
+
+    if (extension != ".png" && extension != ".ogg" && extension != ".m4a")
+        return false;
+
+    if (encryptAudio && (extension == ".ogg" || extension == ".m4a")) {
+        return true;
+    }
+
+    if (encryptImages && extension == ".png") {
+        if (version == RPGMakerVersion::MZ) {
+            //effects/Textures is not encrypted in MZ
+            if (parentname == "Texture" && grandparentname == "effects")
+                return false;
+
+            //img/system gets encrypted, in MV some are left out
+            if (parentname == "system" && grandparentname == "img")
+                return true;
+        } else if (version == RPGMakerVersion::MV) {
+            if (parentname == "system" && grandparentname == "img") {
+                //these are for some reason not encrypted in MV
+                if (filename == "Loading.png") return false;
+                if (filename == "Window.png") return false;
+            }
+        }
+
+        //game icon for the window
+        if (filename == "icon.png" && parentname == "icon")
+            return false;
+
+        return true;
+    }
+
+    return false;
 }
