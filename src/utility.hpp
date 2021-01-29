@@ -134,9 +134,10 @@ unsigned int* stringToHexHash(std::string encryptionHash) {
     return result;
 }
 
-bool encryptFile(ghc::filesystem::path from, ghc::filesystem::path to, unsigned int* encryptionHash, RPGMakerVersion version, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<spdlog::logger> errorLogger) {
-    logger->debug("Encrypting file at {} to {}", from, to);
+auto lastPlatform = Platform::None;
+std::map<std::string, std::string> cachedEncryptedFiles;
 
+bool encryptFile(ghc::filesystem::path from, ghc::filesystem::path to, unsigned int* encryptionHash, bool useCache, bool hardlink, Platform platform, RPGMakerVersion version, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<spdlog::logger> errorLogger) {
     auto extension = from.extension();
 
     if (extension == ".ogg") {
@@ -158,6 +159,35 @@ bool encryptFile(ghc::filesystem::path from, ghc::filesystem::path to, unsigned 
         errorLogger->error("Unknown extension {} of file {}", extension, from);
         return false;
     }
+
+    if (useCache) {
+        if (lastPlatform == Platform::None)
+            lastPlatform = platform;
+        else if (lastPlatform != platform) {
+            //hardlink to the previously encrypted files
+            if (hardlink) {
+                auto iter = cachedEncryptedFiles.find(std::string(from.c_str()));
+                if (iter != cachedEncryptedFiles.end()) {
+                    auto prev = ghc::filesystem::path(iter->second);
+
+                    std::error_code ec;
+                    if (ghc::filesystem::exists(prev, ec)) {
+                        logger->debug("Using cached path from encryption file at {} and hardlink to {}", prev, to);
+                        if(copyFile(prev, to, true, logger, errorLogger))
+                            return true;
+                        return false;
+                    } else {
+                        errorLogger->warn("Cached path {} does not exist anymore!", prev);
+                        cachedEncryptedFiles.erase(iter);
+                    }
+                } else {
+                    errorLogger->warn("Unable to find path {} in cached map!", from);
+                }
+            }
+        }
+    }
+
+    logger->debug("Encrypting file at {} to {}", from, to);
 
     auto ifstream = ghc::filesystem::ifstream(from, std::ios_base::in | std::ios_base::binary);
     if (!ifstream.is_open()){
@@ -218,6 +248,8 @@ bool encryptFile(ghc::filesystem::path from, ghc::filesystem::path to, unsigned 
     ifstream.close();
     ofstream.close();
     delete[] bytes;
+
+    cachedEncryptedFiles[std::string(from.c_str())] = std::string(to.c_str());
 
     return true;
 }

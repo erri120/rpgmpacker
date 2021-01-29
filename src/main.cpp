@@ -13,7 +13,7 @@
 #include "formatters.hpp"
 #include "utility.hpp"
 
-#define RPGMPACKER_TESTING
+//#define RPGMPACKER_TESTING
 
 enum class FolderType {
     RPGMaker,
@@ -38,11 +38,12 @@ int main(int argc, char** argv) {
         ("encryptAudio", "Enable Audio Encryption using encryptionKey. Default: false", cxxopts::value<bool>()->default_value("false"))
         ("encryptionKey", "Encryption Key for Images or Audio, either encryptImages or encryptAudio have to be set", cxxopts::value<std::string>())
         ("hardlinks", "Use hardlinks instead of creating copies. Default: false", cxxopts::value<bool>()->default_value("false"))
-        ("d,debug", "Enable debugging. Default: false", cxxopts::value<bool>()->default_value("false"))
+        ("cache", "Use a path cache for already encrypted files when multi-targeting and using hardlinks. Default: false", cxxopts::value<bool>()->default_value("false"))
+        ("d,debug", "Enable debugging output (very noisy). Default: false", cxxopts::value<bool>()->default_value("false"))
         ("h,help", "Print usage");
 
     std::string input, output, rpgmaker, encryptionKey;
-    bool encryptImages, encryptAudio, debug, useHardlinks;
+    bool encryptImages, encryptAudio, debug, useHardlinks, useCache;
     std::vector<std::string> platformNames;
 
     try {
@@ -65,6 +66,7 @@ int main(int argc, char** argv) {
         //debug = true;
         debug = false;
         useHardlinks = true;
+        useCache = true;
 
         platformNames = std::vector<std::string>();
         platformNames.emplace_back("win");
@@ -79,6 +81,7 @@ int main(int argc, char** argv) {
         encryptAudio = result["encryptAudio"].as<bool>();
         debug = result["debug"].as<bool>();
         useHardlinks = result["hardlinks"].as<bool>();
+        useCache = result["cache"].as<bool>();
 
         if (encryptImages || encryptAudio)
             encryptionKey = result["encryptionKey"].as<std::string>();
@@ -119,6 +122,7 @@ int main(int argc, char** argv) {
     logger->info("Platforms: {}", platformsStr);
     logger->info("Debug: {}", debug);
     logger->info("Use Hardlinks: {}", useHardlinks);
+    logger->info("Use Cache: {}", useCache);
 
     if (!isValidDirectory(input, "Input", errorLogger))
         return -1;
@@ -143,6 +147,16 @@ int main(int argc, char** argv) {
 
     auto canUseHardlinksRPGMakerToOutput = useHardlinks && rpgmakerRootName == outputRootName;
     auto canUseHardlinksInputToOutput = useHardlinks && inputRootName == outputRootName;
+
+    if (useHardlinks) {
+        logger->info("Can use hardlinking from RPGMaker Folder to Output: {}", canUseHardlinksRPGMakerToOutput);
+        logger->info("Can use hardlinking from Input Folder to Output: {}", canUseHardlinksInputToOutput);
+    }
+
+    if (useCache && (!useHardlinks || (!encryptAudio && !encryptImages))) {
+        logger->warn("Cache option is active but requires hardlink and encryption to be turned on as well.");
+        useCache = false;
+    }
 
     MD5 md5;
     std::string encryptionHash = std::string("");
@@ -264,7 +278,7 @@ int main(int argc, char** argv) {
 
                     if (encryptAudio || encryptImages) {
                         if (shouldEncryptFile(&filepath, &outputFilePath, encryptAudio, encryptImages, rpgmakerVersion)) {
-                            if (!encryptFile(filepath, outputFilePath, hash, rpgmakerVersion, logger, errorLogger))
+                            if (!encryptFile(filepath, outputFilePath, hash, useCache, canUseHardlinksInputToOutput, platform, rpgmakerVersion, logger, errorLogger))
                                 return 1;
                             continue;
                         }
