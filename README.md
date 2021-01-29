@@ -1,5 +1,7 @@
 # RPGMPacker
 
+![CI CMake Build](https://github.com/erri120/rpgmpacker/workflows/CI%20CMake%20Build/badge.svg)
+
 Simple CLI program for packaging RPG Maker games to use in a CI/CD workflow.
 
 - Supported RPG Maker versions:
