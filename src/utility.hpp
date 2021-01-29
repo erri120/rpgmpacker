@@ -30,7 +30,7 @@ bool ensureDirectory(ghc::filesystem::path path, std::shared_ptr<spdlog::logger>
     return false;
 }
 
-bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platforms, std::shared_ptr<spdlog::logger> errorLogger) {
+bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platforms, RPGMakerVersion version, std::shared_ptr<spdlog::logger> errorLogger) {
     for (auto i = 0; i < names->size(); i++) {
         auto current = names->at(i);
         if (current == "win") {
@@ -44,6 +44,10 @@ bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platfo
         }
 
         if (current == "linux") {
+            if (version == RPGMakerVersion::MZ) {
+                errorLogger->error("Linux is not supported in MZ!");
+                return false;
+            }
             platforms->emplace_back(Platform::Linux);
             continue;
         }
@@ -54,10 +58,12 @@ bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platfo
         }
 
         if (current == "mobile") {
-            //platforms->emplace_back(Platform::Mobile);
-            //continue;
-            errorLogger->error("Mobile is not supported at the moment!");
-            return false;
+            if (version == RPGMakerVersion::MV) {
+                errorLogger->error("Mobile is not supported for MV at the moment!");
+                return false;
+            }
+            platforms->emplace_back(Platform::Mobile);
+            continue;
         }
 
         errorLogger->error("Unknown platform: {}", current);

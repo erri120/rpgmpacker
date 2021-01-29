@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
         platformNames.emplace_back("win");
         //platformNames.emplace_back("osx");
         //platformNames.emplace_back("linux");
-        //platformNames.emplace_back("browser");
+        platformNames.emplace_back("browser");
 #else
         input = result["input"].as<std::string>();
         output = result["output"].as<std::string>();
@@ -125,13 +125,17 @@ int main(int argc, char** argv) {
     if (!isValidDirectory(rpgmaker, "RPG Maker", errorLogger))
         return -1;
 
-    std::vector<Platform> platforms;
-    if (!getPlatforms(&platformNames, &platforms, errorLogger))
-        return -1;
-
     auto inputPath = ghc::filesystem::path(input);
     auto outputPath = ghc::filesystem::path(output);
     auto rpgmakerPath = ghc::filesystem::path(rpgmaker);
+
+    auto rpgmakerVersion = getRPGMakerVersion(inputPath, logger, errorLogger);
+    if (rpgmakerVersion == RPGMakerVersion::None)
+        return -1;
+
+    std::vector<Platform> platforms;
+    if (!getPlatforms(&platformNames, &platforms, rpgmakerVersion, errorLogger))
+        return -1;
 
     auto inputRootName = inputPath.root_name();
     auto outputRootName = outputPath.root_name();
@@ -146,10 +150,6 @@ int main(int argc, char** argv) {
         encryptionHash = md5(encryptionKey);
 
     auto hash = stringToHexHash(encryptionHash);
-
-    auto rpgmakerVersion = getRPGMakerVersion(inputPath, logger, errorLogger);
-    if (rpgmakerVersion == RPGMakerVersion::None)
-        return -1;
 
     std::error_code ec;
     if (ghc::filesystem::exists(outputPath, ec)) {
