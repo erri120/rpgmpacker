@@ -42,11 +42,16 @@ Simple CLI program for packaging RPG Maker games to use in a CI/CD workflow.
                            encryptImages or encryptAudio have to be set
       --hardlinks          Use hardlinks instead of creating copies. Default:
                            false
-  -d, --debug              Enable debugging. Default: false
+      --cache              Use a path cache for already encrypted files when
+                           multi-targeting and using hardlinks. Default: false
+  -d, --debug              Enable debugging output (very noisy). Default:
+                           false
   -h, --help               Print usage
 ```
 
 It is recommended to use the hardlink option for faster speeds and less disk usage. You can't hardlink across different drives and the program will check if hardlinks can be used beforehand. If you don't know what hardlinks are then take a look at the [Wikipedia article](https://en.wikipedia.org/wiki/Hard_link), the [Win32 docs](https://docs.microsoft.com/en-us/windows/win32/fileio/hard-links-and-junctions) or an [article from Linux Handbook](https://linuxhandbook.com/hard-link/).
+
+The cache option is recommend to use when you encrypt your files, use the hardlink option and target multiple platforms. It works by encrypting the files only once, caching the path and subsequently encryptions will just hardlink to the already encrypted file reducing operation speed and disk usage.
 
 ### Example
 
