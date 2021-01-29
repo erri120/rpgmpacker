@@ -27,7 +27,6 @@ CPMAddPackage (
         "GHC_FILESYSTEM_BUILD_TESTING Off"
         "GHC_FILESYSTEM_BUILD_EXAMPLES Off"
         "GHC_FILESYSTEM_WITH_INSTALL Off"
-        "GHC_WITH_EXCEPTIONS Off"
 )
 
 add_executable(RPGMPacker src/platform.hpp src/formatters.hpp src/utility.hpp src/hash.h src/md5.h src/md5.cpp src/main.cpp)
