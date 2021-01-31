@@ -36,13 +36,13 @@ int main(int argc, char** argv) {
         ("o,output", "(REQUIRED) Output folder", cxxopts::value<std::string>())
         ("rpgmaker", "(REQUIRED) RPG Maker installation folder", cxxopts::value<std::string>())
         ("p,platforms", "(REQUIRED) Platforms to build for, this can take a list of platforms delimited with a comma or just one value. Possible values: win, osx, linux, browser, mobile", cxxopts::value<std::vector<std::string>>())
-        ("encryptImages", "Enable Image Encryption using encryptionKey. Default: false", cxxopts::value<bool>()->default_value("false"))
-        ("encryptAudio", "Enable Audio Encryption using encryptionKey. Default: false", cxxopts::value<bool>()->default_value("false"))
+        ("encryptImages", "Enable Image Encryption using encryptionKey. (default: false)", cxxopts::value<bool>()->default_value("false"))
+        ("encryptAudio", "Enable Audio Encryption using encryptionKey. (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("encryptionKey", "Encryption Key for Images or Audio, either encryptImages or encryptAudio have to be set", cxxopts::value<std::string>())
-        ("hardlinks", "Use hardlinks instead of creating copies. Default: false", cxxopts::value<bool>()->default_value("false"))
-        ("cache", "Use a path cache for already encrypted files when multi-targeting and using hardlinks. Default: false", cxxopts::value<bool>()->default_value("false"))
-        ("threads", "Amount of worker threads to use. Min: 1, Max: 10, Default: 2", cxxopts::value<int>()->default_value("2"))
-        ("d,debug", "Enable debugging output (very noisy). Default: false", cxxopts::value<bool>()->default_value("false"))
+        ("hardlinks", "Use hardlinks instead of creating copies. (default: false)", cxxopts::value<bool>()->default_value("false"))
+        ("cache", "Use a path cache for already encrypted files when multi-targeting and using hardlinks. (default: false)", cxxopts::value<bool>()->default_value("false"))
+        ("threads", "Amount of worker threads to use. Min: 1, Max: 10", cxxopts::value<int>()->default_value("2"))
+        ("d,debug", "Enable debugging output (very noisy). (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("h,help", "Print usage");
 
     std::string input, output, rpgmaker, encryptionKey;

@@ -35,19 +35,20 @@ Simple CLI program for packaging RPG Maker games to use in a CI/CD workflow.
                            one value. Possible values: win, osx, linux,
                            browser, mobile
       --encryptImages      Enable Image Encryption using encryptionKey.
-                           Default: false
+                           (default: false)
       --encryptAudio       Enable Audio Encryption using encryptionKey.
-                           Default: false
+                           (default: false)
       --encryptionKey arg  Encryption Key for Images or Audio, either
                            encryptImages or encryptAudio have to be set
-      --hardlinks          Use hardlinks instead of creating copies. Default:
-                           false
+      --hardlinks          Use hardlinks instead of creating copies.
+                           (default: false)
       --cache              Use a path cache for already encrypted files when
-                           multi-targeting and using hardlinks. Default: false
-      --threads arg        Amount of worker threads to use. Min: 1, Max: 10,
-                           Default: 2 (default: 2)
-  -d, --debug              Enable debugging output (very noisy). Default:
-                           false
+                           multi-targeting and using hardlinks. (default:
+                           false)
+      --threads arg        Amount of worker threads to use. Min: 1, Max: 10
+                           (default: 2)
+  -d, --debug              Enable debugging output (very noisy). (default:
+                           false)
   -h, --help               Print usage
 ```
 
