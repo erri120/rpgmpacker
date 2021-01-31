@@ -44,6 +44,8 @@ Simple CLI program for packaging RPG Maker games to use in a CI/CD workflow.
                            false
       --cache              Use a path cache for already encrypted files when
                            multi-targeting and using hardlinks. Default: false
+      --threads arg        Amount of worker threads to use. Min: 1, Max: 10,
+                           Default: 2 (default: 2)
   -d, --debug              Enable debugging output (very noisy). Default:
                            false
   -h, --help               Print usage
@@ -61,6 +63,8 @@ The output directory will be cleaned before execution and each platform will get
 It is recommended to use the hardlink option for faster speeds and less disk usage. You can't hardlink across different drives and the program will check if hardlinks can be used beforehand. If you don't know what hardlinks are then take a look at the [Wikipedia article](https://en.wikipedia.org/wiki/Hard_link), the [Win32 docs](https://docs.microsoft.com/en-us/windows/win32/fileio/hard-links-and-junctions) or an [article from Linux Handbook](https://linuxhandbook.com/hard-link/).
 
 The cache option is recommend to use when you encrypt your files, use the hardlink option and target multiple platforms. It works by encrypting the files only once, caching the path and subsequently encryptions will just hardlink to the already encrypted file reducing operation speed and disk usage.
+
+Since this application is mostly just doing IO stuff, I added parallel execution that you can configure with the threads option which will set the amount of worker threads to use. I recommend something between 2 and 4 as anything above 4 is not having that much of an impact.
 
 ### Example
 
