@@ -29,11 +29,25 @@ CPMAddPackage (
         "GHC_FILESYSTEM_WITH_INSTALL Off"
 )
 
+CPMAddPackage (
+    NAME Taskflow
+    GITHUB_REPOSITORY taskflow/taskflow
+    VERSION 3.0.0
+    OPTIONS
+        "TF_BUILD_BENCHMARKS Off"
+        "TF_BUILD_CUDA Off"
+        "TF_BUILD_SYCL Off"
+        "TF_BUILD_TESTS Off"
+        "TF_BUILD_EXAMPLES Off"
+        "TF_BUILD_PROFILER Off"
+)
+
 add_executable(RPGMPacker src/platform.hpp src/formatters.hpp src/utility.hpp src/hash.h src/md5.h src/md5.cpp src/rpgmakerVersion.hpp src/main.cpp)
 
 target_link_libraries(RPGMPacker cxxopts)
 target_link_libraries(RPGMPacker spdlog)
 target_link_libraries(RPGMPacker ghc_filesystem)
+target_link_libraries(RPGMPacker Taskflow)
 
 set_target_properties(RPGMPacker PROPERTIES CXX_STANDARD 17)
 

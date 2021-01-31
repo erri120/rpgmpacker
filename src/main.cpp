@@ -4,6 +4,7 @@
 #include <spdlog/stopwatch.h>
 #include <spdlog/fmt/fmt.h>
 #include <ghc/filesystem.hpp>
+#include <taskflow/taskflow.hpp>
 #include <iostream>
 #include <string>
 #include <numeric>

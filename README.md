@@ -104,6 +104,7 @@ Managed with [CPM](https://github.com/TheLartians/CPM.cmake).
 - [spdlog](https://github.com/gabime/spdlog) ([MIT](https://github.com/gabime/spdlog/blob/v1.x/LICENSE))
 - [ghc::filesystem](https://github.com/gulrak/filesystem) ([MIT](https://github.com/gulrak/filesystem/blob/master/LICENSE))
 - MD5 hash functions from [stbrumme/hash-library](https://github.com/stbrumme/hash-library) ([zlib](https://github.com/stbrumme/hash-library/blob/master/LICENSE))
+- [Taskflow](https://github.com/taskflow/taskflow) ([MIT](https://github.com/taskflow/taskflow/blob/master/LICENSE))
 
 ## License
 
