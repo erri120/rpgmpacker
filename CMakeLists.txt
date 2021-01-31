@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
-project(RPGMPacker LANGUAGES CXX)
+project(
+    RPGMPacker
+    LANGUAGES CXX
+)
 
 include(cmake/CPM.cmake)
 
@@ -42,7 +45,9 @@ CPMAddPackage (
         "TF_BUILD_PROFILER Off"
 )
 
-add_executable(RPGMPacker src/platform.hpp src/formatters.hpp src/utility.hpp src/hash.h src/md5.h src/md5.cpp src/rpgmakerVersion.hpp src/main.cpp)
+
+file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/**")
+add_executable(RPGMPacker ${sources})
 
 target_link_libraries(RPGMPacker cxxopts)
 target_link_libraries(RPGMPacker spdlog)

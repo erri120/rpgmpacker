@@ -79,7 +79,9 @@
         "variant": "cpp",
         "filesystem": "cpp",
         "numeric": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "csignal": "cpp",
+        "future": "cpp"
     },
     "cSpell.words": [
         "RPGM",

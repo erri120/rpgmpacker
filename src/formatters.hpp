@@ -25,7 +25,7 @@ struct fmt::formatter<std::error_code> {
 
     template <typename FormatContext>
     auto format(const std::error_code& ec, FormatContext& ctx) {
-        return format_to(ctx.out(), "[{}]({}): {}", ec.category().name(), ec.value(), ec.message());
+        return format_to(ctx.out(), "\n[{}]({}): {}", ec.category().name(), ec.value(), ec.message());
     }
 };
 

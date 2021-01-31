@@ -26,7 +26,7 @@ bool ensureDirectory(ghc::filesystem::path path, std::shared_ptr<spdlog::logger>
     if (ec) return false;
 
     if (ghc::filesystem::create_directory(path, ec)) return true;
-    errorLogger->error("Unable to create directory {} {}", path, ec);
+    errorLogger->error("Unable to create directory {}! {}", path, ec);
     return false;
 }
 
@@ -137,6 +137,8 @@ unsigned int* stringToHexHash(std::string encryptionHash) {
 auto lastPlatform = Platform::None;
 std::map<std::string, std::string> cachedEncryptedFiles;
 
+static uint8_t header[] = { 0x52, 0x50, 0x47, 0x4D, 0x56, 0x00, 0x00, 0x00, 0x00, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
 bool encryptFile(ghc::filesystem::path from, ghc::filesystem::path to, unsigned int* encryptionHash, bool useCache, bool hardlink, Platform platform, RPGMakerVersion version, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<spdlog::logger> errorLogger) {
     auto extension = from.extension();
 
@@ -177,11 +179,11 @@ bool encryptFile(ghc::filesystem::path from, ghc::filesystem::path to, unsigned 
                             return true;
                         return false;
                     } else {
-                        errorLogger->warn("Cached path {} does not exist anymore!", prev);
+                        logger->warn("Cached path {} does not exist anymore!", prev);
                         cachedEncryptedFiles.erase(iter);
                     }
                 } else {
-                    errorLogger->warn("Unable to find path {} in cached map!", from);
+                    logger->warn("Unable to find path {} in cached map!", from);
                 }
             }
         }
@@ -218,7 +220,6 @@ bool encryptFile(ghc::filesystem::path from, ghc::filesystem::path to, unsigned 
         3) write the rest of the original file
     */
 
-    uint8_t header[] = { 0x52, 0x50, 0x47, 0x4D, 0x56, 0x00, 0x00, 0x00, 0x00, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00 };
     ofstream.write((char*)&header, 16);
 
     auto bytes = new char[16];
@@ -248,6 +249,7 @@ bool encryptFile(ghc::filesystem::path from, ghc::filesystem::path to, unsigned 
     ifstream.close();
     ofstream.close();
     delete[] bytes;
+    delete[] buffer;
 
     cachedEncryptedFiles[std::string(from.c_str())] = std::string(to.c_str());
 
