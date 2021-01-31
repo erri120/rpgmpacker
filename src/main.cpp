@@ -230,8 +230,6 @@ int main(int argc, char** argv) {
                         FolderType::RPGMaker
                     };
 
-                    //if(!copyFile(path, outputPath, canUseHardlinksRPGMakerToOutput, logger, errorLogger))
-                    //    return 1;
                     operations.emplace_back(operation);
                 }
             }
@@ -285,6 +283,9 @@ int main(int argc, char** argv) {
             }
         }
 
+        std::atomic<unsigned int> succeeded;
+        std::atomic<unsigned int> failed;
+
         tf::Taskflow taskflow;
 
         taskflow.for_each(operations.begin(), operations.end(), [&](struct Operation& operation) {
@@ -292,16 +293,29 @@ int main(int argc, char** argv) {
                 ? canUseHardlinksInputToOutput
                 : canUseHardlinksRPGMakerToOutput;
             if (operation.type == OperationType::Copy) {
-                copyFile(operation.from, operation.to, canUseHardlinks, logger, errorLogger);
+                if(copyFile(operation.from, operation.to, canUseHardlinks, logger, errorLogger)) {
+                    succeeded++;
+                } else {
+                    failed++;
+                }
             } else if (operation.type == OperationType::Encrypt) {
-                encryptFile(operation.from, operation.to, hash, useCache, canUseHardlinks, platform, rpgmakerVersion, logger, errorLogger);
+                if(encryptFile(operation.from, operation.to, hash, useCache, canUseHardlinks, platform, rpgmakerVersion, logger, errorLogger)) {
+                    succeeded++;
+                } else {
+                    failed++;
+                }
             }
         });
 
         auto fu = executor.run(taskflow);
         fu.wait();
 
-        logger->info("Finished operations for {} in {} seconds", platform, sw);
+        if (failed.load() == 0) {
+            logger->info("Successfully executed {} operations for {} in {} seconds", succeeded.load(), platform, sw);
+        } else {
+            errorLogger->error("Some operations failed for {} in {} seconds: {} failed, {} succeeded", platform, sw, failed.load(), succeeded.load());
+            return 1;
+        }
     }
 
     delete[] hash;
