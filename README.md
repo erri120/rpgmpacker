@@ -65,12 +65,36 @@ It is recommended to use the hardlink option for faster speeds and less disk usa
 
 The cache option is recommend to use when you encrypt your files, use the hardlink option and target multiple platforms. It works by encrypting the files only once, caching the path and subsequently encryptions will just hardlink to the already encrypted file reducing operation speed and disk usage.
 
-Since this application is mostly just doing IO stuff, I added parallel execution that you can configure with the threads option which will set the amount of worker threads to use. I recommend something between 2 and 4 as anything above 4 is not having that much of an impact.
+Since this application is mostly just doing IO stuff, I added parallel execution that you can configure with the threads option which will set the amount of worker threads to use. I recommend something between 2 and 4 as anything above 4 is not having that much of an impact:
+
+| Worker Threads | Time (first platform) | Time (second platform) |
+|----------------|-----------------------|------------------------|
+| 1 | `4.84sec` | `0.16sec` |
+| 2 | `3.28sec` | `0.11sec` |
+| 4 | `1.84sec` | `0.09sec` |
+| 6 | `1.66sec` | `0.10sec` |
+| 8 | `1.31sec` | `0.09sec` |
+
+For testing I used the following options:
+
+- Input: `E:\\Projects\\RPGMakerTest\\src\\MZProject1`
+- Output: `E:\\Projects\\RPGMakerTest\\out-c`
+- RPG Maker: `C:\\Program Files\\KADOKAWA\\RPGMZ`
+- Encryption Key: `1337`
+- Encrypt Images: `true`
+- Encrypt Audio: `true`
+- Platforms: `win,browser`
+- Debug: `false`
+- Use Hardlinks: `true`
+- Use Cache: `true`
+- RPGMaker Version: `MZ`
+- Can use hardlinking from RPGMaker Folder to Output: `false`
+- Can use hardlinking from Input Folder to Output: `true`
 
 ### Example
 
 ```ps1
-.\RPGMPacker.exe -i "E:\\Projects\\RPGMakerTest\\src\\Project1" -o "E:\\Projects\\RPGMakerTest\\out-c" --rpgmaker "M:\\SteamLibrary\\steamapps\\common\\RPG Maker MV" --platforms win,linux,osx --hardlinks
+.\RPGMPacker.exe -i "E:\\Projects\\RPGMakerTest\\src\\Project1" -o "E:\\Projects\\RPGMakerTest\\out-c" --rpgmaker "M:\\SteamLibrary\\steamapps\\common\\RPG Maker MV" --platforms win,linux,osx --encryptImages --encryptAudio --encryptionKey="1337" --hardlinks --cache
 ```
 
 ## How it works
