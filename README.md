@@ -1,7 +1,7 @@
 # RPGMPacker
 
-![CI CMake Build](https://github.com/erri120/rpgmpacker/workflows/CI%20CMake%20Build/badge.svg)
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/erri120/rpgmpacker)
+[![CI CMake Build](https://github.com/erri120/rpgmpacker/workflows/CI%20CMake%20Build/badge.svg)](https://github.com/erri120/rpgmpacker/actions?query=workflow%3A%22CI+CMake+Build%22)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/erri120/rpgmpacker)](https://github.com/erri120/rpgmpacker/releases/latest)
 
 Simple CLI program for packaging RPG Maker games to use in a CI/CD workflow.
 
