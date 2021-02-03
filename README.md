@@ -146,6 +146,15 @@ Finally the MD5 hash of the encryption key will be put into `data/System.json`:
 
 Since the game is in Javascript you can easily just go to `js/rpg_core.js` and find the decryption functions as those are not even minified.
 
+## Building from Source
+
+Requirements:
+
+- [CMake](https://cmake.org/) (see `cmake_minimum_required` in [`CMakeLists.txt`](CMakeLists.txt))
+- Compiler has to support C++17
+
+You don't have to worry about dependencies as those are handled by [CPM](https://github.com/TheLartians/CPM.cmake) (see [Libraries used](#libraries-used)).
+
 ## Libraries used
 
 Managed with [CPM](https://github.com/TheLartians/CPM.cmake).
