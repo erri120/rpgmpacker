@@ -6,18 +6,19 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Unreleased]
 
----
-
 ## [Released]
 
----
+## [1.0.0] - 2021-02-03
+
+### Added
+
+- Everything. This is the first release of this application.
 
 <!-- Links -->
 [Keep a Changelog]: https://keepachangelog.com/
 [Semantic Versioning]: https://semver.org/
 
 <!-- Versions -->
-[Unreleased]: https://github.com/Author/Repository/compare/v1.0.0...HEAD
-[Released]: https://github.com/Author/Repository/releases
-[0.0.2]: https://github.com/Author/Repository/compare/v0.0.1..v0.0.2
-[0.0.1]: https://github.com/Author/Repository/releases/v0.0.1
+[Unreleased]: https://github.com/erri120/rpgmpacker/compare/v1.0.0...HEAD
+[Released]: https://github.com/erri120/rpgmpacker/releases/
+[1.0.0]: https://github.com/erri120/rpgmpacker/releases/v1.0.0
