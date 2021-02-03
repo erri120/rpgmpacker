@@ -124,9 +124,9 @@ RPG Maker has a very _simple_ way of deploying your game due to the fact that th
 
 ### Encryption
 
-The encryption method used by RPG Maker is a joke and only makes sense if you don't want every user to easily access the audio and image files.
+The "encryption" method used by RPG Maker is the opposite of strong and is only useful if you don't want users to simply open the assets folder and look at some images.
 
-RPG Maker starts by writing a new header:
+Only image (`.png`) and audio (`.ogg` or `.m4a`) files are being encrypted. RPG Maker starts by writing a new header:
 
 ```txt
 52 50 47 4D 56 00 00 00 00 03 01 00 00 00 00 00
