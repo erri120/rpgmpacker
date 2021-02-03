@@ -98,6 +98,26 @@ For testing I used the following options:
 .\RPGMPacker.exe -i "E:\\Projects\\RPGMakerTest\\src\\Project1" -o "E:\\Projects\\RPGMakerTest\\out-c" --rpgmaker "M:\\SteamLibrary\\steamapps\\common\\RPG Maker MV" --platforms win,linux,osx --encryptImages --encryptAudio --encryptionKey="1337" --hardlinks --cache
 ```
 
+### GitHub Actions
+
+Using this application in [GitHub Actions](https://github.com/features/actions) can be done by downloading a release using `wget` and then executing with configured arguments. I doubt you have your game on a public repository and should also consider using a self-hosted runner. I recommend using `ubuntu-latest` because everything is faster than on `windows-latest`.
+
+```yml
+- name: RPGMPacker
+    # see https://github.com/erri120/rpgmpacker#usage for all arguments
+    # see https://github.com/erri120/rpgmpacker/releases for all releases
+    # note: using chmod to make sure we set execution permission, not needed on Windows
+    shell: bash
+    env:
+        RPGMPACKER_VERSION: '1.0.0'
+    run: |
+        wget https://github.com/erri120/rpgmpacker/releases/download/v$RPGMPACKER_VERSION/RPGMPacker-Linux
+        chmod +x ./RPGMPacker-Linux
+        ./RPGMPacker-Linux -i path-to-input -o path-to-output --rpgmaker path-to-rpgm --platforms win,lnx
+```
+
+If you are using `windows-latest` for whatever reason change `RPGMPacker-Linux` to `RPGMPacker-Windows.exe`. You don't have to change the shell as `bash` works on all platforms ([GitHub Actions Docs](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#using-a-specific-shell)).
+
 ## How it works
 
 RPG Maker has a very _simple_ way of deploying your game due to the fact that the game is in Javascript and no compilation is needed. What the program does is copy your project files as well as the runtime to the output directory. The runtime can be found in the RPG Maker installation folder and some project files are filtered out before copying (eg only `.ogg` audio files on Desktop).
