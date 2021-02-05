@@ -6,7 +6,7 @@
 #include "platform.hpp"
 #include "rpgmakerVersion.hpp"
 
-bool isValidDirectory(std::string directory, std::string name, std::shared_ptr<spdlog::logger> errorLogger) {
+bool isValidDirectory(const std::string& directory, const std::string& name, const std::shared_ptr<spdlog::logger>& errorLogger) {
     if (!ghc::filesystem::exists(directory)) {
         errorLogger->error("{} Folder does not exist!", name);
         return false;
@@ -20,7 +20,7 @@ bool isValidDirectory(std::string directory, std::string name, std::shared_ptr<s
     return true;
 }
 
-bool ensureDirectory(ghc::filesystem::path path, std::shared_ptr<spdlog::logger> errorLogger) {
+bool ensureDirectory(const ghc::filesystem::path& path, const std::shared_ptr<spdlog::logger>& errorLogger) {
     std::error_code ec;
     if (ghc::filesystem::exists(path, ec)) return true;
     if (ec) return false;
@@ -30,9 +30,8 @@ bool ensureDirectory(ghc::filesystem::path path, std::shared_ptr<spdlog::logger>
     return false;
 }
 
-bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platforms, RPGMakerVersion version, std::shared_ptr<spdlog::logger> errorLogger) {
-    for (auto i = 0; i < names->size(); i++) {
-        auto current = names->at(i);
+bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platforms, RPGMakerVersion version, const std::shared_ptr<spdlog::logger>& errorLogger) {
+    for (const auto& current : *names) {
         if (current == "win") {
             platforms->emplace_back(Platform::Windows);
             continue;
@@ -73,7 +72,7 @@ bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platfo
     return true;
 }
 
-bool copyFile(ghc::filesystem::path from, ghc::filesystem::path to, bool useHardlinks, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<spdlog::logger> errorLogger) {
+bool copyFile(const ghc::filesystem::path& from, const ghc::filesystem::path& to, bool useHardlinks, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger) {
     if (useHardlinks) {
         logger->debug("Creating hardlink from {} to {}", from , to);
     } else {
@@ -139,7 +138,7 @@ std::map<std::string, std::string> cachedEncryptedFiles;
 
 static uint8_t header[] = { 0x52, 0x50, 0x47, 0x4D, 0x56, 0x00, 0x00, 0x00, 0x00, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-bool encryptFile(ghc::filesystem::path from, ghc::filesystem::path to, unsigned int* encryptionHash, bool useCache, bool hardlink, Platform platform, RPGMakerVersion version, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<spdlog::logger> errorLogger) {
+bool encryptFile(const ghc::filesystem::path& from, ghc::filesystem::path to, const unsigned int* encryptionHash, bool useCache, bool hardlink, Platform platform, RPGMakerVersion version, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger) {
     auto extension = from.extension();
 
     if (extension == ".ogg") {
@@ -256,7 +255,7 @@ bool encryptFile(ghc::filesystem::path from, ghc::filesystem::path to, unsigned 
     return true;
 }
 
-bool updateSystemJson(ghc::filesystem::path from, ghc::filesystem::path to, bool encryptAudio, bool encryptImages, std::string hash, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<spdlog::logger> errorLogger) {
+bool updateSystemJson(const ghc::filesystem::path& from, const ghc::filesystem::path& to, bool encryptAudio, bool encryptImages, const std::string& hash, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger) {
     logger->debug("Updating System.json with encryption data from {} to {}", from, to);
 
     auto ifstream = ghc::filesystem::ifstream(from, std::ios_base::in);
@@ -290,7 +289,7 @@ bool updateSystemJson(ghc::filesystem::path from, ghc::filesystem::path to, bool
         json.append("true");
     else
         json.append("false");
-    json.append(",\"encryptionKey\":\"");
+    json.append(R"(,"encryptionKey":")");
     json.append(hash);
     json.append("\"}");
 
@@ -302,12 +301,12 @@ bool updateSystemJson(ghc::filesystem::path from, ghc::filesystem::path to, bool
     return true;
 }
 
-RPGMakerVersion getRPGMakerVersion(ghc::filesystem::path projectPath, std::shared_ptr<spdlog::logger> logger, std::shared_ptr<spdlog::logger> errorLogger) {
+RPGMakerVersion getRPGMakerVersion(const ghc::filesystem::path& projectPath, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger) {
     logger->debug("Identifying RPGMaker Version");
 
     std::error_code ec;
     auto version = RPGMakerVersion::None;
-    for (auto p : ghc::filesystem::directory_iterator(projectPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
+    for (const auto& p : ghc::filesystem::directory_iterator(projectPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
         if (!p.is_regular_file()) continue;
         auto extension = p.path().extension();
 

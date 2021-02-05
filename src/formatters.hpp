@@ -7,7 +7,7 @@
 
 template <>
 struct fmt::formatter<ghc::filesystem::path> {
-    constexpr auto parse(format_parse_context& ctx) {
+    static constexpr auto parse(format_parse_context& ctx) {
         return ctx.end();
     }
 
@@ -19,7 +19,7 @@ struct fmt::formatter<ghc::filesystem::path> {
 
 template <>
 struct fmt::formatter<std::error_code> {
-    constexpr auto parse(format_parse_context& ctx) {
+    static constexpr auto parse(format_parse_context& ctx) {
         return ctx.end();
     }
 
@@ -31,7 +31,7 @@ struct fmt::formatter<std::error_code> {
 
 template <>
 struct fmt::formatter<Platform> {
-    constexpr auto parse(format_parse_context& ctx) {
+    static constexpr auto parse(format_parse_context& ctx) {
         return ctx.end();
     }
 
@@ -43,7 +43,7 @@ struct fmt::formatter<Platform> {
 
 template <>
 struct fmt::formatter<RPGMakerVersion> {
-    constexpr auto parse(format_parse_context& ctx) {
+    static constexpr auto parse(format_parse_context& ctx) {
         return ctx.end();
     }
 
