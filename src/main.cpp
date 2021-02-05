@@ -19,7 +19,7 @@
 
 //bool filterFolder(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderType folderType, RPGMakerVersion version, Platform platform);
 bool filterFile(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderType folderType, RPGMakerVersion version, Platform platform);
-bool shouldEncryptFile(ghc::filesystem::path* from, ghc::filesystem::path* to, bool encryptAudio, bool encryptImages, RPGMakerVersion version);
+bool shouldEncryptFile(ghc::filesystem::path *from, bool encryptAudio, bool encryptImages, RPGMakerVersion version);
 
 int main(int argc, char** argv) {
     auto logger = spdlog::stdout_color_mt("console");
@@ -266,7 +266,7 @@ int main(int argc, char** argv) {
                 };
 
                 if (encryptAudio || encryptImages) {
-                    if (shouldEncryptFile(&path, &entryOutputPath, encryptAudio, encryptImages, rpgmakerVersion)) {
+                    if (shouldEncryptFile(&path, encryptAudio, encryptImages, rpgmakerVersion)) {
                         operation.type = OperationType::Encrypt;
                     }
 
@@ -361,7 +361,7 @@ bool filterFile(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderTy
     return false;
 }
 
-bool shouldEncryptFile(ghc::filesystem::path* from, ghc::filesystem::path* to, bool encryptAudio, bool encryptImages, RPGMakerVersion version) {
+bool shouldEncryptFile(ghc::filesystem::path *from, bool encryptAudio, bool encryptImages, RPGMakerVersion version) {
     auto filename = from->filename();
     auto extension = from->extension();
     auto parent = from->parent_path();
