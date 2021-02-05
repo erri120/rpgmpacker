@@ -3,7 +3,7 @@
 [![CI CMake Build](https://github.com/erri120/rpgmpacker/workflows/CI%20CMake%20Build/badge.svg)](https://github.com/erri120/rpgmpacker/actions?query=workflow%3A%22CI+CMake+Build%22)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/erri120/rpgmpacker)](https://github.com/erri120/rpgmpacker/releases/latest)
 
-Simple CLI program for packaging RPG Maker games to use in a CI/CD workflow.
+Simple CLI program for packaging RPG Maker games to use in an automated build/deploy pipeline.
 
 - Supported RPG Maker versions:
   - RPG Maker MV
@@ -97,6 +97,10 @@ For testing I used the following options:
 ```ps1
 .\RPGMPacker.exe -i "E:\\Projects\\RPGMakerTest\\src\\Project1" -o "E:\\Projects\\RPGMakerTest\\out-c" --rpgmaker "M:\\SteamLibrary\\steamapps\\common\\RPG Maker MV" --platforms win,linux,osx --encryptImages --encryptAudio --encryptionKey="1337" --hardlinks --cache
 ```
+
+### Pipeline Example and Guide
+
+See [this](https://erri120.github.io/2021/02/04/CI-CD-for-RPG-Maker-Games/) post I made about CI/CD for RPG Maker Game Development where we build an entire release pipeline.
 
 ### GitHub Actions
 
