@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
     - uses: actions/checkout@v2
     - uses: actions/cache@v2
@@ -53,6 +53,13 @@ jobs:
         name: build-linux
         path: ${{github.workspace}}/build/${{ env.TARGET }}
         if-no-files-found: error
+    - name: Upload Artifact - macOS
+      if: matrix.os == 'macos-latest'
+      uses: actions/upload-artifact@v2
+      with:
+        name: build-macos
+        path: ${{github.workspace}}/build/${{ env.TARGET }}
+        if-no-files-found: error
 
   publish:
     needs: [build]
@@ -78,17 +85,22 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: build-windows
-        path: out/
+        path: out/Windows/
     - uses: actions/download-artifact@v2
       with:
         name: build-linux
-        path: out/
+        path: out/Linux/
+    - uses: actions/download-artifact@v2
+      with:
+        name: build-macos
+        path: out/macOS/
 
     - name: Rename
       shell: bash
       run: |
-        mv out/${{ env.TARGET }} out/${{ env.TARGET}}-Linux
-        mv out/${{ env.TARGET }}.exe out/${{ env.TARGET }}-Windows.exe
+        mv out/Windows/${{ env.TARGET }}.exe out/${{ env.TARGET}}-Windows.exe
+        mv out/Linux/${{ env.TARGET }} out/${{ env.TARGET }}-Linux
+        mv out/macOS/${{ env.TARGET }} out/${{ env.TARGET }}-macOS
 
     - name: Create Release
       id: create_release
