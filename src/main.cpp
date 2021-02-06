@@ -224,14 +224,43 @@ int main(int argc, char** argv) {
             return 1;
 
         //Actors.json
+        //img/sv_actors/{}.png
         std::set<std::string_view> actorBattlerNames;
-        std::set<std::string_view> actorCharacterNames;
-        std::set<std::string_view> actorFaceNames;
+
         //Animations.json
+        //img/animations/{}.png
         std::set<std::string_view> animationNames;
-        std::set<std::string_view> animationSoundEffectNames;
+
         //Enemies.json
-        std::set<std::string_view> enemiesBattlerNames;
+        //img/sv_enemies/{}.png
+        std::set<std::string_view> enemyBattlerNames;
+
+        //other
+        //img/characters/{}.png
+        std::set<std::string_view> characterNames;
+        //img/faces/{}.png
+        std::set<std::string_view> faceNames;
+
+        //audio/bgm/{}.m4a/ogg
+        std::set<std::string_view> bgmNames;
+        //audio/bgs/{}.m4a/ogg
+        std::set<std::string_view> bgsNames;
+        //audio/me/{}.m4a/ogg
+        std::set<std::string_view> meNames;
+        //audio/se/{}.m4a/ogg
+        std::set<std::string_view> seNames;
+
+        //img/pictures/{}.png
+        std::set<std::string_view> pictureNames;
+        //movies/{}.webm
+        std::set<std::string_view> movieNames;
+
+        //img/battlebacks1/{}.png
+        std::set<std::string_view> battlebacks1Names;
+        //img/battlebacks2/{}.png
+        std::set<std::string_view> battlebacks2Names;
+        //img/parallaxes/{}.png
+        std::set<std::string_view> parallaxesNames;
 
         auto sInputPath = std::string(inputPath.c_str());
         for (const auto& p : ghc::filesystem::recursive_directory_iterator(inputPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
@@ -267,12 +296,12 @@ int main(int argc, char** argv) {
                             std::string_view faceName = obj["faceName"];
 
                             actorBattlerNames.insert(battlerName);
-                            actorCharacterNames.insert(characterName);
-                            actorFaceNames.insert(faceName);
+                            characterNames.insert(characterName);
+                            faceNames.insert(faceName);
                         }
 
                         logger->info("Found {} battlerNames, {} characterNames and {} faceNames",
-                                     actorBattlerNames.size(), actorCharacterNames.size(), actorFaceNames.size());
+                                     actorBattlerNames.size(), characterNames.size(), faceNames.size());
                     } else if (filename == "Animations.json") {
                         logger->info("Parsing Animations.json");
                         dom::parser parser;
@@ -300,14 +329,13 @@ int main(int argc, char** argv) {
                                 if (seElement.type() == dom::element_type::NULL_VALUE) continue;
                                 dom::object se = seElement;
 
-                                std::string_view animationSoundEffectName = se["name"];
+                                std::string_view seName = se["name"];
 
-                                animationSoundEffectNames.insert(animationSoundEffectName);
+                                seNames.insert(seName);
                             }
                         }
 
-                        logger->info("Found {} animationNames and {} animationSoundEffectNames",
-                                     animationNames.size(), animationSoundEffectNames.size());
+                        logger->info("Found {} animationNames and", animationNames.size());
                     } else if (filename == "CommonEvents.json") {
                         logger->info("Parsing CommonEvents.json");
                         dom::parser parser;
@@ -342,7 +370,7 @@ int main(int argc, char** argv) {
                                  * - 261: play movie, [0] is movie name
                                  *
                                  * - 282: change tileset, [0] is index of tileset (maybe not needed)
-                                 * - 283: change battle back, [0] and [1] are image names
+                                 * - 283: change battle back, [0] is battlebacks1 and [1] is battlebacks2
                                  * - 284: change parallax, [0] is image name
                                  *
                                  * - 322: change actor images, [1] is face name, [3] is character name, [5] is battler name
@@ -371,10 +399,10 @@ int main(int argc, char** argv) {
 
                             std::string_view battlerName = obj["battlerName"];
 
-                            enemiesBattlerNames.insert(battlerName);
+                            enemyBattlerNames.insert(battlerName);
                         }
 
-                        logger->info("Found {} enemiesBattlerNames", enemiesBattlerNames.size());
+                        logger->info("Found {} enemyBattlerNames", enemyBattlerNames.size());
                     } else  if (filename == "System.json") {
                         //TODO: System.json
                     } else if (filename == "Tilesets.json") {
