@@ -223,6 +223,16 @@ int main(int argc, char** argv) {
         if (!ensureDirectory(wwwPath, errorLogger))
             return 1;
 
+        //Actors.json
+        std::set<std::string_view> actorBattlerNames;
+        std::set<std::string_view> actorCharacterNames;
+        std::set<std::string_view> actorFaceNames;
+        //Animations.json
+        std::set<std::string_view> animationNames;
+        std::set<std::string_view> animationSoundEffectNames;
+        //Enemies.json
+        std::set<std::string_view> enemiesBattlerNames;
+
         auto sInputPath = std::string(inputPath.c_str());
         for (const auto& p : ghc::filesystem::recursive_directory_iterator(inputPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
             auto path = p.path();
@@ -234,6 +244,92 @@ int main(int argc, char** argv) {
                     return 1;
             } else if (p.is_regular_file(ec)) {
                 auto filename = path.filename();
+
+                if (excludeUnused) {
+                    using namespace simdjson;
+                    if (filename == "Actors.json") {
+                        logger->info("Parsing Actors.json");
+                        dom::parser parser;
+                        dom::element elements = parser.load(path);
+
+                        for (dom::element element : elements) {
+                            if (element.type() == dom::element_type::NULL_VALUE) continue;
+                            dom::object obj = element;
+                            /*
+                             * Actors.json:
+                             * battlerName => img/sv_actors/{battlerName}.png
+                             * characterName (w/ index) => img/characters/{characterName}.png
+                             * faceName (w/ index) => img/faces/{faceName}.png
+                             */
+
+                            std::string_view battlerName = obj["battlerName"];
+                            std::string_view characterName = obj["characterName"];
+                            std::string_view faceName = obj["faceName"];
+
+                            actorBattlerNames.insert(battlerName);
+                            actorCharacterNames.insert(characterName);
+                            actorFaceNames.insert(faceName);
+                        }
+
+                        logger->info("Found {} battlerNames, {} characterNames and {} faceNames",
+                                     actorBattlerNames.size(), actorCharacterNames.size(), actorFaceNames.size());
+                    }  else if (filename == "Animations.json") {
+                        logger->info("Parsing Animations.json");
+                        dom::parser parser;
+                        dom::element elements = parser.load(path);
+
+                        for (dom::element element : elements) {
+                            if (element.type() == dom::element_type::NULL_VALUE) continue;
+                            dom::object obj = element;
+                            /*
+                             * Animations.json:
+                             * animation1Name => img/animations/{animation1Name}.png
+                             * animation2Name => img/animations/{animation2Name}.png
+                             * timings[i].se.name => audio/se/{name}.m4a/ogg
+                             */
+
+                            std::string_view animation1Name = obj["animation1Name"];
+                            std::string_view animation2Name = obj["animation2Name"];
+
+                            animationNames.insert(animation1Name);
+                            animationNames.insert(animation2Name);
+
+                            dom::element timings = obj["timings"];
+                            for (dom::object timing : timings) {
+                                dom::element seElement = timing["se"];
+                                if (seElement.type() == dom::element_type::NULL_VALUE) continue;
+                                dom::object se = seElement;
+
+                                std::string_view animationSoundEffectName = se["name"];
+
+                                animationSoundEffectNames.insert(animationSoundEffectName);
+                            }
+                        }
+
+                        logger->info("Found {} animationNames and {} animationSoundEffectNames",
+                                     animationNames.size(), animationSoundEffectNames.size());
+                    }  else if (filename == "Enemies.json") {
+                        logger->info("Parsing Enemies.json");
+                        dom::parser parser;
+                        dom::element elements = parser.load(path);
+
+                        for (dom::element element : elements) {
+                            if (element.type() == dom::element_type::NULL_VALUE) continue;
+                            dom::object obj = element;
+                            /*
+                             * Actors.json:
+                             * battlerName => img/sv_enemies/{battlerName}.png
+                             */
+
+                            std::string_view battlerName = obj["battlerName"];
+
+                            enemiesBattlerNames.insert(battlerName);
+                        }
+
+                        logger->info("Found {} enemiesBattlerNames", enemiesBattlerNames.size());
+                    }
+                }
+
                 if (filterFile(&path, &entryOutputPath, FolderType::Project, rpgmakerVersion, platform))
                     continue;
 
