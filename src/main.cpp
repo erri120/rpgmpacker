@@ -323,14 +323,16 @@ int main(int argc, char** argv) {
 
                                 /*
                                  * RPG Maker MV code list (only important ones):
-                                 * - 101: show actor face, [0] is actor name
+                                 * - 101: show text with actor face, [0] is actor name
                                  *
                                  * - 132: change battle bgm, [0].name is bgm name
                                  * - 133: change victory me, [0].name is me name
                                  * - 139: change defeat me, [0].name is me name
                                  * - 140: change vehicle bgm, [1].name is bgm name
                                  *
-                                 * - 212: show animation, [2] is index of the animation
+                                 * - 205: set movement route (see 505)
+                                 *
+                                 * - 212: show animation, [2] is index of animation (maybe not needed)
                                  * - 231: show picture, [1] is picture name
                                  *
                                  * - 241: play bgm, [0].name is bgm name
@@ -339,8 +341,18 @@ int main(int argc, char** argv) {
                                  * - 250: play se, [0].name is se name
                                  * - 261: play movie, [0] is movie name
                                  *
+                                 * - 282: change tileset, [0] is index of tileset (maybe not needed)
+                                 * - 283: change battle back, [0] and [1] are image names
+                                 * - 284: change parallax, [0] is image name
+                                 *
                                  * - 322: change actor images, [1] is face name, [3] is character name, [5] is battler name
                                  * - 323: change vehicle image, [1] is image name
+                                 *
+                                 * - 337: show battle animation, [1] is index of animation (maybe not needed)
+                                 *
+                                 * - 505: argument of 205 where each item in parameters also has code+parameters fields:
+                                 *      - 41: change character image, [0] is character name
+                                 *      - 44: play se, [0].name is se name
                                  */
                             }
                         }
