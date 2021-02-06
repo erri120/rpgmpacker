@@ -309,7 +309,41 @@ int main(int argc, char** argv) {
                         logger->info("Found {} animationNames and {} animationSoundEffectNames",
                                      animationNames.size(), animationSoundEffectNames.size());
                     } else if (filename == "CommonEvents.json") {
-                        //TODO: CommonEvents.json
+                        logger->info("Parsing CommonEvents.json");
+                        dom::parser parser;
+                        dom::element elements = parser.load(path);
+
+                        for (dom::element element : elements) {
+                            if (element.type() == dom::element_type::NULL_VALUE) continue;
+                            dom::object obj = element;
+
+                            dom::array list = obj["list"];
+                            for (dom::element listItem : list) {
+                                uint64_t code = listItem["code"];
+
+                                /*
+                                 * RPG Maker MV code list (only important ones):
+                                 * - 101: show actor face, [0] is actor name
+                                 *
+                                 * - 132: change battle bgm, [0].name is bgm name
+                                 * - 133: change victory me, [0].name is me name
+                                 * - 139: change defeat me, [0].name is me name
+                                 * - 140: change vehicle bgm, [1].name is bgm name
+                                 *
+                                 * - 212: show animation, [2] is index of the animation
+                                 * - 231: show picture, [1] is picture name
+                                 *
+                                 * - 241: play bgm, [0].name is bgm name
+                                 * - 245: play bgs, [0].name is bgs name
+                                 * - 249: play me, [0].name is me name
+                                 * - 250: play se, [0].name is se name
+                                 * - 261: play movie, [0] is movie name
+                                 *
+                                 * - 322: change actor images, [1] is face name, [3] is character name, [5] is battler name
+                                 * - 323: change vehicle image, [1] is image name
+                                 */
+                            }
+                        }
                     } else if (filename == "Enemies.json") {
                         logger->info("Parsing Enemies.json");
                         dom::parser parser;
