@@ -45,6 +45,13 @@ CPMAddPackage (
         "TF_BUILD_PROFILER Off"
 )
 
+CPMAddPackage (
+    NAME simdjson
+    GITHUB_REPOSITORY simdjson/simdjson
+    VERSION 0.8.1
+    OPTIONS
+        "SIMDJSON_JUST_LIBRARY On"
+)
 
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/**")
 add_executable(RPGMPacker ${sources})
@@ -53,6 +60,7 @@ target_link_libraries(RPGMPacker cxxopts)
 target_link_libraries(RPGMPacker spdlog)
 target_link_libraries(RPGMPacker ghc_filesystem)
 target_link_libraries(RPGMPacker Taskflow)
+target_link_libraries(RPGMPacker simdjson)
 
 set_target_properties(RPGMPacker PROPERTIES CXX_STANDARD 17)
 

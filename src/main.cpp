@@ -4,6 +4,7 @@
 #include <spdlog/stopwatch.h>
 #include <ghc/filesystem.hpp>
 #include <taskflow/taskflow.hpp>
+#include <simdjson.h>
 #include <iostream>
 #include <string>
 #include <numeric>
