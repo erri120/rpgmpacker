@@ -245,11 +245,7 @@ int main(int argc, char** argv) {
             } else if (p.is_regular_file(ec)) {
                 auto filename = path.filename();
 
-                if (excludeUnused) {
-                    //TODO: CommonEvents.json
-                    //TODO: Map*.json
-                    //TODO: System.json
-                    //TODO: Tilesets.json
+                if (filename.extension() == ".json" && excludeUnused) {
                     using namespace simdjson;
                     if (filename == "Actors.json") {
                         logger->info("Parsing Actors.json");
@@ -277,7 +273,7 @@ int main(int argc, char** argv) {
 
                         logger->info("Found {} battlerNames, {} characterNames and {} faceNames",
                                      actorBattlerNames.size(), actorCharacterNames.size(), actorFaceNames.size());
-                    }  else if (filename == "Animations.json") {
+                    } else if (filename == "Animations.json") {
                         logger->info("Parsing Animations.json");
                         dom::parser parser;
                         dom::element elements = parser.load(path);
@@ -312,7 +308,9 @@ int main(int argc, char** argv) {
 
                         logger->info("Found {} animationNames and {} animationSoundEffectNames",
                                      animationNames.size(), animationSoundEffectNames.size());
-                    }  else if (filename == "Enemies.json") {
+                    } else if (filename == "CommonEvents.json") {
+                        //TODO: CommonEvents.json
+                    } else if (filename == "Enemies.json") {
                         logger->info("Parsing Enemies.json");
                         dom::parser parser;
                         dom::element elements = parser.load(path);
@@ -331,6 +329,19 @@ int main(int argc, char** argv) {
                         }
 
                         logger->info("Found {} enemiesBattlerNames", enemiesBattlerNames.size());
+                    } else  if (filename == "System.json") {
+                        //TODO: System.json
+                    } else if (filename == "Tilesets.json") {
+                        //TODO: Tilesets.json
+                    } else {
+                        std::string sFileName = filename;
+                        //11 chars: MapXYZ.json
+                        if (sFileName.length() == 11) {
+                            auto res = sFileName.find("Map");
+                            if (res != std::string::npos) {
+                                //TODO:Map*.json
+                            }
+                        }
                     }
                 }
 
