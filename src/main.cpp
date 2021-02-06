@@ -32,6 +32,7 @@ int main(int argc, char** argv) {
         ("encryptImages", "Enable Image Encryption using encryptionKey. (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("encryptAudio", "Enable Audio Encryption using encryptionKey. (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("encryptionKey", "Encryption Key for Images or Audio, either encryptImages or encryptAudio have to be set", cxxopts::value<std::string>())
+        ("exclude", "Exclude unused files. (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("hardlinks", "Use hardlinks instead of creating copies. (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("cache", "Use a path cache for already encrypted files when multi-targeting and using hardlinks. (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("threads", "Amount of worker threads to use. Min: 1, Max: 10", cxxopts::value<int>()->default_value("2"))
@@ -39,7 +40,7 @@ int main(int argc, char** argv) {
         ("h,help", "Print usage");
 
     std::string input, output, rpgmaker, encryptionKey;
-    bool encryptImages, encryptAudio, debug, useHardlinks, useCache;
+    bool encryptImages, encryptAudio, debug, useHardlinks, useCache, excludeUnused;
     std::vector<std::string> platformNames;
     int workerThreads = 0;
 
@@ -50,12 +51,13 @@ int main(int argc, char** argv) {
             std::cout << options.help() << std::endl;
             return 0;
         }
-
+        
         input = result["input"].as<std::string>();
         output = result["output"].as<std::string>();
         rpgmaker = result["rpgmaker"].as<std::string>();
         encryptImages = result["encryptImages"].as<bool>();
         encryptAudio = result["encryptAudio"].as<bool>();
+        excludeUnused = result["exclude"].as<bool>();
         debug = result["debug"].as<bool>();
         useHardlinks = result["hardlinks"].as<bool>();
         useCache = result["cache"].as<bool>();
@@ -92,6 +94,7 @@ int main(int argc, char** argv) {
         logger->info("Encryption Key: REDACTED");
     logger->info("Encrypt Images: {}", encryptImages);
     logger->info("Encrypt Audio: {}", encryptAudio);
+    logger->info("Exclude Unused Files: {}", excludeUnused);
     auto strReduce = [](std::string a, std::string b) {
         return std::move(a) + ',' + std::move(b);
     };
