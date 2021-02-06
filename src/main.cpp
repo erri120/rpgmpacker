@@ -246,6 +246,10 @@ int main(int argc, char** argv) {
                 auto filename = path.filename();
 
                 if (excludeUnused) {
+                    //TODO: CommonEvents.json
+                    //TODO: Map*.json
+                    //TODO: System.json
+                    //TODO: Tilesets.json
                     using namespace simdjson;
                     if (filename == "Actors.json") {
                         logger->info("Parsing Actors.json");
