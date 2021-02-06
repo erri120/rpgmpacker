@@ -348,10 +348,11 @@ int main(int argc, char** argv) {
                             dom::array list = obj["list"];
                             for (dom::element listItem : list) {
                                 uint64_t code = listItem["code"];
+                                dom::array parameters = listItem["parameters"];
 
                                 /*
                                  * RPG Maker MV code list (only important ones):
-                                 * - 101: show text with actor face, [0] is actor name
+                                 * - 101: show text with actor face, [0] is face name
                                  *
                                  * - 132: change battle bgm, [0].name is bgm name
                                  * - 133: change victory me, [0].name is me name
@@ -374,7 +375,7 @@ int main(int argc, char** argv) {
                                  * - 284: change parallax, [0] is image name
                                  *
                                  * - 322: change actor images, [1] is face name, [3] is character name, [5] is battler name
-                                 * - 323: change vehicle image, [1] is image name
+                                 * - 323: change vehicle image, [1] is face name
                                  *
                                  * - 337: show battle animation, [1] is index of animation (maybe not needed)
                                  *
@@ -382,6 +383,68 @@ int main(int argc, char** argv) {
                                  *      - 41: change character image, [0] is character name
                                  *      - 44: play se, [0].name is se name
                                  */
+
+                                if (code == 101) {
+                                    std::string_view faceName = parameters.at(0);
+                                    faceNames.insert(faceName);
+                                } else if (code == 132 || code == 133 || code == 139 || code == 241
+                                        || code == 245 || code == 249 || code == 250) {
+                                    dom::object audioObj = parameters.at(0);
+                                    std::string_view audioName = audioObj["name"];
+                                    if (code == 132 || code == 241) {
+                                        bgmNames.insert(audioName);
+                                    } else if (code == 133 || code == 139 || code == 249) {
+                                        meNames.insert(audioName);
+                                    } else if (code == 245) {
+                                        bgsNames.insert(audioName);
+                                    } else if (code == 250) {
+                                        seNames.insert(audioName);
+                                    }
+                                } else if (code == 140) {
+                                    dom::object vehicleObj = parameters.at(1);
+                                    std::string_view bgmName = vehicleObj["name"];
+                                    bgmNames.insert(bgmName);
+                                } else if (code == 231) {
+                                    std::string_view pictureName = parameters.at(1);
+                                    pictureNames.insert(pictureName);
+                                } else if (code == 261) {
+                                    std::string_view movieName = parameters.at(0);
+                                    movieNames.insert(movieName);
+                                } else if (code == 283) {
+                                    std::string_view battlebacks1Name = parameters.at(0);
+                                    std::string_view battlebacks2Name = parameters.at(1);
+
+                                    battlebacks1Names.insert(battlebacks1Name);
+                                    battlebacks2Names.insert(battlebacks2Name);
+                                } else if (code == 284) {
+                                    std::string_view parallaxName = parameters.at(0);
+                                    parallaxesNames.insert(parallaxName);
+                                } else if (code == 322) {
+                                    std::string_view faceName = parameters.at(1);
+                                    std::string_view characterName = parameters.at(3);
+                                    std::string_view actorBattlerName = parameters.at(5);
+
+                                    faceNames.insert(faceName);
+                                    characterNames.insert(characterName);
+                                    actorBattlerNames.insert(actorBattlerName);
+                                } else if (code == 323) {
+                                    std::string_view faceName = parameters.at(1);
+                                    faceNames.insert(faceName);
+                                } else if (code == 505) {
+                                    dom::object extraObj = parameters.at(0);
+
+                                    uint64_t extraCode = extraObj["code"];
+                                    dom::array extraParameters = extraObj["parameters"];
+
+                                    if (extraCode == 41) {
+                                        std::string_view characterName = extraParameters.at(0);
+                                        characterNames.insert(characterName);
+                                    } else if (extraCode == 44) {
+                                        dom::object seObj = extraParameters.at(0);
+                                        std::string_view seName = seObj["name"];
+                                        seNames.insert(seName);
+                                    }
+                                }
                             }
                         }
                     } else if (filename == "Enemies.json") {
