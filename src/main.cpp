@@ -15,8 +15,6 @@
 #include "foldertype.hpp"
 #include "operation.hpp"
 
-//#define RPGMPACKER_TESTING
-
 //bool filterFolder(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderType folderType, RPGMakerVersion version, Platform platform);
 bool filterFile(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderType folderType, RPGMakerVersion version, Platform platform);
 bool shouldEncryptFile(ghc::filesystem::path *from, bool encryptAudio, bool encryptImages, RPGMakerVersion version);
@@ -53,27 +51,6 @@ int main(int argc, char** argv) {
             return 0;
         }
 
-#ifdef RPGMPACKER_TESTING
-        //input = R"(E:\Projects\RPGMakerTest\src\Project1)";
-        input = R"(E:\Projects\RPGMakerTest\src\MZProject1)";
-        output = R"(E:\Projects\RPGMakerTest\out-c)";
-        //rpgmaker = R"(M:\SteamLibrary\steamapps\common\RPG Maker MV)";
-        rpgmaker = R"(C:\Program Files\KADOKAWA\RPGMZ)";
-        encryptImages = true;
-        encryptAudio = true;
-        encryptionKey = std::string("1337");
-        //debug = true;
-        debug = false;
-        useHardlinks = true;
-        useCache = true;
-        workerThreads = 2;
-
-        platformNames = std::vector<std::string>();
-        platformNames.emplace_back("win");
-        //platformNames.emplace_back("osx");
-        //platformNames.emplace_back("linux");
-        platformNames.emplace_back("browser");
-#else
         input = result["input"].as<std::string>();
         output = result["output"].as<std::string>();
         rpgmaker = result["rpgmaker"].as<std::string>();
@@ -90,7 +67,6 @@ int main(int argc, char** argv) {
             encryptionKey = std::string("");
 
         platformNames = result["platforms"].as<std::vector<std::string>>();
-#endif
     } catch (const cxxopts::OptionException& e) {
         errorLogger->error(e.what());
         std::cout << options.help() << std::endl;
