@@ -235,6 +235,10 @@ int main(int argc, char** argv) {
         //img/sv_enemies/{}.png
         std::set<std::string_view> enemyBattlerNames;
 
+        //Tilesets.json
+        //img/tilesets/{}.png+{}.txt
+        std::set<std::string_view> tilesetNames;
+
         //other
         //img/characters/{}.png
         std::set<std::string_view> characterNames;
@@ -414,8 +418,10 @@ int main(int argc, char** argv) {
                                     std::string_view battlebacks1Name = parameters.at(0);
                                     std::string_view battlebacks2Name = parameters.at(1);
 
-                                    battlebacks1Names.insert(battlebacks1Name);
-                                    battlebacks2Names.insert(battlebacks2Name);
+                                    if (!battlebacks1Name.empty())
+                                        battlebacks1Names.insert(battlebacks1Name);
+                                    if (!battlebacks2Name.empty())
+                                        battlebacks2Names.insert(battlebacks2Name);
                                 } else if (code == 284) {
                                     std::string_view parallaxName = parameters.at(0);
                                     parallaxesNames.insert(parallaxName);
@@ -456,7 +462,7 @@ int main(int argc, char** argv) {
                             if (element.type() == dom::element_type::NULL_VALUE) continue;
                             dom::object obj = element;
                             /*
-                             * Actors.json:
+                             * Enemies.json:
                              * battlerName => img/sv_enemies/{battlerName}.png
                              */
 
@@ -469,7 +475,26 @@ int main(int argc, char** argv) {
                     } else  if (filename == "System.json") {
                         //TODO: System.json
                     } else if (filename == "Tilesets.json") {
-                        //TODO: Tilesets.json
+                        logger->info("Parsing Tilesets.json");
+                        dom::parser parser;
+                        dom::element elements = parser.load(path);
+
+                        for (dom::element element : elements) {
+                            if (element.type() == dom::element_type::NULL_VALUE) continue;
+                            dom::object obj = element;
+                            /*
+                             * Tilesets.json:
+                             * tilesetNames[n] => img/tilesets/{}.png+{}.txt
+                             */
+
+                            dom::array names = obj["tilesetNames"];
+                            for (std::string_view tilesetName : names) {
+                                if (tilesetName.empty()) continue;
+                                tilesetNames.insert(tilesetName);
+                            }
+                        }
+
+                        logger->info("Found {} tilesetNames", tilesetNames.size());
                     } else {
                         std::string sFileName = filename;
                         //11 chars: MapXYZ.json
