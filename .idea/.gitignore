@@ -4,7 +4,6 @@
 # Editor-based HTTP Client requests
 /httpRequests/
 # User-specific stuff:
-/workspace.xml
 /tasks.xml
 /dictionaries
 /vcs.xml
