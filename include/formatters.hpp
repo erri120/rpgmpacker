@@ -1,7 +1,8 @@
 #pragma once
+#include <iostream>
 #include <spdlog/fmt/fmt.h>
 #include <ghc/filesystem.hpp>
-#include <iostream>
+#include <simdjson/error.h>
 #include "platform.hpp"
 #include "rpgmakerVersion.hpp"
 
@@ -50,5 +51,17 @@ struct fmt::formatter<RPGMakerVersion> {
     template <typename FormatContext>
     auto format(const RPGMakerVersion& version, FormatContext& ctx) {
         return format_to(ctx.out(), "{}", RPGMakerVersionNames[(int)version]);
+    }
+};
+
+template <>
+struct fmt::formatter<simdjson::error_code> {
+    static constexpr auto parse(format_parse_context& ctx) {
+        return ctx.end();
+    }
+
+    template <typename FormatContext>
+    auto format(const simdjson::error_code& error, FormatContext& ctx) {
+        return format_to(ctx.out(), "{}", simdjson::error_message(error));
     }
 };

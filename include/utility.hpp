@@ -1,7 +1,8 @@
 #pragma once
 
-#include <spdlog/spdlog.h>
 #include <string>
+
+#include <spdlog/spdlog.h>
 #include <ghc/filesystem.hpp>
 
 #include "formatters.hpp"
