@@ -239,6 +239,12 @@ int main(int argc, char** argv) {
         //img/tilesets/{}.png+{}.txt
         std::set<std::string_view> tilesetNames;
 
+        //System.json
+        //img/titles1/{}.png
+        std::set<std::string_view> title1Names;
+        //img/titles2/{}.png
+        std::set<std::string_view> title2Names;
+
         //other
         //img/characters/{}.png
         std::set<std::string_view> characterNames;
@@ -260,11 +266,11 @@ int main(int argc, char** argv) {
         std::set<std::string_view> movieNames;
 
         //img/battlebacks1/{}.png
-        std::set<std::string_view> battlebacks1Names;
+        std::set<std::string_view> battleback1Names;
         //img/battlebacks2/{}.png
-        std::set<std::string_view> battlebacks2Names;
+        std::set<std::string_view> battleback2Names;
         //img/parallaxes/{}.png
-        std::set<std::string_view> parallaxesNames;
+        std::set<std::string_view> parallaxNames;
 
         auto sInputPath = std::string(inputPath.c_str());
         for (const auto& p : ghc::filesystem::recursive_directory_iterator(inputPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
@@ -303,9 +309,6 @@ int main(int argc, char** argv) {
                             characterNames.insert(characterName);
                             faceNames.insert(faceName);
                         }
-
-                        logger->info("Found {} battlerNames, {} characterNames and {} faceNames",
-                                     actorBattlerNames.size(), characterNames.size(), faceNames.size());
                     } else if (filename == "Animations.json") {
                         logger->info("Parsing Animations.json");
                         dom::parser parser;
@@ -338,8 +341,6 @@ int main(int argc, char** argv) {
                                 seNames.insert(seName);
                             }
                         }
-
-                        logger->info("Found {} animationNames and", animationNames.size());
                     } else if (filename == "CommonEvents.json") {
                         logger->info("Parsing CommonEvents.json");
                         dom::parser parser;
@@ -419,12 +420,12 @@ int main(int argc, char** argv) {
                                     std::string_view battlebacks2Name = parameters.at(1);
 
                                     if (!battlebacks1Name.empty())
-                                        battlebacks1Names.insert(battlebacks1Name);
+                                        battleback1Names.insert(battlebacks1Name);
                                     if (!battlebacks2Name.empty())
-                                        battlebacks2Names.insert(battlebacks2Name);
+                                        battleback2Names.insert(battlebacks2Name);
                                 } else if (code == 284) {
                                     std::string_view parallaxName = parameters.at(0);
-                                    parallaxesNames.insert(parallaxName);
+                                    parallaxNames.insert(parallaxName);
                                 } else if (code == 322) {
                                     std::string_view faceName = parameters.at(1);
                                     std::string_view characterName = parameters.at(3);
@@ -470,10 +471,93 @@ int main(int argc, char** argv) {
 
                             enemyBattlerNames.insert(battlerName);
                         }
-
-                        logger->info("Found {} enemyBattlerNames", enemyBattlerNames.size());
                     } else  if (filename == "System.json") {
-                        //TODO: System.json
+                        logger->info("Parsing System.json");
+                        dom::parser parser;
+                        dom::object system = parser.load(path);
+
+                        /*
+                         * System.json:
+                         *
+                         * airship.bgm.name => audio/bgm/{}.m4a/ogg
+                         * airship.characterName => img/characters/{}.png
+                         *
+                         * boat.bgm.name => audio/bgm/{}.m4a/ogg
+                         * boat.characterName => img/characters/{}.png
+                         *
+                         * ship.bgm.name => audio/bgm/{}.m4a/ogg
+                         * ship.characterName => img/character/{}.png
+                         *
+                         * battleback1Name => img/battlebacks1/{}.png
+                         * battleback2Name => img/battlebacks2/{}.png
+                         *
+                         * battlerName => img/sv_enemy/{}.png
+                         *
+                         * title1Name => img/titles1/{}.png
+                         * title2Name => img/titles2/{}.png
+                         *
+                         * sounds[n].name => audio/se/{}.m4a/ogg
+                         *
+                         * battleBgm.name => audio/bgm/{}.m4a/ogg
+                         * titleBgm.name => audio/bgm/{}.m4a/ogg
+                         *
+                         * defeatMe.name => audio/me/{}.m4a/ogg
+                         * gameoverMe.name => audio/me/{}.m4a/ogg
+                         * victoryMe.name => audio/me/{}.m4a/ogg
+                         *
+                         */
+
+                        std::string_view airshipBgm = system["airship"]["bgm"]["name"];
+                        std::string_view boatBgm = system["boat"]["bgm"]["name"];
+                        std::string_view shipBgm = system["ship"]["bgm"]["name"];
+
+                        bgmNames.insert(airshipBgm);
+                        bgmNames.insert(boatBgm);
+                        bgmNames.insert(shipBgm);
+
+                        std::string_view airshipCharacter = system["airship"]["characterName"];
+                        std::string_view boatCharacter = system["boat"]["characterName"];
+                        std::string_view shipCharacter = system["ship"]["characterName"];
+
+                        characterNames.insert(airshipCharacter);
+                        characterNames.insert(boatCharacter);
+                        characterNames.insert(shipCharacter);
+
+                        std::string_view battleback1Name = system["battleback1Name"];
+                        std::string_view battleback2Name = system["battleback2Name"];
+
+                        battleback1Names.insert(battleback1Name);
+                        battleback2Names.insert(battleback2Name);
+
+                        std::string_view battlerName = system["battlerName"];
+
+                        enemyBattlerNames.insert(battlerName);
+
+                        std::string_view title1Name = system["title1Name"];
+                        std::string_view title2Name = system["title2Name"];
+
+                        title1Names.insert(title1Name);
+                        title2Names.insert(title2Name);
+
+                        std::string_view battleBgm = system["battleBgm"]["name"];
+                        std::string_view titleBgm = system["titleBgm"]["name"];
+
+                        bgmNames.insert(battleBgm);
+                        bgmNames.insert(titleBgm);
+
+                        std::string_view defeatMe = system["defeatMe"]["name"];
+                        std::string_view gameoverMe = system["gameoverMe"]["name"];
+                        std::string_view victoryMe = system["victoryMe"]["name"];
+
+                        meNames.insert(defeatMe);
+                        meNames.insert(gameoverMe);
+                        meNames.insert(victoryMe);
+
+                        dom::array sounds = system["sounds"];
+                        for (dom::object sound : sounds) {
+                            std::string_view soundName = sound["name"];
+                            seNames.insert(soundName);
+                        }
                     } else if (filename == "Tilesets.json") {
                         logger->info("Parsing Tilesets.json");
                         dom::parser parser;
@@ -493,8 +577,6 @@ int main(int argc, char** argv) {
                                 tilesetNames.insert(tilesetName);
                             }
                         }
-
-                        logger->info("Found {} tilesetNames", tilesetNames.size());
                     } else {
                         std::string sFileName = filename;
                         //11 chars: MapXYZ.json
