@@ -16,7 +16,7 @@ CPMAddPackage (
 CPMAddPackage (
         NAME ghc_filesystem
         GITHUB_REPOSITORY gulrak/filesystem
-        VERSION 1.4.0
+        VERSION 1.5.0
         OPTIONS
         "GHC_FILESYSTEM_BUILD_TESTING Off"
         "GHC_FILESYSTEM_BUILD_EXAMPLES Off"
