@@ -181,7 +181,7 @@ int main(int argc, char** argv) {
         auto templateName = PlatformFolders[(int)platform];
         if (!templateName.empty()) {
             auto templateFolderPath = ghc::filesystem::path(rpgmakerPath).append(templateName);
-            auto sTemplateFolderPath = std::string(templateFolderPath.c_str());
+            auto sTemplateFolderPath = templateFolderPath.wstring();
 
             if (!ghc::filesystem::exists(templateFolderPath, ec)) {
                 errorLogger->error("The template directory at {} does not exist!", templateFolderPath);
@@ -191,7 +191,7 @@ int main(int argc, char** argv) {
             logger->debug("Template Folder: {}", templateFolderPath);
             for (const auto& p : ghc::filesystem::recursive_directory_iterator(templateFolderPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
                 auto path = p.path();
-                auto sPath = std::string(path.c_str());
+                auto sPath = path.wstring();
                 auto entryOutputPath = ghc::filesystem::path(platformOutputPath).append(sPath.substr(sTemplateFolderPath.length()+1));
 
                 if (p.is_directory(ec)) {
@@ -272,10 +272,10 @@ int main(int argc, char** argv) {
         //img/parallaxes/{}.png
         std::set<std::string_view> parallaxNames;
 
-        auto sInputPath = std::string(inputPath.c_str());
+        auto sInputPath = inputPath.wstring();
         for (const auto& p : ghc::filesystem::recursive_directory_iterator(inputPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
             auto path = p.path();
-            auto sPath = std::string(path.c_str());
+            auto sPath = path.wstring();
             auto entryOutputPath = ghc::filesystem::path(wwwPath).append(sPath.substr(sInputPath.length()+1));
 
             if (p.is_directory(ec)) {
@@ -289,7 +289,7 @@ int main(int argc, char** argv) {
                     if (filename == "Actors.json") {
                         logger->info("Parsing Actors.json");
                         dom::parser parser;
-                        dom::element elements = parser.load(path);
+                        dom::element elements = parser.load(path.u8string());
 
                         for (dom::element element : elements) {
                             if (element.type() == dom::element_type::NULL_VALUE) continue;
@@ -312,7 +312,7 @@ int main(int argc, char** argv) {
                     } else if (filename == "Animations.json") {
                         logger->info("Parsing Animations.json");
                         dom::parser parser;
-                        dom::element elements = parser.load(path);
+                        dom::element elements = parser.load(path.u8string());
 
                         for (dom::element element : elements) {
                             if (element.type() == dom::element_type::NULL_VALUE) continue;
@@ -344,7 +344,7 @@ int main(int argc, char** argv) {
                     } else if (filename == "CommonEvents.json") {
                         logger->info("Parsing CommonEvents.json");
                         dom::parser parser;
-                        dom::element elements = parser.load(path);
+                        dom::element elements = parser.load(path.u8string());
 
                         for (dom::element element : elements) {
                             if (element.type() == dom::element_type::NULL_VALUE) continue;
@@ -457,7 +457,7 @@ int main(int argc, char** argv) {
                     } else if (filename == "Enemies.json") {
                         logger->info("Parsing Enemies.json");
                         dom::parser parser;
-                        dom::element elements = parser.load(path);
+                        dom::element elements = parser.load(path.u8string());
 
                         for (dom::element element : elements) {
                             if (element.type() == dom::element_type::NULL_VALUE) continue;
@@ -474,7 +474,7 @@ int main(int argc, char** argv) {
                     } else  if (filename == "System.json") {
                         logger->info("Parsing System.json");
                         dom::parser parser;
-                        dom::object system = parser.load(path);
+                        dom::object system = parser.load(path.u8string());
 
                         /*
                          * System.json:
@@ -561,7 +561,7 @@ int main(int argc, char** argv) {
                     } else if (filename == "Tilesets.json") {
                         logger->info("Parsing Tilesets.json");
                         dom::parser parser;
-                        dom::element elements = parser.load(path);
+                        dom::element elements = parser.load(path.u8string());
 
                         for (dom::element element : elements) {
                             if (element.type() == dom::element_type::NULL_VALUE) continue;
@@ -578,14 +578,14 @@ int main(int argc, char** argv) {
                             }
                         }
                     } else {
-                        std::string sFileName = filename;
+                        auto sFileName = filename.u8string();
                         //11 chars: MapXYZ.json
                         if (sFileName.length() == 11) {
                             auto res = sFileName.find("Map");
                             if (res != std::string::npos) {
                                 logger->info("Parsing {}", sFileName);
                                 dom::parser parser;
-                                dom::object map = parser.load(path);
+                                dom::object map = parser.load(path.u8string());
 
                                 /*
                                  * Map.json:

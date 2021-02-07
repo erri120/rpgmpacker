@@ -13,7 +13,7 @@ struct fmt::formatter<ghc::filesystem::path> {
 
     template <typename FormatContext>
     auto format(const ghc::filesystem::path& p, FormatContext& ctx) {
-        return format_to(ctx.out(), "{}", p.c_str());
+        return format_to(ctx.out(), "{}", p.u8string());
     }
 };
 

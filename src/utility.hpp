@@ -134,7 +134,7 @@ unsigned int* stringToHexHash(std::string encryptionHash) {
 }
 
 auto lastPlatform = Platform::None;
-std::map<std::string, std::string> cachedEncryptedFiles;
+std::map<std::wstring, std::wstring> cachedEncryptedFiles;
 
 static uint8_t header[] = { 0x52, 0x50, 0x47, 0x4D, 0x56, 0x00, 0x00, 0x00, 0x00, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
@@ -167,7 +167,7 @@ bool encryptFile(const ghc::filesystem::path& from, ghc::filesystem::path to, co
         else if (lastPlatform != platform) {
             //hardlink to the previously encrypted files
             if (hardlink) {
-                auto iter = cachedEncryptedFiles.find(std::string(from.c_str()));
+                auto iter = cachedEncryptedFiles.find(from.wstring());
                 if (iter != cachedEncryptedFiles.end()) {
                     auto prev = ghc::filesystem::path(iter->second);
 
@@ -250,7 +250,7 @@ bool encryptFile(const ghc::filesystem::path& from, ghc::filesystem::path to, co
     delete[] bytes;
     delete[] buffer;
 
-    cachedEncryptedFiles[std::string(from.c_str())] = std::string(to.c_str());
+    cachedEncryptedFiles[from.wstring()] = to.wstring();
 
     return true;
 }
