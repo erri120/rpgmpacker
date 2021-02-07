@@ -205,7 +205,7 @@ int main(int argc, char** argv) {
                         FolderType::RPGMaker
                     };
 
-                    operations.emplace_back(operation);
+                    operations.push_back(operation);
                 }
             }
         }
@@ -221,52 +221,52 @@ int main(int argc, char** argv) {
 
         //Actors.json
         //img/sv_actors/{}.png
-        std::set<std::string_view> actorBattlerNames;
+        std::set<std::string> actorBattlerNames;
 
         //Animations.json
         //img/animations/{}.png
-        std::set<std::string_view> animationNames;
+        std::set<std::string> animationNames;
 
         //Enemies.json
         //img/sv_enemies/{}.png
-        std::set<std::string_view> enemyBattlerNames;
+        std::set<std::string> enemyBattlerNames;
 
         //Tilesets.json
         //img/tilesets/{}.png+{}.txt
-        std::set<std::string_view> tilesetNames;
+        std::set<std::string> tilesetNames;
 
         //System.json
         //img/titles1/{}.png
-        std::set<std::string_view> title1Names;
+        std::set<std::string> title1Names;
         //img/titles2/{}.png
-        std::set<std::string_view> title2Names;
+        std::set<std::string> title2Names;
 
         //other
         //img/characters/{}.png
-        std::set<std::string_view> characterNames;
+        std::set<std::string> characterNames;
         //img/faces/{}.png
-        std::set<std::string_view> faceNames;
+        std::set<std::string> faceNames;
 
         //audio/bgm/{}.m4a/ogg
-        std::set<std::string_view> bgmNames;
+        std::set<std::string> bgmNames;
         //audio/bgs/{}.m4a/ogg
-        std::set<std::string_view> bgsNames;
+        std::set<std::string> bgsNames;
         //audio/me/{}.m4a/ogg
-        std::set<std::string_view> meNames;
+        std::set<std::string> meNames;
         //audio/se/{}.m4a/ogg
-        std::set<std::string_view> seNames;
+        std::set<std::string> seNames;
 
         //img/pictures/{}.png
-        std::set<std::string_view> pictureNames;
+        std::set<std::string> pictureNames;
         //movies/{}.webm
-        std::set<std::string_view> movieNames;
+        std::set<std::string> movieNames;
 
         //img/battlebacks1/{}.png
-        std::set<std::string_view> battleback1Names;
+        std::set<std::string> battleback1Names;
         //img/battlebacks2/{}.png
-        std::set<std::string_view> battleback2Names;
+        std::set<std::string> battleback2Names;
         //img/parallaxes/{}.png
-        std::set<std::string_view> parallaxNames;
+        std::set<std::string> parallaxNames;
 
         auto sInputPath = inputPath.wstring();
         for (const auto& p : ghc::filesystem::recursive_directory_iterator(inputPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
@@ -301,9 +301,9 @@ int main(int argc, char** argv) {
                             std::string_view characterName = obj["characterName"];
                             std::string_view faceName = obj["faceName"];
 
-                            actorBattlerNames.insert(battlerName);
-                            characterNames.insert(characterName);
-                            faceNames.insert(faceName);
+                            actorBattlerNames.emplace(battlerName);
+                            characterNames.emplace(characterName);
+                            faceNames.emplace(faceName);
                         }
                     } else if (filename == "Animations.json") {
                         logger->info("Parsing Animations.json");
@@ -323,8 +323,8 @@ int main(int argc, char** argv) {
                             std::string_view animation1Name = obj["animation1Name"];
                             std::string_view animation2Name = obj["animation2Name"];
 
-                            animationNames.insert(animation1Name);
-                            animationNames.insert(animation2Name);
+                            animationNames.emplace(animation1Name);
+                            animationNames.emplace(animation2Name);
 
                             dom::element timings = obj["timings"];
                             for (dom::object timing : timings) {
@@ -333,8 +333,7 @@ int main(int argc, char** argv) {
                                 dom::object se = seElement;
 
                                 std::string_view seName = se["name"];
-
-                                seNames.insert(seName);
+                                seNames.emplace(seName);
                             }
                         }
                     } else if (filename == "CommonEvents.json") {
@@ -387,52 +386,52 @@ int main(int argc, char** argv) {
 
                                 if (code == 101) {
                                     std::string_view faceName = parameters.at(0);
-                                    faceNames.insert(faceName);
+                                    faceNames.emplace(faceName);
                                 } else if (code == 132 || code == 133 || code == 139 || code == 241
                                         || code == 245 || code == 249 || code == 250) {
                                     dom::object audioObj = parameters.at(0);
                                     std::string_view audioName = audioObj["name"];
                                     if (code == 132 || code == 241) {
-                                        bgmNames.insert(audioName);
+                                        bgmNames.emplace(audioName);
                                     } else if (code == 133 || code == 139 || code == 249) {
-                                        meNames.insert(audioName);
+                                        meNames.emplace(audioName);
                                     } else if (code == 245) {
-                                        bgsNames.insert(audioName);
+                                        bgsNames.emplace(audioName);
                                     } else if (code == 250) {
-                                        seNames.insert(audioName);
+                                        seNames.emplace(audioName);
                                     }
                                 } else if (code == 140) {
                                     dom::object vehicleObj = parameters.at(1);
                                     std::string_view bgmName = vehicleObj["name"];
-                                    bgmNames.insert(bgmName);
+                                    bgmNames.emplace(bgmName);
                                 } else if (code == 231) {
                                     std::string_view pictureName = parameters.at(1);
-                                    pictureNames.insert(pictureName);
+                                    pictureNames.emplace(pictureName);
                                 } else if (code == 261) {
                                     std::string_view movieName = parameters.at(0);
-                                    movieNames.insert(movieName);
+                                    movieNames.emplace(movieName);
                                 } else if (code == 283) {
                                     std::string_view battlebacks1Name = parameters.at(0);
                                     std::string_view battlebacks2Name = parameters.at(1);
 
                                     if (!battlebacks1Name.empty())
-                                        battleback1Names.insert(battlebacks1Name);
+                                        battleback1Names.emplace(battlebacks1Name);
                                     if (!battlebacks2Name.empty())
-                                        battleback2Names.insert(battlebacks2Name);
+                                        battleback2Names.emplace(battlebacks2Name);
                                 } else if (code == 284) {
                                     std::string_view parallaxName = parameters.at(0);
-                                    parallaxNames.insert(parallaxName);
+                                    parallaxNames.emplace(parallaxName);
                                 } else if (code == 322) {
                                     std::string_view faceName = parameters.at(1);
                                     std::string_view characterName = parameters.at(3);
                                     std::string_view actorBattlerName = parameters.at(5);
 
-                                    faceNames.insert(faceName);
-                                    characterNames.insert(characterName);
-                                    actorBattlerNames.insert(actorBattlerName);
+                                    faceNames.emplace(faceName);
+                                    characterNames.emplace(characterName);
+                                    actorBattlerNames.emplace(actorBattlerName);
                                 } else if (code == 323) {
                                     std::string_view faceName = parameters.at(1);
-                                    faceNames.insert(faceName);
+                                    faceNames.emplace(faceName);
                                 } else if (code == 505) {
                                     dom::object extraObj = parameters.at(0);
 
@@ -441,11 +440,11 @@ int main(int argc, char** argv) {
 
                                     if (extraCode == 41) {
                                         std::string_view characterName = extraParameters.at(0);
-                                        characterNames.insert(characterName);
+                                        characterNames.emplace(characterName);
                                     } else if (extraCode == 44) {
                                         dom::object seObj = extraParameters.at(0);
                                         std::string_view seName = seObj["name"];
-                                        seNames.insert(seName);
+                                        seNames.emplace(seName);
                                     }
                                 }
                             }
@@ -465,7 +464,7 @@ int main(int argc, char** argv) {
 
                             std::string_view battlerName = obj["battlerName"];
 
-                            enemyBattlerNames.insert(battlerName);
+                            enemyBattlerNames.emplace(battlerName);
                         }
                     } else  if (filename == "System.json") {
                         logger->info("Parsing System.json");
@@ -507,52 +506,52 @@ int main(int argc, char** argv) {
                         std::string_view boatBgm = system["boat"]["bgm"]["name"];
                         std::string_view shipBgm = system["ship"]["bgm"]["name"];
 
-                        bgmNames.insert(airshipBgm);
-                        bgmNames.insert(boatBgm);
-                        bgmNames.insert(shipBgm);
+                        bgmNames.emplace(airshipBgm);
+                        bgmNames.emplace(boatBgm);
+                        bgmNames.emplace(shipBgm);
 
                         std::string_view airshipCharacter = system["airship"]["characterName"];
                         std::string_view boatCharacter = system["boat"]["characterName"];
                         std::string_view shipCharacter = system["ship"]["characterName"];
 
-                        characterNames.insert(airshipCharacter);
-                        characterNames.insert(boatCharacter);
-                        characterNames.insert(shipCharacter);
+                        characterNames.emplace(airshipCharacter);
+                        characterNames.emplace(boatCharacter);
+                        characterNames.emplace(shipCharacter);
 
                         std::string_view battleback1Name = system["battleback1Name"];
                         std::string_view battleback2Name = system["battleback2Name"];
 
-                        battleback1Names.insert(battleback1Name);
-                        battleback2Names.insert(battleback2Name);
+                        battleback1Names.emplace(battleback1Name);
+                        battleback2Names.emplace(battleback2Name);
 
                         std::string_view battlerName = system["battlerName"];
 
-                        enemyBattlerNames.insert(battlerName);
+                        enemyBattlerNames.emplace(battlerName);
 
                         std::string_view title1Name = system["title1Name"];
                         std::string_view title2Name = system["title2Name"];
 
-                        title1Names.insert(title1Name);
-                        title2Names.insert(title2Name);
+                        title1Names.emplace(title1Name);
+                        title2Names.emplace(title2Name);
 
                         std::string_view battleBgm = system["battleBgm"]["name"];
                         std::string_view titleBgm = system["titleBgm"]["name"];
 
-                        bgmNames.insert(battleBgm);
-                        bgmNames.insert(titleBgm);
+                        bgmNames.emplace(battleBgm);
+                        bgmNames.emplace(titleBgm);
 
                         std::string_view defeatMe = system["defeatMe"]["name"];
                         std::string_view gameoverMe = system["gameoverMe"]["name"];
                         std::string_view victoryMe = system["victoryMe"]["name"];
 
-                        meNames.insert(defeatMe);
-                        meNames.insert(gameoverMe);
-                        meNames.insert(victoryMe);
+                        meNames.emplace(defeatMe);
+                        meNames.emplace(gameoverMe);
+                        meNames.emplace(victoryMe);
 
                         dom::array sounds = system["sounds"];
                         for (dom::object sound : sounds) {
                             std::string_view soundName = sound["name"];
-                            seNames.insert(soundName);
+                            seNames.emplace(soundName);
                         }
                     } else if (filename == "Tilesets.json") {
                         logger->info("Parsing Tilesets.json");
@@ -570,7 +569,7 @@ int main(int argc, char** argv) {
                             dom::array names = obj["tilesetNames"];
                             for (std::string_view tilesetName : names) {
                                 if (tilesetName.empty()) continue;
-                                tilesetNames.insert(tilesetName);
+                                tilesetNames.emplace(tilesetName);
                             }
                         }
                     } else {
@@ -607,13 +606,13 @@ int main(int argc, char** argv) {
 
                                 std::string_view parallaxName = map["parallaxName"];
 
-                                battleback1Names.insert(battleback1Name);
-                                battleback2Names.insert(battleback2Name);
+                                battleback1Names.emplace(battleback1Name);
+                                battleback2Names.emplace(battleback2Name);
 
-                                bgmNames.insert(bgmName);
-                                bgsNames.insert(bgsName);
+                                bgmNames.emplace(bgmName);
+                                bgsNames.emplace(bgsName);
 
-                                parallaxNames.insert(parallaxName);
+                                parallaxNames.emplace(parallaxName);
 
                                 dom::array events = map["events"];
                                 for (dom::element event : events) {
@@ -623,7 +622,7 @@ int main(int argc, char** argv) {
                                         if (page.type() == dom::element_type::NULL_VALUE) continue;
 
                                         std::string_view image = page["image"]["characterName"];
-                                        characterNames.insert(image);
+                                        characterNames.emplace(image);
 
                                         dom::array list = page["list"];
                                         for (dom::object listItem : list) {
@@ -660,7 +659,7 @@ int main(int argc, char** argv) {
                     }
                 }
 
-                operations.emplace_back(operation);
+                operations.push_back(operation);
             }
         }
 
