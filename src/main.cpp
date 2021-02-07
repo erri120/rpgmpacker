@@ -583,7 +583,58 @@ int main(int argc, char** argv) {
                         if (sFileName.length() == 11) {
                             auto res = sFileName.find("Map");
                             if (res != std::string::npos) {
-                                //TODO:Map*.json
+                                logger->info("Parsing {}", sFileName);
+                                dom::parser parser;
+                                dom::object map = parser.load(path);
+
+                                /*
+                                 * Map.json:
+                                 *
+                                 * battleback1Name => img/battlebacks1/{}.png
+                                 * battleback2Name =>img/battlebacks2/{}.png
+                                 *
+                                 * bgm.name => audio/bgm/{}.m4a/ogg
+                                 * bgs.name => audio/bgs/{}.m4a/ogg
+                                 *
+                                 * parallaxName => img/parallaxes/{}.png
+                                 *
+                                 * events[n].pages[n]:
+                                 *  - image.characterName => img/characters/{}.png
+                                 *  - list[n] => same as CommonEvents.json
+                                 */
+
+                                std::string_view battleback1Name = map["battleback1Name"];
+                                std::string_view battleback2Name = map["battleback2Name"];
+
+                                std::string_view bgmName = map["bgm"]["name"];
+                                std::string_view bgsName = map["bgs"]["name"];
+
+                                std::string_view parallaxName = map["parallaxName"];
+
+                                battleback1Names.insert(battleback1Name);
+                                battleback2Names.insert(battleback2Name);
+
+                                bgmNames.insert(bgmName);
+                                bgsNames.insert(bgsName);
+
+                                parallaxNames.insert(parallaxName);
+
+                                dom::array events = map["events"];
+                                for (dom::element event : events) {
+                                    if (event.type() == dom::element_type::NULL_VALUE) continue;
+                                    dom::array pages = event["pages"];
+                                    for (dom::element page : pages) {
+                                        if (page.type() == dom::element_type::NULL_VALUE) continue;
+
+                                        std::string_view image = page["image"]["characterName"];
+                                        characterNames.insert(image);
+
+                                        dom::array list = page["list"];
+                                        for (dom::object listItem : list) {
+                                            //TODO: same as CommonEvent.json
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
