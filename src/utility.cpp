@@ -1,8 +1,10 @@
 #pragma once
 #include <spdlog/spdlog.h>
-#include <string>
 #include <ghc/filesystem.hpp>
+#include <string>
+#include <map>
 
+#include "utility.hpp"
 #include "platform.hpp"
 #include "rpgmakerVersion.hpp"
 
