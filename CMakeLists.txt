@@ -53,6 +53,14 @@ CPMAddPackage (
         "SIMDJSON_JUST_LIBRARY On"
 )
 
+if (USE_CCACHE)
+    CPMAddPackage (
+        NAME Ccache.cmake
+        GITHUB_REPOSITORY TheLartians/Ccache.cmake
+        VERSION 1.2
+    )
+endif()
+
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/**")
 add_executable(RPGMPacker ${sources})
 
