@@ -1,12 +1,13 @@
+#include <iostream>
+#include <string>
+#include <numeric>
+
 #include <cxxopts.hpp>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/stopwatch.h>
 #include <ghc/filesystem.hpp>
 #include <taskflow/taskflow.hpp>
-#include <iostream>
-#include <string>
-#include <numeric>
 #include "md5.h"
 
 #include "platform.hpp"
@@ -14,10 +15,8 @@
 #include "utility.hpp"
 #include "foldertype.hpp"
 #include "operation.hpp"
-
-//bool filterFolder(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderType folderType, RPGMakerVersion version, Platform platform);
-bool filterFile(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderType folderType, RPGMakerVersion version, Platform platform);
-bool shouldEncryptFile(ghc::filesystem::path *from, bool encryptAudio, bool encryptImages, RPGMakerVersion version);
+#include "parseData.hpp"
+#include "inputPaths.hpp"
 
 int main(int argc, char** argv) {
     auto logger = spdlog::stdout_color_mt("console");
@@ -32,6 +31,7 @@ int main(int argc, char** argv) {
         ("encryptImages", "Enable Image Encryption using encryptionKey. (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("encryptAudio", "Enable Audio Encryption using encryptionKey. (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("encryptionKey", "Encryption Key for Images or Audio, either encryptImages or encryptAudio have to be set", cxxopts::value<std::string>())
+        ("exclude", "Exclude unused files. (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("hardlinks", "Use hardlinks instead of creating copies. (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("cache", "Use a path cache for already encrypted files when multi-targeting and using hardlinks. (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("threads", "Amount of worker threads to use. Min: 1, Max: 10", cxxopts::value<int>()->default_value("2"))
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
         ("h,help", "Print usage");
 
     std::string input, output, rpgmaker, encryptionKey;
-    bool encryptImages, encryptAudio, debug, useHardlinks, useCache;
+    bool encryptImages, encryptAudio, debug, useHardlinks, useCache, excludeUnused;
     std::vector<std::string> platformNames;
     int workerThreads = 0;
 
@@ -50,12 +50,13 @@ int main(int argc, char** argv) {
             std::cout << options.help() << std::endl;
             return 0;
         }
-
+        
         input = result["input"].as<std::string>();
         output = result["output"].as<std::string>();
         rpgmaker = result["rpgmaker"].as<std::string>();
         encryptImages = result["encryptImages"].as<bool>();
         encryptAudio = result["encryptAudio"].as<bool>();
+        excludeUnused = result["exclude"].as<bool>();
         debug = result["debug"].as<bool>();
         useHardlinks = result["hardlinks"].as<bool>();
         useCache = result["cache"].as<bool>();
@@ -92,6 +93,7 @@ int main(int argc, char** argv) {
         logger->info("Encryption Key: REDACTED");
     logger->info("Encrypt Images: {}", encryptImages);
     logger->info("Encrypt Audio: {}", encryptAudio);
+    logger->info("Exclude Unused Files: {}", excludeUnused);
     auto strReduce = [](std::string a, std::string b) {
         return std::move(a) + ',' + std::move(b);
     };
@@ -160,9 +162,27 @@ int main(int argc, char** argv) {
     }
 
     if (!ensureDirectory(outputPath, errorLogger))
-        return 1;
+        return EXIT_FAILURE;
 
     tf::Executor executor(workerThreads);
+
+    struct ParsedData parsedData;
+    struct InputPaths inputPaths;
+
+    if (!getInputPaths(inputPath, &inputPaths, errorLogger))
+        return EXIT_FAILURE;
+
+    if (excludeUnused) {
+        auto dataFolder = ghc::filesystem::path(inputPath).append("data");
+        if (!ghc::filesystem::is_directory(dataFolder, ec)) {
+            errorLogger->error("Directory does not exist: {}! {}", dataFolder, ec);
+            return EXIT_FAILURE;
+        }
+
+        if (!parseData(dataFolder, &parsedData, logger, errorLogger)) {
+            return EXIT_FAILURE;
+        }
+    }
 
     logger->info("Building output for {} platforms", platforms.size());
     for (auto platform : platforms) {
@@ -170,29 +190,29 @@ int main(int argc, char** argv) {
         logger->debug("Platform {}", platform);
         auto platformOutputPath = ghc::filesystem::path(outputPath).append(PlatformNames[(int)platform]);
         if (!ensureDirectory(platformOutputPath, errorLogger))
-            return 1;
+            return EXIT_FAILURE;
 
         std::vector<Operation> operations;
 
         auto templateName = PlatformFolders[(int)platform];
         if (!templateName.empty()) {
             auto templateFolderPath = ghc::filesystem::path(rpgmakerPath).append(templateName);
-            auto sTemplateFolderPath = std::string(templateFolderPath.c_str());
+            auto sTemplateFolderPath = templateFolderPath.wstring();
 
             if (!ghc::filesystem::exists(templateFolderPath, ec)) {
                 errorLogger->error("The template directory at {} does not exist!", templateFolderPath);
-                return 1;
+                return EXIT_FAILURE;
             }
 
             logger->debug("Template Folder: {}", templateFolderPath);
             for (const auto& p : ghc::filesystem::recursive_directory_iterator(templateFolderPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
                 auto path = p.path();
-                auto sPath = std::string(path.c_str());
+                auto sPath = path.wstring();
                 auto entryOutputPath = ghc::filesystem::path(platformOutputPath).append(sPath.substr(sTemplateFolderPath.length()+1));
 
                 if (p.is_directory(ec)) {
                     if (!ensureDirectory(entryOutputPath, errorLogger))
-                        return 1;
+                        return EXIT_FAILURE;
                 } else if (p.is_regular_file(ec)) {
                     if (filterFile(&path, &entryOutputPath, FolderType::RPGMaker, rpgmakerVersion, platform))
                         continue;
@@ -205,7 +225,7 @@ int main(int argc, char** argv) {
                         FolderType::RPGMaker
                     };
 
-                    operations.emplace_back(operation);
+                    operations.push_back(operation);
                 }
             }
         }
@@ -217,19 +237,25 @@ int main(int argc, char** argv) {
                 : ghc::filesystem::path(platformOutputPath).append("www")
             : ghc::filesystem::path(platformOutputPath);
         if (!ensureDirectory(wwwPath, errorLogger))
-            return 1;
+            return EXIT_FAILURE;
 
-        auto sInputPath = std::string(inputPath.c_str());
+        auto sInputPath = inputPath.wstring();
         for (const auto& p : ghc::filesystem::recursive_directory_iterator(inputPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
             auto path = p.path();
-            auto sPath = std::string(path.c_str());
+            auto sPath = path.wstring();
             auto entryOutputPath = ghc::filesystem::path(wwwPath).append(sPath.substr(sInputPath.length()+1));
 
             if (p.is_directory(ec)) {
                 if (!ensureDirectory(entryOutputPath, errorLogger))
-                    return 1;
+                    return EXIT_FAILURE;
             } else if (p.is_regular_file(ec)) {
                 auto filename = path.filename();
+
+                if (excludeUnused) {
+                    if (filterUnusedFiles(path, &inputPaths, &parsedData))
+                        continue;
+                }
+
                 if (filterFile(&path, &entryOutputPath, FolderType::Project, rpgmakerVersion, platform))
                     continue;
 
@@ -249,12 +275,12 @@ int main(int argc, char** argv) {
                     //updating System.json with the encryption data
                     if (filename == "System.json") {
                         if (!updateSystemJson(path, entryOutputPath, encryptAudio, encryptImages, encryptionHash, logger, errorLogger))
-                            return 1;
+                            return EXIT_FAILURE;
                         continue;
                     }
                 }
 
-                operations.emplace_back(operation);
+                operations.push_back(operation);
             }
         }
 
@@ -289,92 +315,10 @@ int main(int argc, char** argv) {
             logger->info("Successfully executed {} operations for {} in {} seconds", succeeded.load(), platform, sw);
         } else {
             errorLogger->error("Some operations failed for {} in {} seconds: {} failed, {} succeeded", platform, sw, failed.load(), succeeded.load());
-            return 1;
+            return EXIT_FAILURE;
         }
     }
 
     delete[] hash;
-    return 0;
-}
-
-bool filterFile(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderType folderType, RPGMakerVersion version, Platform platform) {
-    auto filename = from->filename();
-    auto extension = from->extension();
-
-    auto parent = from->parent_path();
-    auto parentName = parent.filename();
-
-    if (folderType == FolderType::RPGMaker) {
-        if (version == RPGMakerVersion::MZ) {
-            if (parentName == "pnacl") return true;
-
-            //nw.exe gets renamed to Game.exe to reduce confusion for players
-            if (filename == "nw.exe") {
-                to->replace_filename("Game.exe");
-                return false;
-            }
-
-            //chromium related files that are ignored
-            //TODO: Windows only?
-            if (filename == "chromedriver.exe") return true;
-            if (filename == "nacl_irt_x86_64.nexe") return true;
-            if (filename == "nw.exe") return true;
-            if (filename == "nwjc.exe") return true;
-            if (filename == "payload.exe") return true;
-        }
-    } else if (folderType == FolderType::Project) {
-        //Desktop: only ogg
-        //Mobile: only m4a
-        //Browser: both
-        if (platform == Platform::Mobile && extension == ".ogg") return true;
-        if (extension == ".m4a" && platform != Platform::Mobile && platform != Platform::Browser) return true;
-
-        //skip project files
-        if (extension == ".rpgproject") return true;
-        if (extension == ".rmmzproject") return true;
-    }
-
-    return false;
-}
-
-bool shouldEncryptFile(ghc::filesystem::path *from, bool encryptAudio, bool encryptImages, RPGMakerVersion version) {
-    auto filename = from->filename();
-    auto extension = from->extension();
-    auto parent = from->parent_path();
-    auto parentName = parent.filename();
-    auto grandparent = parent.parent_path();
-    auto grandparentName = grandparent.filename();
-
-    if (extension != ".png" && extension != ".ogg" && extension != ".m4a")
-        return false;
-
-    if (encryptAudio && (extension == ".ogg" || extension == ".m4a")) {
-        return true;
-    }
-
-    if (encryptImages && extension == ".png") {
-        if (version == RPGMakerVersion::MZ) {
-            //effects/Textures is not encrypted in MZ
-            if (parentName == "Texture" && grandparentName == "effects")
-                return false;
-
-            //img/system gets encrypted, in MV some are left out
-            if (parentName == "system" && grandparentName == "img")
-                return true;
-        } else if (version == RPGMakerVersion::MV) {
-            if (parentName == "system" && grandparentName == "img") {
-                //these are for some reason not encrypted in MV
-                if (filename == "Loading.png") return false;
-                if (filename == "Window.png") return false;
-            }
-        }
-
-        //game icon for the window
-        if (filename == "icon.png" && parentName == "icon")
-            return false;
-
-        return true;
-    }
-
-    return false;
+    return EXIT_SUCCESS;
 }

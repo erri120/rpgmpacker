@@ -1,10 +1,14 @@
-#pragma once
-#include <spdlog/spdlog.h>
 #include <string>
+#include <map>
+#include <set>
+
+#include <spdlog/spdlog.h>
 #include <ghc/filesystem.hpp>
 
+#include "utility.hpp"
 #include "platform.hpp"
 #include "rpgmakerVersion.hpp"
+#include "foldertype.hpp"
 
 bool isValidDirectory(const std::string& directory, const std::string& name, const std::shared_ptr<spdlog::logger>& errorLogger) {
     if (!ghc::filesystem::exists(directory)) {
@@ -134,7 +138,7 @@ unsigned int* stringToHexHash(std::string encryptionHash) {
 }
 
 auto lastPlatform = Platform::None;
-std::map<std::string, std::string> cachedEncryptedFiles;
+std::map<std::wstring, std::wstring> cachedEncryptedFiles;
 
 static uint8_t header[] = { 0x52, 0x50, 0x47, 0x4D, 0x56, 0x00, 0x00, 0x00, 0x00, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
@@ -167,7 +171,7 @@ bool encryptFile(const ghc::filesystem::path& from, ghc::filesystem::path to, co
         else if (lastPlatform != platform) {
             //hardlink to the previously encrypted files
             if (hardlink) {
-                auto iter = cachedEncryptedFiles.find(std::string(from.c_str()));
+                auto iter = cachedEncryptedFiles.find(from.wstring());
                 if (iter != cachedEncryptedFiles.end()) {
                     auto prev = ghc::filesystem::path(iter->second);
 
@@ -250,7 +254,7 @@ bool encryptFile(const ghc::filesystem::path& from, ghc::filesystem::path to, co
     delete[] bytes;
     delete[] buffer;
 
-    cachedEncryptedFiles[std::string(from.c_str())] = std::string(to.c_str());
+    cachedEncryptedFiles[from.wstring()] = to.wstring();
 
     return true;
 }
@@ -326,4 +330,131 @@ RPGMakerVersion getRPGMakerVersion(const ghc::filesystem::path& projectPath, con
     }
 
     return version;
+}
+
+bool filterFile(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderType folderType, RPGMakerVersion version, Platform platform) {
+    auto filename = from->filename();
+    auto extension = from->extension();
+
+    auto parent = from->parent_path();
+    auto parentName = parent.filename();
+
+    if (folderType == FolderType::RPGMaker) {
+        if (version == RPGMakerVersion::MZ) {
+            if (parentName == "pnacl") return true;
+
+            //nw.exe gets renamed to Game.exe to reduce confusion for players
+            if (filename == "nw.exe") {
+                to->replace_filename("Game.exe");
+                return false;
+            }
+
+            //chromium related files that are ignored
+            //TODO: Windows only?
+            if (filename == "chromedriver.exe") return true;
+            if (filename == "nacl_irt_x86_64.nexe") return true;
+            if (filename == "nw.exe") return true;
+            if (filename == "nwjc.exe") return true;
+            if (filename == "payload.exe") return true;
+        }
+    } else if (folderType == FolderType::Project) {
+        //Desktop: only ogg
+        //Mobile: only m4a
+        //Browser: both
+        if (platform == Platform::Mobile && extension == ".ogg") return true;
+        if (extension == ".m4a" && platform != Platform::Mobile && platform != Platform::Browser) return true;
+
+        //skip project files
+        if (extension == ".rpgproject") return true;
+        if (extension == ".rmmzproject") return true;
+    }
+
+    return false;
+}
+
+bool shouldEncryptFile(ghc::filesystem::path *from, bool encryptAudio, bool encryptImages, RPGMakerVersion version) {
+    auto filename = from->filename();
+    auto extension = from->extension();
+    auto parent = from->parent_path();
+    auto parentName = parent.filename();
+    auto grandparent = parent.parent_path();
+    auto grandparentName = grandparent.filename();
+
+    if (extension != ".png" && extension != ".ogg" && extension != ".m4a")
+        return false;
+
+    if (encryptAudio && (extension == ".ogg" || extension == ".m4a")) {
+        return true;
+    }
+
+    if (encryptImages && extension == ".png") {
+        if (version == RPGMakerVersion::MZ) {
+            //effects/Textures is not encrypted in MZ
+            if (parentName == "Texture" && grandparentName == "effects")
+                return false;
+
+            //img/system gets encrypted, in MV some are left out
+            if (parentName == "system" && grandparentName == "img")
+                return true;
+        } else if (version == RPGMakerVersion::MV) {
+            if (parentName == "system" && grandparentName == "img") {
+                //these are for some reason not encrypted in MV
+                if (filename == "Loading.png") return false;
+                if (filename == "Window.png") return false;
+            }
+        }
+
+        //game icon for the window
+        if (filename == "icon.png" && parentName == "icon")
+            return false;
+
+        return true;
+    }
+
+    return false;
+}
+
+#define FIND(path, set) else if (parent == path) { \
+it = set.find(name);                          \
+return it == set.end(); }                     \
+
+
+bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inputPaths, struct ParsedData* parsedData){
+    auto filename = path.filename().u8string();
+    auto extension = path.extension().u8string();
+    auto parent = path.parent_path();
+
+    if (parent.filename() == "sv_enemies") {
+        //sv_enemies will be completely ignored by RPG Maker and only the enemies folder is being used
+        //you can verify this by opening RPG Maker, going to the Database->Enemies and selecting an image
+        //the base Actor1_3 is different in sv_enemies/ and enemies/ but only the one from enemies/ turns up
+        return true;
+    }
+
+    auto name = filename.substr(0, filename.find(extension));
+
+    std::set<std::string>::iterator it;
+
+    if (parent == inputPaths->bgmPath) {
+        it = parsedData->bgmNames.find(name);
+        return it == parsedData->bgmNames.end();
+    }
+    FIND(inputPaths->bgsPath, parsedData->bgsNames)
+    FIND(inputPaths->mePath, parsedData->meNames)
+    FIND(inputPaths->sePath, parsedData->seNames)
+    FIND(inputPaths->moviesPath, parsedData->movieNames)
+    FIND(inputPaths->picturesPath, parsedData->pictureNames)
+    FIND(inputPaths->titles1Path, parsedData->title1Names)
+    FIND(inputPaths->titles2Path, parsedData->title2Names)
+    FIND(inputPaths->charactersPath, parsedData->characterNames)
+    FIND(inputPaths->facesPath, parsedData->faceNames)
+    FIND(inputPaths->actorsBattlerPath, parsedData->actorBattlerNames)
+    FIND(inputPaths->enemiesBattlerPath, parsedData->enemyBattlerNames)
+    FIND(inputPaths->animationsPath, parsedData->animationNames)
+    FIND(inputPaths->tilesetsPath, parsedData->tilesetNames)
+    FIND(inputPaths->battlebacks1Path, parsedData->battleback1Names)
+    FIND(inputPaths->battlebacks2Path, parsedData->battleback2Names)
+    FIND(inputPaths->parallaxesPath, parsedData->parallaxNames)
+
+    return false;
 }
