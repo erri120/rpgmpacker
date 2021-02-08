@@ -50,6 +50,7 @@ bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parse
         PARSE_DATA("Actors.json", parseActors(path, parsedData, errorLogger))
         PARSE_DATA("CommonEvents.json", parseCommonEvents(path, parsedData, errorLogger))
         PARSE_DATA("Enemies.json", parseEnemies(path, parsedData, errorLogger))
+        PARSE_DATA("Items.json", parseItems(path, parsedData, errorLogger))
         PARSE_DATA("Skills.json", parseSkills(path, parsedData, errorLogger))
         PARSE_DATA("System.json", parseSystem(path, parsedData, errorLogger))
         PARSE_DATA("Tilesets.json", parseTilesets(path, parsedData, errorLogger))
@@ -344,6 +345,28 @@ bool parseEnemies(const ghc::filesystem::path& path, struct ParsedData* parsedDa
         GET(element, "battlerName", battlerName)
 
         parsedData->enemyBattlerNames.emplace(battlerName);
+    }
+
+    return true;
+}
+
+bool parseItems(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger) {
+    PARSE_FILE(path)
+    FILE_IS_ARRAY(path)
+
+    for (dom::element element : doc) {
+        SKIP_NULL(element)
+        /*
+         * Items.json:
+         * animationId
+         */
+
+        int64_t animationId;
+        GET(element, "animationId", animationId)
+
+        if (animationId == -1 || animationId == 0) continue;
+
+        parsedData->animationIds.insert(static_cast<uint64_t>(animationId));
     }
 
     return true;
