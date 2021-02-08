@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'src/**'
+      - 'include/**'
       - 'tests/**'
       - '.github/workflows/**'
       - 'CMakeLists.txt'
