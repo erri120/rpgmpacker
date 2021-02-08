@@ -21,7 +21,7 @@ Simple CLI program for packaging RPG Maker games to use in an automated build/de
   - image and audio encryption with an encryption key
   - using hardlinks instead of creating copies
   - deploying for multiple platforms at once
-  - excluding unused files
+  - excluding unused files (**MV only**)
 
 ## Usage
 
