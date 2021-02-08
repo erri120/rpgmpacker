@@ -231,69 +231,8 @@ int main(int argc, char** argv) {
                 return EXIT_FAILURE;
             }
 
-            for (const auto& p : ghc::filesystem::directory_iterator(dataFolder, ghc::filesystem::directory_options::skip_permission_denied)) {
-                if (!p.is_regular_file()) continue;
-
-                auto path = p.path();
-                auto filename = path.filename();
-
-                if (filename == "Actors.json") {
-                    logger->debug("Parsing Actors.json");
-
-                    if(!parseActors(path, &parsedData, errorLogger)) {
-                        errorLogger->error("Error parsing Actors.json at {}", path);
-                        return EXIT_FAILURE;
-                    }
-                } else if (filename == "Animations.json") {
-                    logger->debug("Parsing Animations.json");
-
-                    if(!parseAnimations(path, &parsedData, errorLogger)) {
-                        errorLogger->error("Error parsing Animations.json at {}", path);
-                        return EXIT_FAILURE;
-                    }
-                } else if (filename == "CommonEvents.json") {
-                    logger->debug("Parsing CommonEvents.json");
-
-                    if(!parseCommonEvents(path, &parsedData, errorLogger)) {
-                        errorLogger->error("Error parsing CommonEvents.json at {}", path);
-                        return EXIT_FAILURE;
-                    }
-                } else if (filename == "Enemies.json") {
-                    logger->debug("Parsing Enemies.json");
-
-                    if(!parseEnemies(path, &parsedData, errorLogger)) {
-                        errorLogger->error("Error parsing Enemies.json at {}", path);
-                        return EXIT_FAILURE;
-                    }
-                } else  if (filename == "System.json") {
-                    logger->debug("Parsing System.json");
-
-                    if(!parseSystem(path, &parsedData, errorLogger)) {
-                        errorLogger->error("Error parsing System.json at {}", path);
-                        return EXIT_FAILURE;
-                    }
-                } else if (filename == "Tilesets.json") {
-                    logger->debug("Parsing Tilesets.json");
-
-                    if(!parseTilesets(path, &parsedData, errorLogger)) {
-                        errorLogger->error("Error parsing Tilesets.json at {}", path);
-                        return EXIT_FAILURE;
-                    }
-                } else {
-                    auto sFileName = filename.u8string();
-                    //11 chars: MapXYZ.json
-                    if (sFileName.length() == 11) {
-                        auto res = sFileName.find("Map");
-                        if (res != std::string::npos) {
-                            logger->debug("Parsing {}", sFileName);
-
-                            if(!parseMap(path, &parsedData, errorLogger)) {
-                                errorLogger->error("Error parsing {}", path);
-                                return EXIT_FAILURE;
-                            }
-                        }
-                    }
-                }
+            if (!parseData(dataFolder, &parsedData, logger, errorLogger)) {
+                return EXIT_FAILURE;
             }
 
             didParseData = true;

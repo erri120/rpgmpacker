@@ -58,6 +58,7 @@ struct ParsedData {
     std::set<std::string> parallaxNames;
 };
 
+bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger);
 bool parseEvents(simdjson::dom::array& eventList, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
 
 bool parseActors(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
