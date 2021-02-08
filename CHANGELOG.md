@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed error log always displaying "Actors.json" during JSON exception
+
 ## [Released]
 
 ## [1.2.1] - 2021-02-08
