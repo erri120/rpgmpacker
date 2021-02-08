@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
     }
 
     if (!ensureDirectory(outputPath, errorLogger))
-        return 1;
+        return EXIT_FAILURE;
 
     tf::Executor executor(workerThreads);
 
@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
         logger->debug("Platform {}", platform);
         auto platformOutputPath = ghc::filesystem::path(outputPath).append(PlatformNames[(int)platform]);
         if (!ensureDirectory(platformOutputPath, errorLogger))
-            return 1;
+            return EXIT_FAILURE;
 
         std::vector<Operation> operations;
 
@@ -186,7 +186,7 @@ int main(int argc, char** argv) {
 
             if (!ghc::filesystem::exists(templateFolderPath, ec)) {
                 errorLogger->error("The template directory at {} does not exist!", templateFolderPath);
-                return 1;
+                return EXIT_FAILURE;
             }
 
             logger->debug("Template Folder: {}", templateFolderPath);
@@ -197,7 +197,7 @@ int main(int argc, char** argv) {
 
                 if (p.is_directory(ec)) {
                     if (!ensureDirectory(entryOutputPath, errorLogger))
-                        return 1;
+                        return EXIT_FAILURE;
                 } else if (p.is_regular_file(ec)) {
                     if (filterFile(&path, &entryOutputPath, FolderType::RPGMaker, rpgmakerVersion, platform))
                         continue;
@@ -222,13 +222,13 @@ int main(int argc, char** argv) {
                 : ghc::filesystem::path(platformOutputPath).append("www")
             : ghc::filesystem::path(platformOutputPath);
         if (!ensureDirectory(wwwPath, errorLogger))
-            return 1;
+            return EXIT_FAILURE;
 
         if (excludeUnused && !didParseData) {
             auto dataFolder = ghc::filesystem::path(inputPath).append("data");
             if (!ghc::filesystem::is_directory(dataFolder, ec)) {
                 errorLogger->error("Directory does not exist: {}! {}", dataFolder, ec);
-                return 1;
+                return EXIT_FAILURE;
             }
 
             for (const auto& p : ghc::filesystem::directory_iterator(dataFolder, ghc::filesystem::directory_options::skip_permission_denied)) {
@@ -242,42 +242,42 @@ int main(int argc, char** argv) {
 
                     if(!parseActors(path, &parsedData, errorLogger)) {
                         errorLogger->error("Error parsing Actors.json at {}", path);
-                        return 1;
+                        return EXIT_FAILURE;
                     }
                 } else if (filename == "Animations.json") {
                     logger->debug("Parsing Animations.json");
 
                     if(!parseAnimations(path, &parsedData, errorLogger)) {
                         errorLogger->error("Error parsing Animations.json at {}", path);
-                        return 1;
+                        return EXIT_FAILURE;
                     }
                 } else if (filename == "CommonEvents.json") {
                     logger->debug("Parsing CommonEvents.json");
 
                     if(!parseCommonEvents(path, &parsedData, errorLogger)) {
                         errorLogger->error("Error parsing CommonEvents.json at {}", path);
-                        return 1;
+                        return EXIT_FAILURE;
                     }
                 } else if (filename == "Enemies.json") {
                     logger->debug("Parsing Enemies.json");
 
                     if(!parseEnemies(path, &parsedData, errorLogger)) {
                         errorLogger->error("Error parsing Enemies.json at {}", path);
-                        return 1;
+                        return EXIT_FAILURE;
                     }
                 } else  if (filename == "System.json") {
                     logger->debug("Parsing System.json");
 
                     if(!parseSystem(path, &parsedData, errorLogger)) {
                         errorLogger->error("Error parsing System.json at {}", path);
-                        return 1;
+                        return EXIT_FAILURE;
                     }
                 } else if (filename == "Tilesets.json") {
                     logger->debug("Parsing Tilesets.json");
 
                     if(!parseTilesets(path, &parsedData, errorLogger)) {
                         errorLogger->error("Error parsing Tilesets.json at {}", path);
-                        return 1;
+                        return EXIT_FAILURE;
                     }
                 } else {
                     auto sFileName = filename.u8string();
@@ -289,7 +289,7 @@ int main(int argc, char** argv) {
 
                             if(!parseMap(path, &parsedData, errorLogger)) {
                                 errorLogger->error("Error parsing {}", path);
-                                return 1;
+                                return EXIT_FAILURE;
                             }
                         }
                     }
@@ -307,7 +307,7 @@ int main(int argc, char** argv) {
 
             if (p.is_directory(ec)) {
                 if (!ensureDirectory(entryOutputPath, errorLogger))
-                    return 1;
+                    return EXIT_FAILURE;
             } else if (p.is_regular_file(ec)) {
                 auto filename = path.filename();
 
@@ -330,7 +330,7 @@ int main(int argc, char** argv) {
                     //updating System.json with the encryption data
                     if (filename == "System.json") {
                         if (!updateSystemJson(path, entryOutputPath, encryptAudio, encryptImages, encryptionHash, logger, errorLogger))
-                            return 1;
+                            return EXIT_FAILURE;
                         continue;
                     }
                 }
@@ -370,10 +370,10 @@ int main(int argc, char** argv) {
             logger->info("Successfully executed {} operations for {} in {} seconds", succeeded.load(), platform, sw);
         } else {
             errorLogger->error("Some operations failed for {} in {} seconds: {} failed, {} succeeded", platform, sw, failed.load(), succeeded.load());
-            return 1;
+            return EXIT_FAILURE;
         }
     }
 
     delete[] hash;
-    return 0;
+    return EXIT_SUCCESS;
 }
