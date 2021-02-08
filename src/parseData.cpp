@@ -54,6 +54,7 @@ bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parse
         PARSE_DATA("Skills.json", parseSkills(path, parsedData, errorLogger))
         PARSE_DATA("System.json", parseSystem(path, parsedData, errorLogger))
         PARSE_DATA("Tilesets.json", parseTilesets(path, parsedData, errorLogger))
+        PARSE_DATA("Troops.json", parseTroops(path, parsedData, errorLogger))
         PARSE_DATA("Weapons.json", parseWeapons(path, parsedData, errorLogger))
 
         auto sFileName = filename.u8string();
@@ -603,6 +604,34 @@ bool parseTilesets(const ghc::filesystem::path& path, struct ParsedData* parsedD
     return true;
 }
 
+bool parseTroops(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger) {
+    PARSE_FILE(path)
+    FILE_IS_ARRAY(path)
+
+    for (dom::element element : doc) {
+        SKIP_NULL(element)
+        /*
+         * Troops.json:
+         *
+         * pages[n]:
+         *  - list[n] => same as CommonEvents.json
+         */
+
+        dom::array pages;
+        GET(element, "pages", pages)
+
+        for (dom::object page : pages) {
+            dom::array list;
+            GET(page, "list", list)
+
+            if(!parseEvents(list, parsedData, errorLogger))
+                return false;
+        }
+    }
+
+    return true;
+}
+
 bool parseWeapons(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger) {
     PARSE_FILE(path)
     FILE_IS_ARRAY(path)
@@ -610,7 +639,7 @@ bool parseWeapons(const ghc::filesystem::path& path, struct ParsedData* parsedDa
     for (dom::element element : doc) {
         SKIP_NULL(element)
         /*
-         * Items.json:
+         * Weapons.json:
          * animationId
          */
 
