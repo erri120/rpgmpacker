@@ -54,6 +54,7 @@ bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parse
         PARSE_DATA("Skills.json", parseSkills(path, parsedData, errorLogger))
         PARSE_DATA("System.json", parseSystem(path, parsedData, errorLogger))
         PARSE_DATA("Tilesets.json", parseTilesets(path, parsedData, errorLogger))
+        PARSE_DATA("Weapons.json", parseWeapons(path, parsedData, errorLogger))
 
         auto sFileName = filename.u8string();
         //11 chars: MapXYZ.json
@@ -597,6 +598,28 @@ bool parseTilesets(const ghc::filesystem::path& path, struct ParsedData* parsedD
             if (tilesetName.empty()) continue;
             parsedData->tilesetNames.emplace(tilesetName);
         }
+    }
+
+    return true;
+}
+
+bool parseWeapons(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger) {
+    PARSE_FILE(path)
+    FILE_IS_ARRAY(path)
+
+    for (dom::element element : doc) {
+        SKIP_NULL(element)
+        /*
+         * Items.json:
+         * animationId
+         */
+
+        int64_t animationId;
+        GET(element, "animationId", animationId)
+
+        if (animationId == -1 || animationId == 0) continue;
+
+        parsedData->animationIds.insert(static_cast<uint64_t>(animationId));
     }
 
     return true;
