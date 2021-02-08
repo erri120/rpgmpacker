@@ -15,6 +15,7 @@ struct ParsedData {
     //Animations.json
     //img/animations/{}.png
     std::set<std::string> animationNames;
+    std::set<uint64_t> animationIds;
 
     //Enemies.json
     //img/enemies/{}.png
@@ -66,5 +67,6 @@ bool parseAnimations(const ghc::filesystem::path& path, struct ParsedData* parse
 bool parseCommonEvents(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
 bool parseEnemies(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
 bool parseMap(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseSkills(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
 bool parseSystem(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
 bool parseTilesets(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);

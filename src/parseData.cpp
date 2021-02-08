@@ -1,5 +1,7 @@
 #include "parseData.hpp"
 
+#include <set>
+
 #include <ghc/filesystem.hpp>
 #include <simdjson.h>
 
@@ -32,6 +34,12 @@ if (error) { errorLogger->error("Unable to parse at index {}! {}", index, error)
 errorLogger->error("File {} is not an array!", path);                     \
 return false; }
 
+#define PARSE_DATA(name, func) if (filename == name) { \
+logger->debug("Parsing {}", name);                     \
+if (!func) {                                           \
+errorLogger->error("Error parsing Actors.json at {}", path); \
+return false; } }
+
 bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger) {
     for (const auto& p : ghc::filesystem::directory_iterator(dataFolder, ghc::filesystem::directory_options::skip_permission_denied)) {
         if (!p.is_regular_file()) continue;
@@ -39,64 +47,38 @@ bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parse
         auto path = p.path();
         auto filename = path.filename();
 
-        if (filename == "Actors.json") {
-            logger->debug("Parsing Actors.json");
+        PARSE_DATA("Actors.json", parseActors(path, parsedData, errorLogger))
+        PARSE_DATA("CommonEvents.json", parseCommonEvents(path, parsedData, errorLogger))
+        PARSE_DATA("Enemies.json", parseEnemies(path, parsedData, errorLogger))
+        PARSE_DATA("Skills.json", parseSkills(path, parsedData, errorLogger))
+        PARSE_DATA("System.json", parseSystem(path, parsedData, errorLogger))
+        PARSE_DATA("Tilesets.json", parseTilesets(path, parsedData, errorLogger))
 
-            if(!parseActors(path, parsedData, errorLogger)) {
-                errorLogger->error("Error parsing Actors.json at {}", path);
-                return false;
-            }
-        } else if (filename == "Animations.json") {
-            logger->debug("Parsing Animations.json");
+        auto sFileName = filename.u8string();
+        //11 chars: MapXYZ.json
+        if (sFileName.length() == 11) {
+            auto res = sFileName.find("Map");
+            if (res != std::string::npos) {
+                logger->debug("Parsing {}", sFileName);
 
-            if(!parseAnimations(path, parsedData, errorLogger)) {
-                errorLogger->error("Error parsing Animations.json at {}", path);
-                return false;
-            }
-        } else if (filename == "CommonEvents.json") {
-            logger->debug("Parsing CommonEvents.json");
-
-            if(!parseCommonEvents(path, parsedData, errorLogger)) {
-                errorLogger->error("Error parsing CommonEvents.json at {}", path);
-                return false;
-            }
-        } else if (filename == "Enemies.json") {
-            logger->debug("Parsing Enemies.json");
-
-            if(!parseEnemies(path, parsedData, errorLogger)) {
-                errorLogger->error("Error parsing Enemies.json at {}", path);
-                return false;
-            }
-        } else  if (filename == "System.json") {
-            logger->debug("Parsing System.json");
-
-            if(!parseSystem(path, parsedData, errorLogger)) {
-                errorLogger->error("Error parsing System.json at {}", path);
-                return false;
-            }
-        } else if (filename == "Tilesets.json") {
-            logger->debug("Parsing Tilesets.json");
-
-            if(!parseTilesets(path, parsedData, errorLogger)) {
-                errorLogger->error("Error parsing Tilesets.json at {}", path);
-                return false;
-            }
-        } else {
-            auto sFileName = filename.u8string();
-            //11 chars: MapXYZ.json
-            if (sFileName.length() == 11) {
-                auto res = sFileName.find("Map");
-                if (res != std::string::npos) {
-                    logger->debug("Parsing {}", sFileName);
-
-                    if(!parseMap(path, parsedData, errorLogger)) {
-                        errorLogger->error("Error parsing {}", path);
-                        return false;
-                    }
+                if(!parseMap(path, parsedData, errorLogger)) {
+                    errorLogger->error("Error parsing {}", path);
+                    return false;
                 }
             }
         }
     }
+
+    //parsing Animations.json last because we need to parse everything else first so we can populate the required
+    //animation ids
+    auto animationsPath = ghc::filesystem::path(dataFolder).append("Animations.json");
+    logger->debug("Parsing Animations.json");
+
+    if(!parseAnimations(animationsPath, parsedData, errorLogger)) {
+        errorLogger->error("Error parsing Animations.json at {}", animationsPath);
+        return false;
+    }
+
     return true;
 }
 
@@ -172,6 +154,11 @@ bool parseEvents(simdjson::dom::array& eventList, struct ParsedData* parsedData,
             GET(vehicleObj, "name", bgmName)
 
             parsedData->bgmNames.emplace(bgmName);
+        } else if (code == 212 || code == 337) {
+            uint64_t id;
+            GET_INDEX(parameters, 1, id)
+
+            parsedData->animationIds.insert(id);
         } else if (code == 231) {
             std::string_view pictureName;
             GET_INDEX(parameters, 1, pictureName)
@@ -286,11 +273,18 @@ bool parseAnimations(const ghc::filesystem::path& path, struct ParsedData* parse
          * timings[i].se.name => audio/se/{name}.m4a/ogg
          */
 
-        std::string_view animation1Name = obj["animation1Name"];
-        std::string_view animation2Name = obj["animation2Name"];
+        uint64_t id;
+        GET(obj, "id", id)
+
+        auto it = parsedData->animationIds.find(id);
+        if (it == parsedData->animationIds.end())
+            continue;
+
+        std::string_view animation1Name;
+        std::string_view animation2Name;
 
         GET(obj, "animation1Name", animation1Name)
-        GET(obj, "animation1Name", animation1Name)
+        GET(obj, "animation2Name", animation2Name)
 
         parsedData->animationNames.emplace(animation1Name);
         parsedData->animationNames.emplace(animation2Name);
@@ -418,6 +412,28 @@ bool parseMap(const ghc::filesystem::path& path, struct ParsedData* parsedData, 
             if (!parseEvents(list, parsedData, errorLogger))
                 return false;
         }
+    }
+
+    return true;
+}
+
+bool parseSkills(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger) {
+    PARSE_FILE(path)
+    FILE_IS_ARRAY(path)
+
+    for (dom::element element : doc) {
+        SKIP_NULL(element)
+        /*
+         * Skills.json:
+         * animationId
+         */
+
+        int64_t animationId;
+        GET(element, "animationId", animationId)
+
+        if (animationId == -1 || animationId == 0) continue;
+
+        parsedData->animationIds.insert(static_cast<uint64_t>(animationId));
     }
 
     return true;
