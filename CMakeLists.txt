@@ -31,6 +31,7 @@ target_link_libraries(RPGMPacker ghc_filesystem)
 target_link_libraries(RPGMPacker Taskflow)
 target_link_libraries(RPGMPacker simdjson)
 
-set_target_properties(RPGMPacker PROPERTIES CXX_STANDARD 17)
+#from StableCoder/cmake-scripts/c++-standards.cmake
+cxx_17()
 
 target_compile_options(RPGMPacker PUBLIC "$<$<BOOL:${MSVC}>:/permissive->")
