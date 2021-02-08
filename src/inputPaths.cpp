@@ -6,8 +6,7 @@
 #include "formatters.hpp"
 
 #define FOLDER_EXISTS(folder) if (!ghc::filesystem::is_directory(folder, ec)) { \
-errorLogger->error("Folder does not exist: {}! {}", folder, ec); \
-return false; }
+errorLogger->warn("Folder does not exist: {}! {}", folder, ec); }
 
 bool getInputPaths(const path& inputFolder, struct InputPaths* inputPaths, const std::shared_ptr<spdlog::logger>& errorLogger) {
     std::error_code ec;
