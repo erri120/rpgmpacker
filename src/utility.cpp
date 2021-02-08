@@ -1,8 +1,9 @@
-#pragma once
-#include <spdlog/spdlog.h>
-#include <ghc/filesystem.hpp>
 #include <string>
 #include <map>
+#include <set>
+
+#include <spdlog/spdlog.h>
+#include <ghc/filesystem.hpp>
 
 #include "utility.hpp"
 #include "platform.hpp"
@@ -409,6 +410,51 @@ bool shouldEncryptFile(ghc::filesystem::path *from, bool encryptAudio, bool encr
 
         return true;
     }
+
+    return false;
+}
+
+#define FIND(path, set) else if (parent == path) { \
+it = set.find(name);                          \
+return it == set.end(); }                     \
+
+
+bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inputPaths, struct ParsedData* parsedData){
+    auto filename = path.filename().u8string();
+    auto extension = path.extension().u8string();
+    auto parent = path.parent_path();
+
+    if (parent.filename() == "sv_enemies") {
+        //sv_enemies will be completely ignored by RPG Maker and only the enemies folder is being used
+        //you can verify this by opening RPG Maker, going to the Database->Enemies and selecting an image
+        //the base Actor1_3 is different in sv_enemies/ and enemies/ but only the one from enemies/ turns up
+        return true;
+    }
+
+    auto name = filename.substr(0, filename.find(extension));
+
+    std::set<std::string>::iterator it;
+
+    if (parent == inputPaths->bgmPath) {
+        it = parsedData->bgmNames.find(name);
+        return it == parsedData->bgmNames.end();
+    }
+    FIND(inputPaths->bgsPath, parsedData->bgsNames)
+    FIND(inputPaths->mePath, parsedData->meNames)
+    FIND(inputPaths->sePath, parsedData->seNames)
+    FIND(inputPaths->moviesPath, parsedData->movieNames)
+    FIND(inputPaths->picturesPath, parsedData->pictureNames)
+    FIND(inputPaths->titles1Path, parsedData->title1Names)
+    FIND(inputPaths->titles2Path, parsedData->title2Names)
+    FIND(inputPaths->charactersPath, parsedData->characterNames)
+    FIND(inputPaths->facesPath, parsedData->faceNames)
+    FIND(inputPaths->actorsBattlerPath, parsedData->actorBattlerNames)
+    FIND(inputPaths->enemiesBattlerPath, parsedData->enemyBattlerNames)
+    FIND(inputPaths->animationsPath, parsedData->animationNames)
+    FIND(inputPaths->tilesetsPath, parsedData->tilesetNames)
+    FIND(inputPaths->battlebacks1Path, parsedData->battleback1Names)
+    FIND(inputPaths->battlebacks2Path, parsedData->battleback2Names)
+    FIND(inputPaths->parallaxesPath, parsedData->parallaxNames)
 
     return false;
 }

@@ -17,7 +17,7 @@ struct ParsedData {
     std::set<std::string> animationNames;
 
     //Enemies.json
-    //img/sv_enemies/{}.png
+    //img/enemies/{}.png
     std::set<std::string> enemyBattlerNames;
 
     //Tilesets.json

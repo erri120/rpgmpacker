@@ -343,7 +343,7 @@ bool parseEnemies(const ghc::filesystem::path& path, struct ParsedData* parsedDa
         SKIP_NULL(element)
         /*
          * Enemies.json:
-         * battlerName => img/sv_enemies/{battlerName}.png
+         * battlerName => img/enemies/{battlerName}.png
          */
 
         std::string_view battlerName;
@@ -440,7 +440,7 @@ bool parseSystem(const ghc::filesystem::path& path, struct ParsedData* parsedDat
      * battleback1Name => img/battlebacks1/{}.png
      * battleback2Name => img/battlebacks2/{}.png
      *
-     * battlerName => img/sv_enemy/{}.png
+     * battlerName => img/enemies/{}.png
      *
      * title1Name => img/titles1/{}.png
      * title2Name => img/titles2/{}.png

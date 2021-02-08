@@ -16,6 +16,7 @@
 #include "foldertype.hpp"
 #include "operation.hpp"
 #include "parseData.hpp"
+#include "inputPaths.hpp"
 
 int main(int argc, char** argv) {
     auto logger = spdlog::stdout_color_mt("console");
@@ -166,8 +167,22 @@ int main(int argc, char** argv) {
     tf::Executor executor(workerThreads);
 
     struct ParsedData parsedData;
-    //bool to make sure we only parse the data files once and not for every platform
-    bool didParseData = false;
+    struct InputPaths inputPaths;
+
+    if (!getInputPaths(inputPath, &inputPaths, errorLogger))
+        return EXIT_FAILURE;
+
+    if (excludeUnused) {
+        auto dataFolder = ghc::filesystem::path(inputPath).append("data");
+        if (!ghc::filesystem::is_directory(dataFolder, ec)) {
+            errorLogger->error("Directory does not exist: {}! {}", dataFolder, ec);
+            return EXIT_FAILURE;
+        }
+
+        if (!parseData(dataFolder, &parsedData, logger, errorLogger)) {
+            return EXIT_FAILURE;
+        }
+    }
 
     logger->info("Building output for {} platforms", platforms.size());
     for (auto platform : platforms) {
@@ -224,20 +239,6 @@ int main(int argc, char** argv) {
         if (!ensureDirectory(wwwPath, errorLogger))
             return EXIT_FAILURE;
 
-        if (excludeUnused && !didParseData) {
-            auto dataFolder = ghc::filesystem::path(inputPath).append("data");
-            if (!ghc::filesystem::is_directory(dataFolder, ec)) {
-                errorLogger->error("Directory does not exist: {}! {}", dataFolder, ec);
-                return EXIT_FAILURE;
-            }
-
-            if (!parseData(dataFolder, &parsedData, logger, errorLogger)) {
-                return EXIT_FAILURE;
-            }
-
-            didParseData = true;
-        }
-
         auto sInputPath = inputPath.wstring();
         for (const auto& p : ghc::filesystem::recursive_directory_iterator(inputPath, ghc::filesystem::directory_options::skip_permission_denied, ec)) {
             auto path = p.path();
@@ -249,6 +250,11 @@ int main(int argc, char** argv) {
                     return EXIT_FAILURE;
             } else if (p.is_regular_file(ec)) {
                 auto filename = path.filename();
+
+                if (excludeUnused) {
+                    if (filterUnusedFiles(path, &inputPaths, &parsedData))
+                        continue;
+                }
 
                 if (filterFile(&path, &entryOutputPath, FolderType::Project, rpgmakerVersion, platform))
                     continue;
