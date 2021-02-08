@@ -37,7 +37,7 @@ return false; }
 #define PARSE_DATA(name, func) if (filename == name) { \
 logger->debug("Parsing {}", name);                     \
 if (!func) {                                           \
-errorLogger->error("Error parsing Actors.json at {}", path); \
+errorLogger->error("Error parsing {} at {}", name, path); \
 return false; } }
 
 bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger) {
