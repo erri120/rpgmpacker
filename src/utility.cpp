@@ -450,11 +450,15 @@ bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inp
     FIND(inputPaths->facesPath, parsedData->faceNames)
     FIND(inputPaths->actorsBattlerPath, parsedData->actorBattlerNames)
     FIND(inputPaths->enemiesBattlerPath, parsedData->enemyBattlerNames)
-    FIND(inputPaths->animationsPath, parsedData->animationNames)
     FIND(inputPaths->tilesetsPath, parsedData->tilesetNames)
     FIND(inputPaths->battlebacks1Path, parsedData->battleback1Names)
     FIND(inputPaths->battlebacks2Path, parsedData->battleback2Names)
     FIND(inputPaths->parallaxesPath, parsedData->parallaxNames)
+    
+    //MV only:
+    FIND(inputPaths->animationsPath, parsedData->animationNames)
+    //MZ only:
+    FIND(inputPaths->effectsPath, parsedData->effectNames)
 
     return false;
 }

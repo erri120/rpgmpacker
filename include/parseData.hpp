@@ -15,9 +15,11 @@ struct ParsedData {
     std::set<std::string> actorBattlerNames;
 
     //Animations.json
-    //img/animations/{}.png
-    std::set<std::string> animationNames;
     std::set<uint64_t> animationIds;
+    //MV only: img/animations/{}.png
+    std::set<std::string> animationNames;
+    //MZ only: effects/{}.efkefc
+    std::set<std::string> effectNames;
 
     //Enemies.json
     //img/enemies/{}.png

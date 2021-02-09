@@ -271,9 +271,14 @@ bool parseAnimations(const ghc::filesystem::path& path, struct ParsedData* parse
         dom::object obj = element;
         /*
          * Animations.json:
-         * animation1Name => img/animations/{animation1Name}.png
-         * animation2Name => img/animations/{animation2Name}.png
-         * timings[i].se.name => audio/se/{name}.m4a/ogg
+         *
+         * MV:
+         *  animation1Name => img/animations/{animation1Name}.png
+         *  animation2Name => img/animations/{animation2Name}.png
+         *  timings[i].se.name => audio/se/{name}.m4a/ogg
+         * MZ:
+         *  effectName => effects/{}.efkefc
+         *  soundTimings[i].se.name => audio/se/{name}.m4a/ogg
          */
 
         uint64_t id;
@@ -283,17 +288,28 @@ bool parseAnimations(const ghc::filesystem::path& path, struct ParsedData* parse
         if (it == parsedData->animationIds.end())
             continue;
 
-        std::string_view animation1Name;
-        std::string_view animation2Name;
+        if (rpgMakerVersion == RPGMakerVersion::MV) {
+            std::string_view animation1Name;
+            std::string_view animation2Name;
 
-        GET(obj, "animation1Name", animation1Name)
-        GET(obj, "animation2Name", animation2Name)
+            GET(obj, "animation1Name", animation1Name)
+            GET(obj, "animation2Name", animation2Name)
 
-        parsedData->animationNames.emplace(animation1Name);
-        parsedData->animationNames.emplace(animation2Name);
+            parsedData->animationNames.emplace(animation1Name);
+            parsedData->animationNames.emplace(animation2Name);
+        } else {
+            std::string_view effectName;
+            GET(obj, "effectName", effectName)
+
+            parsedData->effectNames.emplace(effectName);
+        }
 
         dom::element timings;
-        GET(obj, "timings", timings)
+        if (rpgMakerVersion == RPGMakerVersion::MV) {
+            GET(obj, "timings", timings)
+        } else {
+            GET(obj, "soundTimings", timings)
+        }
 
         if (timings.type() != dom::element_type::ARRAY) {
             errorLogger->error("Animation timings is not an array!");

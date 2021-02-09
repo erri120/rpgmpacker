@@ -169,7 +169,7 @@ int main(int argc, char** argv) {
     struct ParsedData parsedData;
     struct InputPaths inputPaths;
 
-    if (!getInputPaths(inputPath, &inputPaths, errorLogger))
+    if (!getInputPaths(inputPath, &inputPaths, rpgmakerVersion, errorLogger))
         return EXIT_FAILURE;
 
     if (excludeUnused) {
