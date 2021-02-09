@@ -3,6 +3,8 @@
 #include <spdlog/spdlog.h>
 #include <ghc/filesystem.hpp>
 
+#include "rpgmakerVersion.hpp"
+
 typedef ghc::filesystem::path path;
 
 struct InputPaths {
@@ -35,8 +37,10 @@ struct InputPaths {
     //img/enemies/ (sv_enemies gets ignored or something)
     path enemiesBattlerPath;
 
-    //img/animations/
+    //MV only: img/animations/
     path animationsPath;
+    //MZ only: effects/
+    path effectsPath;
 
     //img/tilesets/
     path tilesetsPath;
@@ -49,4 +53,4 @@ struct InputPaths {
     path parallaxesPath;
 };
 
-bool getInputPaths(const path& inputFolder, struct InputPaths* inputPaths, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool getInputPaths(const path& inputFolder, struct InputPaths* inputPaths, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);

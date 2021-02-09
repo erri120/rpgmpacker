@@ -7,15 +7,19 @@
 #include <ghc/filesystem.hpp>
 #include <simdjson.h>
 
+#include "rpgmakerVersion.hpp"
+
 struct ParsedData {
     //Actors.json
     //img/sv_actors/{}.png
     std::set<std::string> actorBattlerNames;
 
     //Animations.json
-    //img/animations/{}.png
-    std::set<std::string> animationNames;
     std::set<uint64_t> animationIds;
+    //MV only: img/animations/{}.png
+    std::set<std::string> animationNames;
+    //MZ only: effects/{}.efkefc
+    std::set<std::string> effectNames;
 
     //Enemies.json
     //img/enemies/{}.png
@@ -59,17 +63,17 @@ struct ParsedData {
     std::set<std::string> parallaxNames;
 };
 
-bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger);
-bool parseEvents(simdjson::dom::array& eventList, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseEvents(simdjson::dom::array& eventList, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
 
-bool parseActors(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
-bool parseAnimations(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
-bool parseCommonEvents(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
-bool parseEnemies(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
-bool parseItems(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
-bool parseMap(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
-bool parseSkills(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
-bool parseSystem(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
-bool parseTilesets(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
-bool parseTroops(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
-bool parseWeapons(const ghc::filesystem::path& path, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseActors(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseAnimations(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseCommonEvents(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseEnemies(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseItems(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseMap(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseSkills(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseSystem(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseTilesets(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseTroops(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool parseWeapons(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);

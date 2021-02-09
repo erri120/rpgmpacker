@@ -8,7 +8,7 @@
 #define FOLDER_EXISTS(folder) if (!ghc::filesystem::is_directory(folder, ec)) { \
 errorLogger->warn("Folder does not exist: {}! {}", folder, ec); }
 
-bool getInputPaths(const path& inputFolder, struct InputPaths* inputPaths, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool getInputPaths(const path& inputFolder, struct InputPaths* inputPaths, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
     std::error_code ec;
 
     auto audioFolder = path(inputFolder).append("audio");
@@ -45,9 +45,7 @@ bool getInputPaths(const path& inputFolder, struct InputPaths* inputPaths, const
     FOLDER_EXISTS(inputPaths->actorsBattlerPath)
     FOLDER_EXISTS(inputPaths->enemiesBattlerPath)
 
-    inputPaths->animationsPath = path(imgFolder).append("animations");
     inputPaths->tilesetsPath = path(imgFolder).append("tilesets");
-    FOLDER_EXISTS(inputPaths->animationsPath)
     FOLDER_EXISTS(inputPaths->tilesetsPath)
 
     inputPaths->battlebacks1Path = path(imgFolder).append("battlebacks1");
@@ -56,6 +54,14 @@ bool getInputPaths(const path& inputFolder, struct InputPaths* inputPaths, const
     FOLDER_EXISTS(inputPaths->battlebacks1Path)
     FOLDER_EXISTS(inputPaths->battlebacks2Path)
     FOLDER_EXISTS(inputPaths->parallaxesPath)
+
+    if (rpgMakerVersion == RPGMakerVersion::MV) {
+        inputPaths->animationsPath = path(imgFolder).append("animations");
+        FOLDER_EXISTS(inputPaths->animationsPath)
+    } else {
+        inputPaths->effectsPath = path(inputFolder).append("effects");
+        FOLDER_EXISTS(inputPaths->effectsPath)
+    }
 
     return true;
 }
