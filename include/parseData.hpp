@@ -20,6 +20,8 @@ struct ParsedData {
     std::set<std::string> animationNames;
     //MZ only: effects/{}.efkefc
     std::set<std::string> effectNames;
+    //MZ only: effects/{}
+    std::set<std::wstring> effectResources;
 
     //Enemies.json
     //img/enemies/{}.png
@@ -77,3 +79,16 @@ bool parseSystem(const ghc::filesystem::path& path, struct ParsedData* parsedDat
 bool parseTilesets(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
 bool parseTroops(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
 bool parseWeapons(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
+
+struct EffectInfoChunk {
+    uint32_t name;
+    uint32_t size;
+    uint32_t unknown;
+};
+
+struct EffectHeader {
+    uint32_t magic;
+    uint32_t version;
+};
+
+bool parseEffect(const ghc::filesystem::path& path, const ghc::filesystem::path& effectsPath, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger);

@@ -208,11 +208,11 @@ bool encryptFile(const ghc::filesystem::path& from, ghc::filesystem::path to, co
     }
 
     ifstream.seekg(0, std::ios_base::end);
-    auto filelength = ifstream.tellg();
+    auto fileLength = ifstream.tellg();
     ifstream.seekg(0, std::ios_base::beg);
 
-    if (filelength < 16) {
-        errorLogger->error("File {} is less than 16 bytes long: {}", from, filelength);
+    if (fileLength < 16) {
+        errorLogger->error("File {} is less than 16 bytes long: {}", from, fileLength);
         return false;
     }
 
@@ -237,14 +237,14 @@ bool encryptFile(const ghc::filesystem::path& from, ghc::filesystem::path to, co
     ofstream.write(bytes, 16);
 
     auto buffer = new char[4096];
-    auto max = (long)filelength - 4096;
+    auto max = (long)fileLength - 4096;
     while (ifstream.tellg() < max) {
         ifstream.read(buffer, 4096);
         ofstream.write(buffer, 4096);
     }
 
-    if (ifstream.tellg() != filelength) {
-        auto left = (long)(filelength - ifstream.tellg());
+    if (ifstream.tellg() != fileLength) {
+        auto left = (long)(fileLength - ifstream.tellg());
         ifstream.read(buffer, left);
         ofstream.write(buffer, left);
     }
@@ -459,6 +459,12 @@ bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inp
     FIND(inputPaths->animationsPath, parsedData->animationNames)
     //MZ only:
     FIND(inputPaths->effectsPath, parsedData->effectNames)
+
+    auto pathName = path.u8string();
+    if (pathName.find(inputPaths->effectsPath.u8string()) != std::string::npos) {
+        auto iterator = parsedData->effectResources.find(path.wstring());
+        return iterator == parsedData->effectResources.end();
+    }
 
     return false;
 }
