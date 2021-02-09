@@ -172,6 +172,10 @@ if (parent == inputPaths->bgmPath) {
 
 RPG Maker MZ changed how animations worked and use [Effekseer](https://github.com/effekseer/Effekseer) for particle effects. This also means they changed how those files looked like. Instead of simple pngs they are now `.efkefc` files. The main problem here is that one of those files can also reference textures or models inside `/effects/textures/` or `/effects/models`. RPGMPacker will parse these `.efkefc` files and find what other files it reference.
 
+## Projects using this tool
+
+- Star Knightess Aura (NSFW): [itch.io](https://aura-dev.itch.io/star-knightess-aura), [gitgud](https://gitgud.io/aura-dev/star_knightess_aura/-/tree/develop/)
+
 ## Building from Source
 
 Requirements:
