@@ -212,7 +212,7 @@ bool parseEvents(simdjson::dom::array& eventList, struct ParsedData* parsedData,
             uint64_t extraCode;
             GET(extraObj, "code", extraCode)
 
-            if (extraCode == 0) continue;
+            if (extraCode != 41 && extraCode != 44) continue;
 
             dom::array extraParameters;
             GET(extraObj, "parameters", extraParameters)
