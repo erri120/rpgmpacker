@@ -179,7 +179,7 @@ int main(int argc, char** argv) {
             return EXIT_FAILURE;
         }
 
-        if (!parseData(dataFolder, &parsedData, logger, errorLogger)) {
+        if (!parseData(dataFolder, &parsedData, rpgmakerVersion, logger, errorLogger)) {
             return EXIT_FAILURE;
         }
     }
