@@ -90,11 +90,13 @@ bool parseEvents(simdjson::dom::array& eventList, struct ParsedData* parsedData,
         uint64_t code;
         auto error = listItem["code"].get(code);
 
+        if (code == 0) continue;
+
         dom::array parameters;
         GET(listItem, "parameters", parameters)
 
         /*
-         * RPG Maker MV code list (only important ones):
+         * RPG Maker code list (only important ones):
          * - 101: show text with actor face, [0] is face name
          *
          * - 132: change battle bgm, [0].name is bgm name
@@ -104,7 +106,7 @@ bool parseEvents(simdjson::dom::array& eventList, struct ParsedData* parsedData,
          *
          * - 205: set movement route (see 505)
          *
-         * - 212: show animation, [2] is index of animation (maybe not needed)
+         * - 212: show animation, [2] is index of animation
          * - 231: show picture, [1] is picture name
          *
          * - 241: play bgm, [0].name is bgm name
@@ -120,7 +122,7 @@ bool parseEvents(simdjson::dom::array& eventList, struct ParsedData* parsedData,
          * - 322: change actor images, [1] is face name, [3] is character name, [5] is battler name
          * - 323: change vehicle image, [1] is face name
          *
-         * - 337: show battle animation, [1] is index of animation (maybe not needed)
+         * - 337: show battle animation, [1] is index of animation
          *
          * - 505: argument of 205 where each item in parameters also has code+parameters fields:
          *      - 41: change character image, [0] is character name
@@ -209,6 +211,8 @@ bool parseEvents(simdjson::dom::array& eventList, struct ParsedData* parsedData,
 
             uint64_t extraCode;
             GET(extraObj, "code", extraCode)
+
+            if (extraCode == 0) continue;
 
             dom::array extraParameters;
             GET(extraObj, "parameters", extraParameters)

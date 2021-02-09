@@ -454,7 +454,7 @@ bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inp
     FIND(inputPaths->battlebacks1Path, parsedData->battleback1Names)
     FIND(inputPaths->battlebacks2Path, parsedData->battleback2Names)
     FIND(inputPaths->parallaxesPath, parsedData->parallaxNames)
-    
+
     //MV only:
     FIND(inputPaths->animationsPath, parsedData->animationNames)
     //MZ only:
