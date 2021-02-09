@@ -177,11 +177,11 @@ Requirements:
 - [CMake](https://cmake.org/) (see `cmake_minimum_required` in [`CMakeLists.txt`](CMakeLists.txt))
 - Compiler has to support C++17
 
-You don't have to worry about dependencies as those are handled by [CPM](https://github.com/TheLartians/CPM.cmake) (see [Libraries used](#libraries-used)).
+You don't have to worry about dependencies as those are handled by [CPM](https://github.com/cpm-cmake/CPM.cmake) (see [Libraries used](#libraries-used)).
 
 ## Libraries used
 
-Managed with [CPM](https://github.com/TheLartians/CPM.cmake).
+Managed with [CPM](https://github.com/cpm-cmake/CPM.cmake).
 
 - [cxxopts](https://github.com/jarro2783/cxxopts) ([MIT](https://github.com/jarro2783/cxxopts/blob/master/LICENSE))
 - [spdlog](https://github.com/gabime/spdlog) ([MIT](https://github.com/gabime/spdlog/blob/v1.x/LICENSE))
