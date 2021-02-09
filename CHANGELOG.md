@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 ### Fixed
 
 - Fixed missing folders, replaced error with a warning (see [#6](https://github.com/erri120/rpgmpacker/issues/6))
+- Fixed Exclude Unused Files feature for MZ
 
 ## [1.2.0] - 2021-02-08
 
