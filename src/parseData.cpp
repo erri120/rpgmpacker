@@ -1,6 +1,9 @@
 #include "parseData.hpp"
 
 #include <set>
+#include <string>
+#include <locale>
+#include <codecvt>
 
 #include <ghc/filesystem.hpp>
 #include <simdjson.h>
@@ -80,6 +83,32 @@ bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parse
     if(!parseAnimations(animationsPath, parsedData, rpgMakerVersion, errorLogger)) {
         errorLogger->error("Error parsing Animations.json at {}", animationsPath);
         return false;
+    }
+
+    if (rpgMakerVersion == RPGMakerVersion::MZ) {
+        //MZ uses Effekseer (https://github.com/effekseer/Effekseer) for the effects
+        //we need to read and parse all .efkefc to find which files are not needed
+
+        auto effectsPath = ghc::filesystem::path(dataFolder.parent_path()).append("effects");
+        logger->debug("Parsing effects in {}", effectsPath);
+        for (const auto& p : ghc::filesystem::directory_iterator(effectsPath, ghc::filesystem::directory_options::skip_permission_denied)) {
+            if (!p.is_regular_file()) continue;
+
+            auto path = p.path();
+            auto extension = path.extension();
+
+            if (extension.u8string() != ".efkefc") continue;
+
+            auto filename = p.path().filename().u8string();
+            filename = p.path().filename().u8string().substr(0, filename.find(extension.u8string()));
+            auto it = parsedData->effectNames.find(filename);
+            if (it == parsedData->effectNames.end()) continue;
+
+            if (!parseEffect(path, effectsPath, parsedData, errorLogger)) {
+                errorLogger->error("Error parsing effect {}!", path);
+                return false;
+            }
+        }
     }
 
     return true;
@@ -671,5 +700,102 @@ bool parseWeapons(const ghc::filesystem::path& path, struct ParsedData* parsedDa
         parsedData->animationIds.insert(static_cast<uint64_t>(animationId));
     }
 
+    return true;
+}
+
+bool readResource(const ghc::filesystem::path& effectsPath, ghc::filesystem::ifstream* ifstream, uint32_t count, struct ParsedData* parsedData, struct EffectInfoChunk* infoChunk, const ghc::filesystem::path& path, const std::shared_ptr<spdlog::logger>& errorLogger) {
+    for (auto i = 0; i < count; i++) {
+        uint32_t length;
+        ifstream->read(reinterpret_cast<char*>(&length), sizeof(length));
+
+        if (length >= infoChunk->size) {
+            errorLogger->error("Length of resource in INFO chunk for file {} is bigger than INFO chunk itself! {} >= {}", path, length, infoChunk->size);
+            ifstream->close();
+            return false;
+        }
+
+        //name is utf16le encoded so we use a std::wstring for this one, string is null terminated which we remove
+        std::vector<wchar_t> nameBuf(length-1);
+        ifstream->read(reinterpret_cast<char *>(nameBuf.data()), length*2-2);
+        ifstream->ignore(2);
+
+        auto file = std::wstring(nameBuf.begin(), nameBuf.end());
+        auto p = ghc::filesystem::path(effectsPath).append(file);
+        parsedData->effectResources.insert(p.wstring());
+    }
+
+    return true;
+}
+
+bool parseEffect(const ghc::filesystem::path& path, const ghc::filesystem::path& effectsPath, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger) {
+    auto ifstream = ghc::filesystem::ifstream(path, std::ios_base::in | std::ios_base::binary);
+    if (!ifstream.is_open()){
+        errorLogger->error("Unable to open file {}", path);
+        return false;
+    }
+
+    ifstream.seekg(0, std::ios_base::end);
+    auto fileLength = ifstream.tellg();
+    ifstream.seekg(0, std::ios_base::beg);
+
+    std::vector<char> headerBuf(sizeof(EffectHeader));
+    ifstream.read(headerBuf.data(), headerBuf.size());
+    auto* effect = reinterpret_cast<struct EffectHeader*>(headerBuf.data());
+
+    //0x454B4645 = EFKE
+    if (effect->magic != 0x454B4645) {
+        errorLogger->error("File at {} is not a correct .efkefc file!", path);
+        ifstream.close();
+        return false;
+    }
+
+    if (effect->version != 0) {
+        errorLogger->error("Unknown version number {} for .efkefc file {}!", effect->version, path);
+        ifstream.close();
+        return false;
+    }
+
+    std::vector<char> infoChunkBuf(sizeof(EffectInfoChunk));
+    ifstream.read(infoChunkBuf.data(), infoChunkBuf.size());
+    auto* infoChunk = reinterpret_cast<struct EffectInfoChunk*>(infoChunkBuf.data());
+
+    //0x4F464E49 = INFO
+    if (infoChunk->name != 0x4F464E49) {
+        errorLogger->error("Unknown INFO chunk for file {}!", path);
+        ifstream.close();
+        return false;
+    }
+
+    if (infoChunk->size >= fileLength) {
+        errorLogger->error("INFO Chunk for file {} is bigger than file! {} >= {}", path, infoChunk->size, fileLength);
+        ifstream.close();
+        return false;
+    }
+
+    uint32_t textureElements;
+    ifstream.read(reinterpret_cast<char*>(&textureElements), sizeof(textureElements));
+    if (!readResource(effectsPath, &ifstream, textureElements, parsedData, infoChunk, path, errorLogger))
+        return false;
+
+    uint32_t unknown1;
+    ifstream.read(reinterpret_cast<char*>(&unknown1), sizeof(unknown1));
+
+    if (unknown1) {
+        errorLogger->error("Unable to parse effect file {} due to unknown resource!", path);
+        ifstream.close();
+        return false;
+    }
+
+    uint32_t alphaElements;
+    ifstream.read(reinterpret_cast<char*>(&alphaElements), sizeof(alphaElements));
+    if (!readResource(effectsPath, &ifstream, alphaElements, parsedData, infoChunk, path, errorLogger))
+        return false;
+
+    uint32_t modelElements;
+    ifstream.read(reinterpret_cast<char*>(&modelElements), sizeof(modelElements));
+    if (!readResource(effectsPath, &ifstream, modelElements, parsedData, infoChunk, path, errorLogger))
+        return false;
+
+    ifstream.close();
     return true;
 }
