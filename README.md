@@ -28,6 +28,8 @@ Simple CLI program for packaging RPG Maker games to use in an automated build/de
 ```txt
   RPGMPacker [OPTION...]
 
+      --config arg         Config file location if the config file is not
+                           named config.toml (default: )
   -i, --input arg          (REQUIRED) Input folder containing the .rpgproj
                            file
   -o, --output arg         (REQUIRED) Output folder
@@ -54,6 +56,7 @@ Simple CLI program for packaging RPG Maker games to use in an automated build/de
                            false)
   -h, --help               Print usage
 ```
+
 
 The output directory will be cleaned before execution and each platform will get it's own sub directory:
 
@@ -99,6 +102,26 @@ For testing I used the following options:
 - RPGMaker Version: `MZ`
 - Can use hardlinking from RPGMaker Folder to Output: `false`
 - Can use hardlinking from Input Folder to Output: `true`
+
+### TOML Config
+
+Instead of passing everything in the command, you can also create a config file:
+
+```TOML
+[config]
+input="E:/Projects/RPGMakerTest/src/MZProject1"
+output="E:/Projects/RPGMakerTest/out-c"
+rpgmaker="C:/Program Files/KADOKAWA/RPGMZ"
+platforms=["win", "linux", "browser"]
+hardlinks=true
+exclude=true
+cache=true
+encryptImages=true
+encryptAudio=true
+encryptionKey="1337"
+```
+
+The config file must be named `config.toml` or you must supply a path to the config file using the `--config` option. The value names are the same as the CLI options.
 
 ### Example
 
