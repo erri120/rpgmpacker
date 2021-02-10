@@ -284,8 +284,8 @@ int main(int argc, char** argv) {
             }
         }
 
-        std::atomic<unsigned int> succeeded;
-        std::atomic<unsigned int> failed;
+        std::atomic<unsigned int> succeeded(0);
+        std::atomic<unsigned int> failed(0);
 
         tf::Taskflow taskflow;
 

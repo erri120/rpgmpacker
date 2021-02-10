@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed atomic values not being initialized
+
 ## [Released]
 
 ## [1.3.0] - 2021-02-09
