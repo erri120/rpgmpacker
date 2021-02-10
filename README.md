@@ -178,12 +178,7 @@ RPG Maker MZ changed how animations worked and use [Effekseer](https://github.co
 
 ## Building from Source
 
-Requirements:
-
-- [CMake](https://cmake.org/) (see `cmake_minimum_required` in [`CMakeLists.txt`](CMakeLists.txt))
-- Compiler has to support C++17
-
-You don't have to worry about dependencies as those are handled by [CPM](https://github.com/cpm-cmake/CPM.cmake) (see [Libraries used](#libraries-used)).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 
 ## Libraries used
 
