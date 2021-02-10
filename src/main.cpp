@@ -8,6 +8,7 @@
 #include <spdlog/stopwatch.h>
 #include <ghc/filesystem.hpp>
 #include <taskflow/taskflow.hpp>
+#include <toml.hpp>
 #include "md5.h"
 
 #include "platform.hpp"
@@ -19,11 +20,13 @@
 #include "inputPaths.hpp"
 
 int main(int argc, char** argv) {
+    std::error_code ec;
     auto logger = spdlog::stdout_color_mt("console");
     auto errorLogger = spdlog::stderr_color_mt("stderr");
 
     cxxopts::Options options("RPGMPacker", "RPGMaker Games Packer for use in a CI/CD workflow.");
     options.add_options()
+        ("config", "Config file location if the config file is not named config.toml", cxxopts::value<std::string>()->default_value(""))
         ("i,input", "(REQUIRED) Input folder containing the .rpgproj file", cxxopts::value<std::string>())
         ("o,output", "(REQUIRED) Output folder", cxxopts::value<std::string>())
         ("rpgmaker", "(REQUIRED) RPG Maker installation folder", cxxopts::value<std::string>())
@@ -48,34 +51,74 @@ int main(int argc, char** argv) {
 
         if (result.count("help")) {
             std::cout << options.help() << std::endl;
-            return 0;
+            return EXIT_SUCCESS;
         }
-        
-        input = result["input"].as<std::string>();
-        output = result["output"].as<std::string>();
-        rpgmaker = result["rpgmaker"].as<std::string>();
-        encryptImages = result["encryptImages"].as<bool>();
-        encryptAudio = result["encryptAudio"].as<bool>();
-        excludeUnused = result["exclude"].as<bool>();
-        debug = result["debug"].as<bool>();
-        useHardlinks = result["hardlinks"].as<bool>();
-        useCache = result["cache"].as<bool>();
-        workerThreads = result["threads"].as<int>();
 
-        if (encryptImages || encryptAudio)
-            encryptionKey = result["encryptionKey"].as<std::string>();
-        else
-            encryptionKey = std::string("");
+        auto configFile = result["config"].as<std::string>();
+        auto defaultConfigPath = ghc::filesystem::path("config.toml");
+        if (ghc::filesystem::is_regular_file(defaultConfigPath, ec) || !configFile.empty()) {
+            configFile = configFile.empty() ? "config.toml" : configFile;
+            auto data = toml::parse(configFile);
+            auto tomlConfig = toml::find(data, "config");
 
-        platformNames = result["platforms"].as<std::vector<std::string>>();
+            input = toml::find<std::string>(tomlConfig, "input");
+            output = toml::find<std::string>(tomlConfig, "output");
+            rpgmaker = toml::find<std::string>(tomlConfig, "rpgmaker");
+
+#define TOML_GET(var, name, type, defaultValue) if (tomlConfig.contains(name)) { \
+var = toml::find<type>(tomlConfig, name);\
+} else { var = defaultValue; }\
+
+            TOML_GET(encryptImages, "encryptImages", bool, false)
+            TOML_GET(encryptAudio, "encryptAudio", bool, false)
+            TOML_GET(excludeUnused, "exclude", bool, false)
+            TOML_GET(debug, "debug", bool, false)
+            TOML_GET(useHardlinks, "hardlinks", bool, false)
+            TOML_GET(useCache, "cache", bool, false)
+            TOML_GET(workerThreads, "threads", int64_t, 2)
+
+            if (encryptImages || encryptAudio)
+                encryptionKey = toml::find<std::string>(tomlConfig, "encryptionKey");
+            else
+                encryptionKey = "";
+
+            platformNames = toml::find<std::vector<std::string>>(tomlConfig, "platforms");
+        } else {
+            input = result["input"].as<std::string>();
+            output = result["output"].as<std::string>();
+            rpgmaker = result["rpgmaker"].as<std::string>();
+            encryptImages = result["encryptImages"].as<bool>();
+            encryptAudio = result["encryptAudio"].as<bool>();
+            excludeUnused = result["exclude"].as<bool>();
+            debug = result["debug"].as<bool>();
+            useHardlinks = result["hardlinks"].as<bool>();
+            useCache = result["cache"].as<bool>();
+            workerThreads = result["threads"].as<int>();
+
+            if (encryptImages || encryptAudio)
+                encryptionKey = result["encryptionKey"].as<std::string>();
+            else
+                encryptionKey = "";
+
+            platformNames = result["platforms"].as<std::vector<std::string>>();
+        }
     } catch (const cxxopts::OptionException& e) {
         errorLogger->error(e.what());
         std::cout << options.help() << std::endl;
-        return -1;
+        return EXIT_FAILURE;
+    } catch (const toml::exception& e) {
+        errorLogger->error("TOML exception: \n{}", e.what());
+        return EXIT_FAILURE;
+    } catch (const std::runtime_error& e) {
+        errorLogger->error("Runtime error: \n{}", e.what());
+        return EXIT_FAILURE;
+    } catch (const std::out_of_range& e) {
+        errorLogger->error("Out of Range exception, most likely due to a bad config file: \n{}", e.what());
+        return EXIT_FAILURE;
     } catch (const std::exception& e) {
-        errorLogger->error("Exception while parsing arguments: {}", e.what());
+        errorLogger->error("Exception while parsing arguments: \n{}", e.what());
         std::cout << options.help() << std::endl;
-        return -1;
+        return EXIT_FAILURE;
     }
 
     if (debug) {
@@ -105,9 +148,9 @@ int main(int argc, char** argv) {
     logger->info("Worker Threads: {}", workerThreads);
 
     if (!isValidDirectory(input, "Input", errorLogger))
-        return -1;
+        return EXIT_FAILURE;
     if (!isValidDirectory(rpgmaker, "RPG Maker", errorLogger))
-        return -1;
+        return EXIT_FAILURE;
 
     auto inputPath = ghc::filesystem::path(input);
     auto outputPath = ghc::filesystem::path(output);
@@ -115,11 +158,11 @@ int main(int argc, char** argv) {
 
     auto rpgmakerVersion = getRPGMakerVersion(inputPath, logger, errorLogger);
     if (rpgmakerVersion == RPGMakerVersion::None)
-        return -1;
+        return EXIT_FAILURE;
 
     std::vector<Platform> platforms;
     if (!getPlatforms(&platformNames, &platforms, rpgmakerVersion, errorLogger))
-        return -1;
+        return EXIT_FAILURE;
 
     auto inputRootName = inputPath.root_name();
     auto outputRootName = outputPath.root_name();
@@ -150,7 +193,6 @@ int main(int argc, char** argv) {
 
     auto hash = stringToHexHash(encryptionHash);
 
-    std::error_code ec;
     if (ghc::filesystem::exists(outputPath, ec)) {
         spdlog::stopwatch sw;
         logger->info("Output Folder exists, removing old files...");

@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ### Added
 
+- Added support for a TOML config file
 - Skip copying save files
 
 ### Fixed

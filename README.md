@@ -190,6 +190,7 @@ Managed with [CPM](https://github.com/cpm-cmake/CPM.cmake).
 - MD5 hash functions from [stbrumme/hash-library](https://github.com/stbrumme/hash-library) ([zlib](https://github.com/stbrumme/hash-library/blob/master/LICENSE))
 - [Taskflow](https://github.com/taskflow/taskflow) ([MIT](https://github.com/taskflow/taskflow/blob/master/LICENSE))
 - [simdjson](https://github.com/simdjson/simdjson) ([Apache-2.0](https://github.com/simdjson/simdjson/blob/master/LICENSE))
+- [toml11](https://github.com/ToruNiina/toml11) ([MIT](https://github.com/ToruNiina/toml11/blob/master/LICENSE))
 
 ## License
 

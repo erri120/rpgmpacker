@@ -45,3 +45,13 @@ CPMAddPackage (
         "SIMDJSON_JUST_LIBRARY On"
         "SIMDJSON_BUILD_STATIC On"
 )
+
+CPMAddPackage (
+        NAME toml11
+        GITHUB_REPOSITORY ToruNiina/toml11
+        VERSION 3.6.0
+        OPTIONS
+        "toml11_BUILD_TEST Off"
+        "toml11_TEST_WITH_ASAN Off"
+        "toml11_TEST_WITH_UBSAN Off"
+)
