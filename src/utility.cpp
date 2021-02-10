@@ -367,6 +367,11 @@ bool filterFile(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderTy
         //skip project files
         if (extension == ".rpgproject") return true;
         if (extension == ".rmmzproject") return true;
+
+        //skip saves
+        if (extension == ".rpgsave") return true;
+        if (extension == ".rmmzsave") return true;
+        if (parentName == "save") return true;
     }
 
     return false;
