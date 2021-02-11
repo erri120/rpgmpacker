@@ -8,7 +8,11 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ### Added
 
-- OSX export for MZ
+- OSX export for MZ ([#15](https://github.com/erri120/rpgmpacker/issues/15))
+
+### Fixed
+
+- Fixed memory allocation issue ([#12](https://github.com/erri120/rpgmpacker/issues/12))
 
 ## [Released]
 
@@ -16,8 +20,8 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ### Added
 
-- Added support for a TOML config file
-- Skip copying save files
+- Added support for a TOML config file ([#13](https://github.com/erri120/rpgmpacker/issues/13))
+- Skip copying save files ([#11](https://github.com/erri120/rpgmpacker/issues/11))
 
 ### Fixed
 
@@ -27,7 +31,7 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ### Added
 
-- Added MZ Effect parsing for better unused file exclusion
+- Added MZ Effect parsing for better unused file exclusion ([#9](https://github.com/erri120/rpgmpacker/issues/9))
 
 ### Fixed
 
@@ -38,13 +42,13 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 ### Fixed
 
 - Fixed missing folders, replaced error with a warning (see [#6](https://github.com/erri120/rpgmpacker/issues/6))
-- Fixed Exclude Unused Files feature for MZ
+- Fixed Exclude Unused Files feature for MZ ([#7](https://github.com/erri120/rpgmpacker/issues/7))
 
 ## [1.2.0] - 2021-02-08
 
 ### Added
 
-- "Exclude Unused Files" support
+- "Exclude Unused Files" support ([#1](https://github.com/erri120/rpgmpacker/issues/1))
 
 ## [1.1.0] - 2021-02-05
 
