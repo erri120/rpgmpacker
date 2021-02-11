@@ -34,8 +34,29 @@ bool ensureDirectory(const ghc::filesystem::path& path, const std::shared_ptr<sp
     return false;
 }
 
+// trim from start (in place)
+static inline void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+// trim from end (in place)
+static inline void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+// trim from both ends (in place)
+static inline void trim(std::string &s) {
+    ltrim(s);
+    rtrim(s);
+}
+
 bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platforms, RPGMakerVersion version, const std::shared_ptr<spdlog::logger>& errorLogger) {
-    for (const auto& current : *names) {
+    for (auto& current : *names) {
+        trim(current);
         if (current == "win") {
             platforms->emplace_back(Platform::Windows);
             continue;
@@ -339,23 +360,33 @@ bool filterFile(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderTy
     auto parent = from->parent_path();
     auto parentName = parent.filename();
 
+    //TODO: find a better solution than this
     if (folderType == FolderType::RPGMaker) {
         if (version == RPGMakerVersion::MZ) {
-            if (parentName == "pnacl") return true;
+            if (platform == Platform::Windows) {
+                if (parentName == "pnacl") return true;
 
-            //nw.exe gets renamed to Game.exe to reduce confusion for players
-            if (filename == "nw.exe") {
-                to->replace_filename("Game.exe");
-                return false;
+                //nw.exe gets renamed to Game.exe to reduce confusion for players
+                if (filename == "nw.exe") {
+                    to->replace_filename("Game.exe");
+                    return false;
+                }
+
+                //chromium related files that are ignored
+                if (filename == "chromedriver.exe") return true;
+                if (filename == "nacl_irt_x86_64.nexe") return true;
+                if (filename == "nw.exe") return true;
+                if (filename == "nwjc.exe") return true;
+                if (filename == "payload.exe") return true;
+            } else if (platform == Platform::OSX) {
+                if (filename == "chromedriver") return true;
+                if (filename == "minidump_stackwalk") return true;
+                if (filename == "nwjc") return true;
+                if (filename == "payload") return true;
+
+                if (filename == "v8_context_snapshot.bin" && parentName != "Resources") return true;
+                if (filename == "libffmpeg.dylib" && parentName != "80.0.3987.149") return true;
             }
-
-            //chromium related files that are ignored
-            //TODO: Windows only?
-            if (filename == "chromedriver.exe") return true;
-            if (filename == "nacl_irt_x86_64.nexe") return true;
-            if (filename == "nw.exe") return true;
-            if (filename == "nwjc.exe") return true;
-            if (filename == "payload.exe") return true;
         }
     } else if (folderType == FolderType::Project) {
         //Desktop: only ogg
@@ -472,4 +503,23 @@ bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inp
     }
 
     return false;
+}
+
+#define GET_PLATFORM(p, n) if (platform == p) { \
+return n; }
+
+std::string getPlatformFolder(RPGMakerVersion version, Platform platform) {
+    if (version == RPGMakerVersion::MV) {
+        GET_PLATFORM(Platform::Windows, "nwjs-win")
+        GET_PLATFORM(Platform::OSX, "nwjs-osx-unsigned")
+        GET_PLATFORM(Platform::Linux, "nwjs-lnx")
+        GET_PLATFORM(Platform::Browser, "")
+        GET_PLATFORM(Platform::Mobile, "")
+    } else {
+        GET_PLATFORM(Platform::Windows, "nwjs-win")
+        GET_PLATFORM(Platform::OSX, "nwjs-mac")
+        GET_PLATFORM(Platform::Linux, "")
+        GET_PLATFORM(Platform::Browser, "")
+        GET_PLATFORM(Platform::Mobile, "")
+    }
 }

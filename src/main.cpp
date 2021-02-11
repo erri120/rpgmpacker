@@ -164,6 +164,20 @@ var = toml::find<type>(tomlConfig, name);\
     if (!getPlatforms(&platformNames, &platforms, rpgmakerVersion, errorLogger))
         return EXIT_FAILURE;
 
+    if (rpgmakerVersion == RPGMakerVersion::MZ) {
+        auto it = std::find(platforms.begin(), platforms.end(), Platform::Linux);
+        if (it != platforms.end()) {
+            errorLogger->error("Linux is not supported as an export target for MZ!");
+            return EXIT_FAILURE;
+        }
+    } else {
+        auto it = std::find(platforms.begin(), platforms.end(), Platform::Mobile);
+        if (it != platforms.end()) {
+            errorLogger->error("Mobile is not supported as an export target for MV using this tool!");
+            return EXIT_FAILURE;
+        }
+    }
+
     auto inputRootName = inputPath.root_name();
     auto outputRootName = outputPath.root_name();
     auto rpgmakerRootName = rpgmakerPath.root_name();
@@ -236,7 +250,7 @@ var = toml::find<type>(tomlConfig, name);\
 
         std::vector<Operation> operations;
 
-        auto templateName = PlatformFolders[(int)platform];
+        auto templateName = getPlatformFolder(rpgmakerVersion, platform);
         if (!templateName.empty()) {
             auto templateFolderPath = ghc::filesystem::path(rpgmakerPath).append(templateName);
             auto sTemplateFolderPath = templateFolderPath.wstring();
@@ -251,6 +265,14 @@ var = toml::find<type>(tomlConfig, name);\
                 auto path = p.path();
                 auto sPath = path.wstring();
                 auto entryOutputPath = ghc::filesystem::path(platformOutputPath).append(sPath.substr(sTemplateFolderPath.length()+1));
+
+                if (rpgmakerVersion == RPGMakerVersion::MZ && platform == Platform::OSX) {
+                    auto sEntryOutputPath = entryOutputPath.wstring();
+                    auto it = sEntryOutputPath.find(L"nwjs.app");
+                    if (it != std::string::npos) {
+                        entryOutputPath = ghc::filesystem::path(sEntryOutputPath.replace(it, 8, L"Game.app"));
+                    }
+                }
 
                 if (p.is_directory(ec)) {
                     if (!ensureDirectory(entryOutputPath, errorLogger))
@@ -273,11 +295,11 @@ var = toml::find<type>(tomlConfig, name);\
         }
 
         //MV has a www folder, MZ does not
-        auto wwwPath = rpgmakerVersion == RPGMakerVersion::MV
-            ? platform == Platform::OSX
+        auto wwwPath = platform == Platform::OSX
                 ? ghc::filesystem::path(platformOutputPath).append("Game.app/Contents/Resources/app.nw")
-                : ghc::filesystem::path(platformOutputPath).append("www")
-            : ghc::filesystem::path(platformOutputPath);
+                : rpgmakerVersion == RPGMakerVersion::MV
+                    ? ghc::filesystem::path(platformOutputPath).append("www")
+                    : ghc::filesystem::path(platformOutputPath);
         if (!ensureDirectory(wwwPath, errorLogger))
             return EXIT_FAILURE;
 
