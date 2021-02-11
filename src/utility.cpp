@@ -323,6 +323,7 @@ bool updateSystemJson(const ghc::filesystem::path& from, const ghc::filesystem::
     ifstream.close();
     ofstream.close();
 
+    delete[] buffer;
     return true;
 }
 
@@ -522,4 +523,6 @@ std::string getPlatformFolder(RPGMakerVersion version, Platform platform) {
         GET_PLATFORM(Platform::Browser, "")
         GET_PLATFORM(Platform::Mobile, "")
     }
+
+    return "";
 }
