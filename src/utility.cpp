@@ -323,6 +323,7 @@ bool updateSystemJson(const ghc::filesystem::path& from, const ghc::filesystem::
     ifstream.close();
     ofstream.close();
 
+    delete[] buffer;
     return true;
 }
 
