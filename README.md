@@ -14,7 +14,7 @@ Simple CLI program for packaging RPG Maker games to use in an automated build/de
     - Mobile: **not supported**
   - RPG Maker MZ
     - Windows
-    - OSX: **not supported**
+    - OSX
     - Browser/Mobile
 - Supported deployment features:
   - audio filtering depending on platform

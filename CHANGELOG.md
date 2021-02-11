@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Unreleased]
 
+### Added
+
+- OSX export for MZ
+
 ## [Released]
 
 ## [1.4.0] - 2021-02-09
