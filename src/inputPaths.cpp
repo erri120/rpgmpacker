@@ -41,9 +41,11 @@ bool getInputPaths(const path& inputFolder, struct InputPaths* inputPaths, RPGMa
     FOLDER_EXISTS(inputPaths->facesPath)
 
     inputPaths->actorsBattlerPath = path(imgFolder).append("sv_actors");
-    inputPaths->enemiesBattlerPath = path(imgFolder).append("enemies");
+    inputPaths->enemiesFrontViewBattlerPath = path(imgFolder).append("enemies");
+    inputPaths->enemiesSideViewBattlerPath = path(imgFolder).append("sv_enemies");
     FOLDER_EXISTS(inputPaths->actorsBattlerPath)
-    FOLDER_EXISTS(inputPaths->enemiesBattlerPath)
+    FOLDER_EXISTS(inputPaths->enemiesFrontViewBattlerPath)
+    FOLDER_EXISTS(inputPaths->enemiesSideViewBattlerPath)
 
     inputPaths->tilesetsPath = path(imgFolder).append("tilesets");
     FOLDER_EXISTS(inputPaths->tilesetsPath)

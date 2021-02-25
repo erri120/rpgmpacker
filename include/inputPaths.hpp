@@ -34,8 +34,10 @@ struct InputPaths {
 
     //img/sv_actors/
     path actorsBattlerPath;
-    //img/enemies/ (sv_enemies gets ignored or something)
-    path enemiesBattlerPath;
+    //img/enemies/ for front-view
+    path enemiesFrontViewBattlerPath;
+    //img/sv_enemies for side-view
+    path enemiesSideViewBattlerPath;
 
     //MV only: img/animations/
     path animationsPath;
