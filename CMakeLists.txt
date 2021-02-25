@@ -37,3 +37,8 @@ target_link_libraries(RPGMPacker toml11)
 cxx_17()
 
 target_compile_options(RPGMPacker PUBLIC "$<$<BOOL:${MSVC}>:/permissive->")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU"
+        OR CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?[Cc]lang")
+    # GCC/Clang
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
+endif()
