@@ -1,41 +1,17 @@
-CPMAddPackage (
-        NAME cxxopts
-        GITHUB_REPOSITORY jarro2783/cxxopts
-        VERSION 2.2.1
-        OPTIONS
-        "CXXOPTS_BUILD_EXAMPLES Off"
-        "CXXOPTS_BUILD_TESTS Off"
-)
+CPMAddPackage ("gh:jarro2783/cxxopts@2.2.1")
 
-CPMAddPackage (
-        NAME spdlog
-        GITHUB_REPOSITORY gabime/spdlog
-        VERSION 1.8.2
-)
+CPMAddPackage ("gh:gabime/spdlog@1.8.2")
 
 CPMAddPackage (
         NAME ghc_filesystem
         GITHUB_REPOSITORY gulrak/filesystem
         VERSION 1.5.0
+        EXCLUDE_FROM_ALL YES
         OPTIONS
-        "GHC_FILESYSTEM_BUILD_TESTING Off"
-        "GHC_FILESYSTEM_BUILD_EXAMPLES Off"
-        "GHC_FILESYSTEM_WITH_INSTALL Off"
         "GHC_FILESYSTEM_ENFORCE_CPP17_API On"
 )
 
-CPMAddPackage (
-        NAME Taskflow
-        GITHUB_REPOSITORY taskflow/taskflow
-        VERSION 3.0.0
-        OPTIONS
-        "TF_BUILD_BENCHMARKS Off"
-        "TF_BUILD_CUDA Off"
-        "TF_BUILD_SYCL Off"
-        "TF_BUILD_TESTS Off"
-        "TF_BUILD_EXAMPLES Off"
-        "TF_BUILD_PROFILER Off"
-)
+CPMAddPackage ("gh:taskflow/taskflow@3.0.0")
 
 CPMAddPackage (
         NAME simdjson
@@ -46,12 +22,4 @@ CPMAddPackage (
         "SIMDJSON_BUILD_STATIC On"
 )
 
-CPMAddPackage (
-        NAME toml11
-        GITHUB_REPOSITORY ToruNiina/toml11
-        VERSION 3.6.0
-        OPTIONS
-        "toml11_BUILD_TEST Off"
-        "toml11_TEST_WITH_ASAN Off"
-        "toml11_TEST_WITH_UBSAN Off"
-)
+CPMAddPackage ("gh:ToruNiina/toml11@3.6.0")
