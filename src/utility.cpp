@@ -461,13 +461,6 @@ bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inp
     auto extension = path.extension().u8string();
     auto parent = path.parent_path();
 
-    if (parent.filename() == "sv_enemies") {
-        //sv_enemies will be completely ignored by RPG Maker and only the enemies folder is being used
-        //you can verify this by opening RPG Maker, going to the Database->Enemies and selecting an image
-        //the base Actor1_3 is different in sv_enemies/ and enemies/ but only the one from enemies/ turns up
-        return true;
-    }
-
     auto name = filename.substr(0, filename.find(extension));
 
     std::set<std::string>::iterator it;
@@ -475,6 +468,9 @@ bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inp
     if (parent == inputPaths->bgmPath) {
         it = parsedData->bgmNames.find(name);
         return it == parsedData->bgmNames.end();
+    } else if (parent == inputPaths->enemiesFrontViewBattlerPath || parent == inputPaths->enemiesSideViewBattlerPath) {
+        it = parsedData->enemyBattlerNames.find(name);
+        return it == parsedData->enemyBattlerNames.end();
     }
     FIND(inputPaths->bgsPath, parsedData->bgsNames)
     FIND(inputPaths->mePath, parsedData->meNames)
@@ -486,8 +482,6 @@ bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inp
     FIND(inputPaths->charactersPath, parsedData->characterNames)
     FIND(inputPaths->facesPath, parsedData->faceNames)
     FIND(inputPaths->actorsBattlerPath, parsedData->actorBattlerNames)
-    FIND(inputPaths->enemiesFrontViewBattlerPath, parsedData->enemyBattlerNames)
-    FIND(inputPaths->enemiesSideViewBattlerPath, parsedData->enemyBattlerNames)
     FIND(inputPaths->tilesetsPath, parsedData->tilesetNames)
     FIND(inputPaths->battlebacks1Path, parsedData->battleback1Names)
     FIND(inputPaths->battlebacks2Path, parsedData->battleback2Names)

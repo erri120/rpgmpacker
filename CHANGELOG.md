@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Released]
 
+## [1.5.2] - 2021-02-26
+
+### Fixed
+
+- Hotfixed `sv_enemies` folder still being ignored ([#24](https://github.com/erri120/rpgmpacker/issues/24))
+
 ## [1.5.1] - 2021-02-25
 
 ### Fixed
