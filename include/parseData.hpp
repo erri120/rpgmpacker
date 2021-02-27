@@ -21,7 +21,7 @@ struct ParsedData {
     //MZ only: effects/{}.efkefc
     std::set<std::string> effectNames;
     //MZ only: effects/{}
-    std::set<std::wstring> effectResources;
+    std::set<std::string> effectResources;
 
     //Enemies.json
     //img/enemies/{}.png

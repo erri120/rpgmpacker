@@ -714,14 +714,20 @@ bool readResource(const ghc::filesystem::path& effectsPath, ghc::filesystem::ifs
             return false;
         }
 
+        //NOTICE: wchar_t is 32bit on Linux and 16bit on Windows...
         //name is utf16le encoded so we use a std::wstring for this one, string is null terminated which we remove
-        std::vector<wchar_t> nameBuf(length-1);
-        ifstream->read(reinterpret_cast<char *>(nameBuf.data()), length*2-2);
-        ifstream->ignore(2);
+        //std::vector<wchar_t> nameBuf(length-1);
+        //ifstream->read(reinterpret_cast<char *>(nameBuf.data()), length*2-2);
+        //ifstream->ignore(2);
+        //auto file = std::wstring(nameBuf.begin(), nameBuf.end());
 
-        auto file = std::wstring(nameBuf.begin(), nameBuf.end());
+        std::vector<char16_t> nameBuf(length-1);
+        ifstream->read(reinterpret_cast<char*>(nameBuf.data()), length*2-2);
+        ifstream->ignore(2);
+        auto file = std::u16string(nameBuf.begin(), nameBuf.end());
+
         auto p = ghc::filesystem::path(effectsPath).append(file);
-        parsedData->effectResources.insert(p.wstring());
+        parsedData->effectResources.insert(p.u8string());
     }
 
     return true;

@@ -8,11 +8,17 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Released]
 
+## [1.5.3] - 2021-02-27
+
+### Fixed
+
+- Fixed character encoding for MZ Effect parsing on Linux ([#25](https://github.com/erri120/rpgmpacker/issues/25))
+
 ## [1.5.2] - 2021-02-26
 
 ### Fixed
 
-- Hotfixed `sv_enemies` folder still being ignored ([#24](https://github.com/erri120/rpgmpacker/issues/24))
+- Hotfixes `sv_enemies` folder still being ignored ([#24](https://github.com/erri120/rpgmpacker/issues/24))
 
 ## [1.5.1] - 2021-02-25
 

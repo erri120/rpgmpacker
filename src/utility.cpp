@@ -494,7 +494,7 @@ bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inp
 
     auto pathName = path.u8string();
     if (pathName.find(inputPaths->effectsPath.u8string()) != std::string::npos) {
-        auto iterator = parsedData->effectResources.find(path.wstring());
+        auto iterator = parsedData->effectResources.find(pathName);
         return iterator == parsedData->effectResources.end();
     }
 
