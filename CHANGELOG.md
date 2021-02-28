@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Unreleased]
 
-## [1.5.4] - 2021-XX-XX
+## [Released]
+
+## [1.5.4] - 2021-02-28
 
 ### Fixed
 
@@ -18,8 +20,6 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 - Tool will now exit when output folder can not be cleaned.
 - Updated [`ghc::filesystem`](https://github.com/gulrak/filesystem) to [1.5.2](https://github.com/gulrak/filesystem/releases/tag/v1.5.2) ([#26](https://github.com/erri120/rpgmpacker/issues/26))
-
-## [Released]
 
 ## [1.5.3] - 2021-02-27
 
@@ -104,9 +104,10 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 [Semantic Versioning]: https://semver.org/
 
 <!-- Versions -->
-[Unreleased]: https://github.com/erri120/rpgmpacker/compare/v1.5.3...HEAD
+[Unreleased]: https://github.com/erri120/rpgmpacker/compare/v1.5.4...HEAD
 [Released]: https://github.com/erri120/rpgmpacker/releases/
-[1.5.2]: https://github.com/erri120/rpgmpacker/compare/v1.5.2...v1.5.3
+[1.5.4]: https://github.com/erri120/rpgmpacker/compare/v1.5.3...v1.5.4
+[1.5.3]: https://github.com/erri120/rpgmpacker/compare/v1.5.2...v1.5.3
 [1.5.2]: https://github.com/erri120/rpgmpacker/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/erri120/rpgmpacker/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/erri120/rpgmpacker/compare/v1.4.0...v1.5.0
