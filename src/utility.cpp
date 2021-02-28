@@ -312,6 +312,11 @@ bool updateSystemJson(const ghc::filesystem::path& from, const ghc::filesystem::
         break;
     }
 
+    if (pos == 0) {
+        errorLogger->error("Unable to find closing bracket in System.json!");
+        return false;
+    }
+
     ofstream.write(buffer, pos);
 
     std::string json(",\"hasEncryptedImages\":");
