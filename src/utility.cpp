@@ -302,7 +302,17 @@ bool updateSystemJson(const ghc::filesystem::path& from, const ghc::filesystem::
 
     auto buffer = new char[filelength];
     ifstream.read(buffer, filelength);
-    ofstream.write(buffer, filelength-1);
+
+    auto pos = 0;
+    for (auto i = filelength; i > 0; i--) {
+        auto c = buffer[i];
+        if (c != '}') continue;
+
+        pos = i;
+        break;
+    }
+
+    ofstream.write(buffer, pos);
 
     std::string json(",\"hasEncryptedImages\":");
     if (encryptImages)
