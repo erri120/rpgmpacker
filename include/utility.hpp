@@ -22,5 +22,5 @@ bool updateSystemJson(const ghc::filesystem::path& from, const ghc::filesystem::
 RPGMakerVersion getRPGMakerVersion(const ghc::filesystem::path& projectPath, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger);
 bool filterFile(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderType folderType, RPGMakerVersion version, Platform platform);
 bool shouldEncryptFile(ghc::filesystem::path *from, bool encryptAudio, bool encryptImages, RPGMakerVersion version);
-bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inputPaths, struct ParsedData* parsedData);
+bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inputPaths, struct ParsedData* parsedData, RPGMakerVersion version);
 std::string getPlatformFolder(RPGMakerVersion version, Platform platform);
