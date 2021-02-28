@@ -466,7 +466,7 @@ it = set.find(name);                          \
 return it == set.end(); }                     \
 
 
-bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inputPaths, struct ParsedData* parsedData){
+bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inputPaths, struct ParsedData* parsedData, RPGMakerVersion version){
     auto filename = path.filename().u8string();
     auto extension = path.extension().u8string();
     auto parent = path.parent_path();
@@ -503,7 +503,8 @@ bool filterUnusedFiles(const ghc::filesystem::path& path, struct InputPaths* inp
     FIND(inputPaths->effectsPath, parsedData->effectNames)
 
     auto pathName = path.u8string();
-    if (pathName.find(inputPaths->effectsPath.u8string()) != std::string::npos) {
+    //check if version is MZ because effectsPath will be L"" on MV and some files will be excluded that should not be
+    if (version == RPGMakerVersion::MZ && pathName.find(inputPaths->effectsPath.u8string()) != std::string::npos) {
         auto iterator = parsedData->effectResources.find(pathName);
         return iterator == parsedData->effectResources.end();
     }

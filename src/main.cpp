@@ -318,7 +318,7 @@ var = toml::find<type>(tomlConfig, name);\
                 auto filename = path.filename().u8string();
 
                 if (excludeUnused) {
-                    if (filterUnusedFiles(path, &inputPaths, &parsedData))
+                    if (filterUnusedFiles(path, &inputPaths, &parsedData, rpgmakerVersion))
                         continue;
                 }
 
