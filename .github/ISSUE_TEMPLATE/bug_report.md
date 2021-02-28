@@ -12,4 +12,4 @@ assignees: ''
  - RPG Maker Version: MV/MZ
 
 **Log:**
-<!-- enable debug output (--debug) and post the log here -->
+<!-- enable debug output (--debug) and upload the log as a gist: https://gist.github.com/ -->
