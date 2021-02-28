@@ -212,8 +212,10 @@ var = toml::find<type>(tomlConfig, name);\
         logger->info("Output Folder exists, removing old files...");
         auto result = ghc::filesystem::remove_all(outputPath, ec);
         if (ec) {
-            logger->warn("Unable to completely remove the output directory! {}", ec);
+            errorLogger->error("Unable to completely remove the output directory! {}", ec);
+            return EXIT_FAILURE;
         }
+
         logger->info("Finished cleaning the output directory in {} seconds deleting {} things", sw, result);
     }
 
