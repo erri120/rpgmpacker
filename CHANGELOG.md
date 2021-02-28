@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Unreleased]
 
+## [1.5.4] - 2021-XX-XX
+
+### Changed
+
+- Updated [`ghc::filesystem`](https://github.com/gulrak/filesystem) to [1.5.2](https://github.com/gulrak/filesystem/releases/tag/v1.5.2) ([#26](https://github.com/erri120/rpgmpacker/issues/26))
+
 ## [Released]
 
 ## [1.5.3] - 2021-02-27

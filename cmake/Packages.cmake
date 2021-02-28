@@ -5,7 +5,7 @@ CPMAddPackage ("gh:gabime/spdlog@1.8.2")
 CPMAddPackage (
         NAME ghc_filesystem
         GITHUB_REPOSITORY gulrak/filesystem
-        VERSION 1.5.0
+        VERSION 1.5.2
         EXCLUDE_FROM_ALL YES
         OPTIONS
         "GHC_FILESYSTEM_ENFORCE_CPP17_API On"
