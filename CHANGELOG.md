@@ -8,8 +8,15 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [1.5.4] - 2021-XX-XX
 
+### Fixed
+
+- Fixed file exclusion for MV.
+- Fixed line break problem when updating System.json. The tool will now find the last bracket instead of assuming its position.
+- Fixed System.json not being updated due to string comparison failing.
+
 ### Changed
 
+- Tool will now exit when output folder can not be cleaned.
 - Updated [`ghc::filesystem`](https://github.com/gulrak/filesystem) to [1.5.2](https://github.com/gulrak/filesystem/releases/tag/v1.5.2) ([#26](https://github.com/erri120/rpgmpacker/issues/26))
 
 ## [Released]
