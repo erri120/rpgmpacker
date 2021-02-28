@@ -315,7 +315,7 @@ var = toml::find<type>(tomlConfig, name);\
                 if (!ensureDirectory(entryOutputPath, errorLogger))
                     return EXIT_FAILURE;
             } else if (p.is_regular_file(ec)) {
-                auto filename = path.filename();
+                auto filename = path.filename().u8string();
 
                 if (excludeUnused) {
                     if (filterUnusedFiles(path, &inputPaths, &parsedData))
