@@ -9,28 +9,29 @@
 #include "platform.hpp"
 #include "rpgmakerVersion.hpp"
 #include "foldertype.hpp"
+#include "loggers.h"
 
-bool isValidDirectory(const std::string& directory, const std::string& name, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool isValidDirectory(const std::string& directory, const std::string& name, const struct Loggers& loggers) {
     if (!ghc::filesystem::exists(directory)) {
-        errorLogger->error("{} Folder does not exist!", name);
+        loggers.errorLogger->error("{} Folder does not exist!", name);
         return false;
     }
 
     if (!ghc::filesystem::is_directory(directory)) {
-        errorLogger->error("{} Folder is not a directory!", name);
+        loggers.errorLogger->error("{} Folder is not a directory!", name);
         return false;
     }
 
     return true;
 }
 
-bool ensureDirectory(const ghc::filesystem::path& path, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool ensureDirectory(const ghc::filesystem::path& path, const struct Loggers& loggers) {
     std::error_code ec;
     if (ghc::filesystem::exists(path, ec)) return true;
     if (ec) return false;
 
     if (ghc::filesystem::create_directory(path, ec)) return true;
-    errorLogger->error("Unable to create directory {}! {}", path, ec);
+    loggers.errorLogger->error("Unable to create directory {}! {}", path, ec);
     return false;
 }
 
@@ -54,7 +55,7 @@ static inline void trim(std::string &s) {
     rtrim(s);
 }
 
-bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platforms, RPGMakerVersion version, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platforms, RPGMakerVersion version, const struct Loggers& loggers) {
     for (auto& current : *names) {
         trim(current);
         if (current == "win") {
@@ -69,7 +70,7 @@ bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platfo
 
         if (current == "linux") {
             if (version == RPGMakerVersion::MZ) {
-                errorLogger->error("Linux is not supported in MZ!");
+                loggers.errorLogger->error("Linux is not supported in MZ!");
                 return false;
             }
             platforms->emplace_back(Platform::Linux);
@@ -83,25 +84,25 @@ bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platfo
 
         if (current == "mobile") {
             if (version == RPGMakerVersion::MV) {
-                errorLogger->error("Mobile is not supported for MV at the moment!");
+                loggers.errorLogger->error("Mobile is not supported for MV at the moment!");
                 return false;
             }
             platforms->emplace_back(Platform::Mobile);
             continue;
         }
 
-        errorLogger->error("Unknown platform: {}", current);
+        loggers.errorLogger->error("Unknown platform: {}", current);
         return false;
     }
 
     return true;
 }
 
-bool copyFile(const ghc::filesystem::path& from, const ghc::filesystem::path& to, bool useHardlinks, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool copyFile(const ghc::filesystem::path& from, const ghc::filesystem::path& to, bool useHardlinks, const struct Loggers& loggers) {
     if (useHardlinks) {
-        logger->debug("Creating hardlink from {} to {}", from , to);
+        loggers.logger->debug("Creating hardlink from {} to {}", from , to);
     } else {
-        logger->debug("Copying file from {} to {}", from , to);
+        loggers.logger->debug("Copying file from {} to {}", from , to);
     }
 
     std::error_code ec;
@@ -117,7 +118,7 @@ bool copyFile(const ghc::filesystem::path& from, const ghc::filesystem::path& to
             if (ghc::filesystem::is_regular_file(to, ec)) {
                 auto result = ghc::filesystem::remove(to, ec);
                 if (ec || !result) {
-                    errorLogger->error("Unable to delete file for hardlink at {}! {}", to, ec);
+                    loggers.errorLogger->error("Unable to delete file for hardlink at {}! {}", to, ec);
                     return false;
                 }
             }
@@ -127,9 +128,9 @@ bool copyFile(const ghc::filesystem::path& from, const ghc::filesystem::path& to
     ghc::filesystem::copy(from, to, options, ec);
     if (ec) {
         if (useHardlinks) {
-            errorLogger->error("Unable to create hardlink from {} to {}! {}", from, to, ec);
+            loggers.errorLogger->error("Unable to create hardlink from {} to {}! {}", from, to, ec);
         } else {
-            errorLogger->error("Unable to copy file from {} to {}! {}", from, to, ec);
+            loggers.errorLogger->error("Unable to copy file from {} to {}! {}", from, to, ec);
         }
 
         return false;
@@ -163,7 +164,7 @@ std::map<std::wstring, std::wstring> cachedEncryptedFiles;
 
 static uint8_t header[] = { 0x52, 0x50, 0x47, 0x4D, 0x56, 0x00, 0x00, 0x00, 0x00, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-bool encryptFile(const ghc::filesystem::path& from, ghc::filesystem::path to, const unsigned int* encryptionHash, bool useCache, bool hardlink, Platform platform, RPGMakerVersion version, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool encryptFile(const ghc::filesystem::path& from, ghc::filesystem::path to, const unsigned int* encryptionHash, bool useCache, bool hardlink, Platform platform, RPGMakerVersion version, const struct Loggers& loggers) {
     auto extension = from.extension();
 
     if (extension == ".ogg") {
@@ -182,7 +183,7 @@ bool encryptFile(const ghc::filesystem::path& from, ghc::filesystem::path to, co
         else
             to.replace_extension(".png_");
     } else {
-        errorLogger->error("Unknown extension {} of file {}", extension, from);
+        loggers.errorLogger->error("Unknown extension {} of file {}", extension, from);
         return false;
     }
 
@@ -198,32 +199,32 @@ bool encryptFile(const ghc::filesystem::path& from, ghc::filesystem::path to, co
 
                     std::error_code ec;
                     if (ghc::filesystem::exists(prev, ec)) {
-                        logger->debug("Using cached path from encryption file at {} and hardlink to {}", prev, to);
-                        if(copyFile(prev, to, true, logger, errorLogger))
+                        loggers.logger->debug("Using cached path from encryption file at {} and hardlink to {}", prev, to);
+                        if(copyFile(prev, to, true, loggers))
                             return true;
                         return false;
                     } else {
-                        logger->warn("Cached path {} does not exist anymore!", prev);
+                        loggers.logger->warn("Cached path {} does not exist anymore!", prev);
                         cachedEncryptedFiles.erase(iter);
                     }
                 } else {
-                    logger->warn("Unable to find path {} in cached map!", from);
+                    loggers.logger->warn("Unable to find path {} in cached map!", from);
                 }
             }
         }
     }
 
-    logger->debug("Encrypting file at {} to {}", from, to);
+    loggers.logger->debug("Encrypting file at {} to {}", from, to);
 
     auto ifstream = ghc::filesystem::ifstream(from, std::ios_base::in | std::ios_base::binary);
     if (!ifstream.is_open()){
-        errorLogger->error("Unable to open file {}", from);
+        loggers.errorLogger->error("Unable to open file {}", from);
         return false;
     }
 
     auto ofstream = ghc::filesystem::ofstream(to, std::ios_base::out | std::ios_base::binary);
     if (!ofstream.is_open()){
-        errorLogger->error("Unable to open file {}", to);
+        loggers.errorLogger->error("Unable to open file {}", to);
         ifstream.close();
         return false;
     }
@@ -233,7 +234,7 @@ bool encryptFile(const ghc::filesystem::path& from, ghc::filesystem::path to, co
     ifstream.seekg(0, std::ios_base::beg);
 
     if (fileLength < 16) {
-        errorLogger->error("File {} is less than 16 bytes long: {}", from, fileLength);
+        loggers.errorLogger->error("File {} is less than 16 bytes long: {}", from, fileLength);
         return false;
     }
 
@@ -280,18 +281,18 @@ bool encryptFile(const ghc::filesystem::path& from, ghc::filesystem::path to, co
     return true;
 }
 
-bool updateSystemJson(const ghc::filesystem::path& from, const ghc::filesystem::path& to, bool encryptAudio, bool encryptImages, const std::string& hash, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger) {
-    logger->debug("Updating System.json with encryption data from {} to {}", from, to);
+bool updateSystemJson(const ghc::filesystem::path& from, const ghc::filesystem::path& to, bool encryptAudio, bool encryptImages, const std::string& hash, const struct Loggers& loggers) {
+    loggers.logger->debug("Updating System.json with encryption data from {} to {}", from, to);
 
     auto ifstream = ghc::filesystem::ifstream(from, std::ios_base::in);
     if (!ifstream.is_open()){
-        errorLogger->error("Unable to open file {}", from);
+        loggers.errorLogger->error("Unable to open file {}", from);
         return false;
     }
 
     auto ofstream = ghc::filesystem::ofstream(to, std::ios_base::out);
     if (!ofstream.is_open()){
-        errorLogger->error("Unable to open file {}", to);
+        loggers.errorLogger->error("Unable to open file {}", to);
         ifstream.close();
         return false;
     }
@@ -313,7 +314,7 @@ bool updateSystemJson(const ghc::filesystem::path& from, const ghc::filesystem::
     }
 
     if (pos == 0) {
-        errorLogger->error("Unable to find closing bracket in System.json!");
+        loggers.errorLogger->error("Unable to find closing bracket in System.json!");
         return false;
     }
 
@@ -342,8 +343,8 @@ bool updateSystemJson(const ghc::filesystem::path& from, const ghc::filesystem::
     return true;
 }
 
-RPGMakerVersion getRPGMakerVersion(const ghc::filesystem::path& projectPath, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger) {
-    logger->debug("Identifying RPGMaker Version");
+RPGMakerVersion getRPGMakerVersion(const ghc::filesystem::path& projectPath, const struct Loggers& loggers) {
+    loggers.logger->debug("Identifying RPGMaker Version");
 
     std::error_code ec;
     auto version = RPGMakerVersion::None;
@@ -361,9 +362,9 @@ RPGMakerVersion getRPGMakerVersion(const ghc::filesystem::path& projectPath, con
     }
 
     if (version == RPGMakerVersion::None) {
-        errorLogger->error("Unable to identify RPGMaker Version!");
+        loggers.errorLogger->error("Unable to identify RPGMaker Version!");
     } else {
-        logger->info("RPGMaker Version: {}", version);
+        loggers.logger->info("RPGMaker Version: {}", version);
     }
 
     return version;

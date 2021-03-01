@@ -1,14 +1,10 @@
 #include "inputPaths.hpp"
-
-#include <spdlog/spdlog.h>
-#include <ghc/filesystem.hpp>
-
 #include "formatters.hpp"
 
 #define FOLDER_EXISTS(folder) if (!ghc::filesystem::is_directory(folder, ec)) { \
-errorLogger->warn("Folder does not exist: {}! {}", folder, ec); }
+loggers.logger->warn("Folder does not exist: {}! {}", folder, ec); }
 
-bool getInputPaths(const path& inputFolder, struct InputPaths* inputPaths, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool getInputPaths(const path& inputFolder, struct InputPaths* inputPaths, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     std::error_code ec;
 
     auto audioFolder = path(inputFolder).append("audio");

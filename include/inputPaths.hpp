@@ -1,8 +1,8 @@
 #pragma once
 
-#include <spdlog/spdlog.h>
 #include <ghc/filesystem.hpp>
 
+#include "loggers.h"
 #include "rpgmakerVersion.hpp"
 
 typedef ghc::filesystem::path path;
@@ -55,4 +55,4 @@ struct InputPaths {
     path parallaxesPath;
 };
 
-bool getInputPaths(const path& inputFolder, struct InputPaths* inputPaths, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger);
+bool getInputPaths(const path& inputFolder, struct InputPaths* inputPaths, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers);

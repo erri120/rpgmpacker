@@ -3,11 +3,10 @@
 #include <set>
 #include <string>
 #include <locale>
-#include <codecvt>
 
-#include <ghc/filesystem.hpp>
 #include <simdjson.h>
 
+#include "loggers.h"
 #include "formatters.hpp"
 
 using namespace simdjson;
@@ -17,58 +16,58 @@ using namespace simdjson;
 #define PARSE_FILE(path) dom::parser parser; \
 dom::element doc;                        \
 auto error = parser.load(path.u8string()).get(doc); \
-if (error) { errorLogger->error("Unable to parse {}! {}", path, error); return false; }
+if (error) { loggers.errorLogger->error("Unable to parse {}! {}", path, error); return false; }
 
 #define GET(obj, name, var) error = obj[name].get(var); \
-if (error) { errorLogger->error("Unable to parse {}! {}", name, error); return false; }
+if (error) { loggers.errorLogger->error("Unable to parse {}! {}", name, error); return false; }
 
 #define GET_2(obj, name1, name2, var) error = obj[name1][name2].get(var); \
-if (error) { errorLogger->error("Unable to parse {}.{}! {}", name1, name2, error); return false; }
+if (error) { loggers.errorLogger->error("Unable to parse {}.{}! {}", name1, name2, error); return false; }
 
 #define GET_3(obj, name1, name2, name3, var) error = obj[name1][name2][name3].get(var); \
-if (error) { errorLogger->error("Unable to parse {}.{}.{}! {}", name1, name2, name3, error); return false; }
+if (error) { loggers.errorLogger->error("Unable to parse {}.{}.{}! {}", name1, name2, name3, error); return false; }
 
 #define GET_INDEX(obj, index, var) error = obj.at(index).get(var); \
-if (error) { errorLogger->error("Unable to parse at index {}! {}", index, error); return false; }
+if (error) { loggers.errorLogger->error("Unable to parse at index {}! {}", index, error); return false; }
 
 #define SKIP_NULL(element) if (element.type() == dom::element_type::NULL_VALUE) continue;
 
 #define FILE_IS_ARRAY(path) if (doc.type() != dom::element_type::ARRAY) { \
-errorLogger->error("File {} is not an array!", path);                     \
+loggers.errorLogger->error("File {} is not an array!", path);                     \
 return false; }
 
 #define PARSE_DATA(name, func) if (filename == name) { \
-logger->debug("Parsing {}", name);                     \
+loggers.logger->debug("Parsing {}", name);                     \
 if (!func) {                                           \
-errorLogger->error("Error parsing {} at {}", name, path); \
+loggers.errorLogger->error("Error parsing {} at {}", name, path); \
 return false; } }
 
-bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& logger, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     for (const auto& p : ghc::filesystem::directory_iterator(dataFolder, ghc::filesystem::directory_options::skip_permission_denied)) {
         if (!p.is_regular_file()) continue;
 
         auto path = p.path();
         auto filename = path.filename();
 
-        PARSE_DATA("Actors.json", parseActors(path, parsedData, rpgMakerVersion, errorLogger))
-        PARSE_DATA("CommonEvents.json", parseCommonEvents(path, parsedData, rpgMakerVersion, errorLogger))
-        PARSE_DATA("Enemies.json", parseEnemies(path, parsedData, rpgMakerVersion, errorLogger))
-        PARSE_DATA("Items.json", parseItems(path, parsedData, rpgMakerVersion, errorLogger))
-        PARSE_DATA("Skills.json", parseSkills(path, parsedData, rpgMakerVersion, errorLogger))
-        PARSE_DATA("System.json", parseSystem(path, parsedData, rpgMakerVersion, errorLogger))
-        PARSE_DATA("Tilesets.json", parseTilesets(path, parsedData, rpgMakerVersion, errorLogger))
-        PARSE_DATA("Troops.json", parseTroops(path, parsedData, rpgMakerVersion, errorLogger))
-        PARSE_DATA("Weapons.json", parseWeapons(path, parsedData, rpgMakerVersion, errorLogger))
+        PARSE_DATA("Actors.json", parseActors(path, parsedData, rpgMakerVersion, loggers))
+        PARSE_DATA("CommonEvents.json", parseCommonEvents(path, parsedData, rpgMakerVersion, loggers))
+        PARSE_DATA("Enemies.json", parseEnemies(path, parsedData, rpgMakerVersion, loggers))
+        PARSE_DATA("Items.json", parseItems(path, parsedData, rpgMakerVersion, loggers))
+        PARSE_DATA("Skills.json", parseSkills(path, parsedData, rpgMakerVersion, loggers))
+        PARSE_DATA("System.json", parseSystem(path, parsedData, rpgMakerVersion, loggers))
+        PARSE_DATA("Tilesets.json", parseTilesets(path, parsedData, rpgMakerVersion, loggers))
+        PARSE_DATA("Troops.json", parseTroops(path, parsedData, rpgMakerVersion, loggers))
+        PARSE_DATA("Weapons.json", parseWeapons(path, parsedData, rpgMakerVersion, loggers))
 
         auto sFileName = filename.u8string();
         //11 chars: MapXYZ.json
         if (sFileName.length() == 11) {
             auto res = sFileName.find("Map");
             if (res != std::string::npos) {
-                logger->debug("Parsing {}", sFileName);
+                loggers.logger->debug("Parsing {}", sFileName);
 
-                if(!parseMap(path, parsedData, rpgMakerVersion, errorLogger)) {
-                    errorLogger->error("Error parsing {}", path);
+                if(!parseMap(path, parsedData, rpgMakerVersion, loggers)) {
+                    loggers.errorLogger->error("Error parsing {}", path);
                     return false;
                 }
             }
@@ -78,10 +77,10 @@ bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parse
     //parsing Animations.json last because we need to parse everything else first so we can populate the required
     //animation ids
     auto animationsPath = ghc::filesystem::path(dataFolder).append("Animations.json");
-    logger->debug("Parsing Animations.json");
+    loggers.logger->debug("Parsing Animations.json");
 
-    if(!parseAnimations(animationsPath, parsedData, rpgMakerVersion, errorLogger)) {
-        errorLogger->error("Error parsing Animations.json at {}", animationsPath);
+    if(!parseAnimations(animationsPath, parsedData, rpgMakerVersion, loggers)) {
+        loggers.errorLogger->error("Error parsing Animations.json at {}", animationsPath);
         return false;
     }
 
@@ -90,7 +89,7 @@ bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parse
         //we need to read and parse all .efkefc to find which files are not needed
 
         auto effectsPath = ghc::filesystem::path(dataFolder.parent_path()).append("effects");
-        logger->debug("Parsing effects in {}", effectsPath);
+        loggers.logger->debug("Parsing effects in {}", effectsPath);
         for (const auto& p : ghc::filesystem::directory_iterator(effectsPath, ghc::filesystem::directory_options::skip_permission_denied)) {
             if (!p.is_regular_file()) continue;
 
@@ -104,8 +103,8 @@ bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parse
             auto it = parsedData->effectNames.find(filename);
             if (it == parsedData->effectNames.end()) continue;
 
-            if (!parseEffect(path, effectsPath, parsedData, errorLogger)) {
-                errorLogger->error("Error parsing effect {}!", path);
+            if (!parseEffect(path, effectsPath, parsedData, loggers)) {
+                loggers.errorLogger->error("Error parsing effect {}!", path);
                 return false;
             }
         }
@@ -114,7 +113,7 @@ bool parseData(const ghc::filesystem::path& dataFolder, struct ParsedData* parse
     return true;
 }
 
-bool parseEvents(simdjson::dom::array& eventList, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseEvents(simdjson::dom::array& eventList, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     for (dom::element listItem : eventList) {
         uint64_t code;
         auto error = listItem["code"].get(code);
@@ -266,7 +265,7 @@ bool parseEvents(simdjson::dom::array& eventList, struct ParsedData* parsedData,
     return true;
 }
 
-bool parseActors(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseActors(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     PARSE_FILE(path)
     FILE_IS_ARRAY(path)
 
@@ -295,7 +294,7 @@ bool parseActors(const ghc::filesystem::path& path, struct ParsedData* parsedDat
     return true;
 }
 
-bool parseAnimations(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseAnimations(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     PARSE_FILE(path)
     FILE_IS_ARRAY(path)
 
@@ -345,7 +344,7 @@ bool parseAnimations(const ghc::filesystem::path& path, struct ParsedData* parse
         }
 
         if (timings.type() != dom::element_type::ARRAY) {
-            errorLogger->error("Animation timings is not an array!");
+            loggers.errorLogger->error("Animation timings is not an array!");
             return false;
         }
 
@@ -364,7 +363,7 @@ bool parseAnimations(const ghc::filesystem::path& path, struct ParsedData* parse
     return true;
 }
 
-bool parseCommonEvents(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseCommonEvents(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     PARSE_FILE(path)
     FILE_IS_ARRAY(path)
 
@@ -374,14 +373,14 @@ bool parseCommonEvents(const ghc::filesystem::path& path, struct ParsedData* par
         dom::array list;
         GET(element, "list", list)
 
-        if(!parseEvents(list, parsedData, rpgMakerVersion, errorLogger))
+        if(!parseEvents(list, parsedData, rpgMakerVersion, loggers))
             return false;
     }
 
     return true;
 }
 
-bool parseEnemies(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseEnemies(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     PARSE_FILE(path)
     FILE_IS_ARRAY(path)
 
@@ -401,7 +400,7 @@ bool parseEnemies(const ghc::filesystem::path& path, struct ParsedData* parsedDa
     return true;
 }
 
-bool parseItems(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseItems(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     PARSE_FILE(path)
     FILE_IS_ARRAY(path)
 
@@ -423,7 +422,7 @@ bool parseItems(const ghc::filesystem::path& path, struct ParsedData* parsedData
     return true;
 }
 
-bool parseMap(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseMap(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     PARSE_FILE(path)
     /*
      * Map.json:
@@ -483,7 +482,7 @@ bool parseMap(const ghc::filesystem::path& path, struct ParsedData* parsedData, 
 
             dom::array list = page["list"];
 
-            if (!parseEvents(list, parsedData, rpgMakerVersion, errorLogger))
+            if (!parseEvents(list, parsedData, rpgMakerVersion, loggers))
                 return false;
         }
     }
@@ -491,7 +490,7 @@ bool parseMap(const ghc::filesystem::path& path, struct ParsedData* parsedData, 
     return true;
 }
 
-bool parseSkills(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseSkills(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     PARSE_FILE(path)
     FILE_IS_ARRAY(path)
 
@@ -513,7 +512,7 @@ bool parseSkills(const ghc::filesystem::path& path, struct ParsedData* parsedDat
     return true;
 }
 
-bool parseSystem(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseSystem(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     PARSE_FILE(path)
     /*
      * System.json:
@@ -618,7 +617,7 @@ bool parseSystem(const ghc::filesystem::path& path, struct ParsedData* parsedDat
     GET(doc, "sounds", sounds)
 
     if (sounds.type() != dom::element_type::ARRAY) {
-        errorLogger->error("Sounds is not an array!");
+        loggers.errorLogger->error("Sounds is not an array!");
         return false;
     }
 
@@ -631,7 +630,7 @@ bool parseSystem(const ghc::filesystem::path& path, struct ParsedData* parsedDat
     return true;
 }
 
-bool parseTilesets(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseTilesets(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     PARSE_FILE(path)
     FILE_IS_ARRAY(path)
 
@@ -653,7 +652,7 @@ bool parseTilesets(const ghc::filesystem::path& path, struct ParsedData* parsedD
     return true;
 }
 
-bool parseTroops(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseTroops(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     PARSE_FILE(path)
     FILE_IS_ARRAY(path)
 
@@ -673,7 +672,7 @@ bool parseTroops(const ghc::filesystem::path& path, struct ParsedData* parsedDat
             dom::array list;
             GET(page, "list", list)
 
-            if(!parseEvents(list, parsedData, rpgMakerVersion, errorLogger))
+            if(!parseEvents(list, parsedData, rpgMakerVersion, loggers))
                 return false;
         }
     }
@@ -681,7 +680,7 @@ bool parseTroops(const ghc::filesystem::path& path, struct ParsedData* parsedDat
     return true;
 }
 
-bool parseWeapons(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseWeapons(const ghc::filesystem::path& path, struct ParsedData* parsedData, RPGMakerVersion rpgMakerVersion, const struct Loggers& loggers) {
     PARSE_FILE(path)
     FILE_IS_ARRAY(path)
 
@@ -703,13 +702,13 @@ bool parseWeapons(const ghc::filesystem::path& path, struct ParsedData* parsedDa
     return true;
 }
 
-bool readResource(const ghc::filesystem::path& effectsPath, ghc::filesystem::ifstream* ifstream, uint32_t count, struct ParsedData* parsedData, struct EffectInfoChunk* infoChunk, const ghc::filesystem::path& path, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool readResource(const ghc::filesystem::path& effectsPath, ghc::filesystem::ifstream* ifstream, uint32_t count, struct ParsedData* parsedData, struct EffectInfoChunk* infoChunk, const ghc::filesystem::path& path, const struct Loggers& loggers) {
     for (auto i = 0; i < count; i++) {
         uint32_t length;
         ifstream->read(reinterpret_cast<char*>(&length), sizeof(length));
 
         if (length >= infoChunk->size) {
-            errorLogger->error("Length of resource in INFO chunk for file {} is bigger than INFO chunk itself! {} >= {}", path, length, infoChunk->size);
+            loggers.errorLogger->error("Length of resource in INFO chunk for file {} is bigger than INFO chunk itself! {} >= {}", path, length, infoChunk->size);
             ifstream->close();
             return false;
         }
@@ -733,10 +732,10 @@ bool readResource(const ghc::filesystem::path& effectsPath, ghc::filesystem::ifs
     return true;
 }
 
-bool parseEffect(const ghc::filesystem::path& path, const ghc::filesystem::path& effectsPath, struct ParsedData* parsedData, const std::shared_ptr<spdlog::logger>& errorLogger) {
+bool parseEffect(const ghc::filesystem::path& path, const ghc::filesystem::path& effectsPath, struct ParsedData* parsedData, const struct Loggers& loggers) {
     auto ifstream = ghc::filesystem::ifstream(path, std::ios_base::in | std::ios_base::binary);
     if (!ifstream.is_open()){
-        errorLogger->error("Unable to open file {}", path);
+        loggers.errorLogger->error("Unable to open file {}", path);
         return false;
     }
 
@@ -750,13 +749,13 @@ bool parseEffect(const ghc::filesystem::path& path, const ghc::filesystem::path&
 
     //0x454B4645 = EFKE
     if (effect->magic != 0x454B4645) {
-        errorLogger->error("File at {} is not a correct .efkefc file!", path);
+        loggers.errorLogger->error("File at {} is not a correct .efkefc file!", path);
         ifstream.close();
         return false;
     }
 
     if (effect->version != 0) {
-        errorLogger->error("Unknown version number {} for .efkefc file {}!", effect->version, path);
+        loggers.errorLogger->error("Unknown version number {} for .efkefc file {}!", effect->version, path);
         ifstream.close();
         return false;
     }
@@ -767,39 +766,39 @@ bool parseEffect(const ghc::filesystem::path& path, const ghc::filesystem::path&
 
     //0x4F464E49 = INFO
     if (infoChunk->name != 0x4F464E49) {
-        errorLogger->error("Unknown INFO chunk for file {}!", path);
+        loggers.errorLogger->error("Unknown INFO chunk for file {}!", path);
         ifstream.close();
         return false;
     }
 
     if (infoChunk->size >= fileLength) {
-        errorLogger->error("INFO Chunk for file {} is bigger than file! {} >= {}", path, infoChunk->size, fileLength);
+        loggers.errorLogger->error("INFO Chunk for file {} is bigger than file! {} >= {}", path, infoChunk->size, fileLength);
         ifstream.close();
         return false;
     }
 
     uint32_t textureElements;
     ifstream.read(reinterpret_cast<char*>(&textureElements), sizeof(textureElements));
-    if (!readResource(effectsPath, &ifstream, textureElements, parsedData, infoChunk, path, errorLogger))
+    if (!readResource(effectsPath, &ifstream, textureElements, parsedData, infoChunk, path, loggers))
         return false;
 
     uint32_t unknown1;
     ifstream.read(reinterpret_cast<char*>(&unknown1), sizeof(unknown1));
 
     if (unknown1) {
-        errorLogger->error("Unable to parse effect file {} due to unknown resource!", path);
+        loggers.errorLogger->error("Unable to parse effect file {} due to unknown resource!", path);
         ifstream.close();
         return false;
     }
 
     uint32_t alphaElements;
     ifstream.read(reinterpret_cast<char*>(&alphaElements), sizeof(alphaElements));
-    if (!readResource(effectsPath, &ifstream, alphaElements, parsedData, infoChunk, path, errorLogger))
+    if (!readResource(effectsPath, &ifstream, alphaElements, parsedData, infoChunk, path, loggers))
         return false;
 
     uint32_t modelElements;
     ifstream.read(reinterpret_cast<char*>(&modelElements), sizeof(modelElements));
-    if (!readResource(effectsPath, &ifstream, modelElements, parsedData, infoChunk, path, errorLogger))
+    if (!readResource(effectsPath, &ifstream, modelElements, parsedData, infoChunk, path, loggers))
         return false;
 
     ifstream.close();

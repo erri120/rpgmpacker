@@ -11,6 +11,7 @@
 #include <toml.hpp>
 #include "md5.h"
 
+#include "loggers.h"
 #include "platform.hpp"
 #include "formatters.hpp"
 #include "utility.hpp"
@@ -23,6 +24,7 @@ int main(int argc, char** argv) {
     std::error_code ec;
     auto logger = spdlog::stdout_color_mt("console");
     auto errorLogger = spdlog::stderr_color_mt("stderr");
+    const struct Loggers loggers(logger, errorLogger);
 
     cxxopts::Options options("RPGMPacker", "RPGMaker Games Packer for use in a CI/CD workflow.");
     options.add_options()
@@ -147,21 +149,21 @@ var = toml::find<type>(tomlConfig, name);\
     logger->info("Use Cache: {}", useCache);
     logger->info("Worker Threads: {}", workerThreads);
 
-    if (!isValidDirectory(input, "Input", errorLogger))
+    if (!isValidDirectory(input, "Input", loggers))
         return EXIT_FAILURE;
-    if (!isValidDirectory(rpgmaker, "RPG Maker", errorLogger))
+    if (!isValidDirectory(rpgmaker, "RPG Maker", loggers))
         return EXIT_FAILURE;
 
     auto inputPath = ghc::filesystem::path(input);
     auto outputPath = ghc::filesystem::path(output);
     auto rpgmakerPath = ghc::filesystem::path(rpgmaker);
 
-    auto rpgmakerVersion = getRPGMakerVersion(inputPath, logger, errorLogger);
+    auto rpgmakerVersion = getRPGMakerVersion(inputPath, loggers);
     if (rpgmakerVersion == RPGMakerVersion::None)
         return EXIT_FAILURE;
 
     std::vector<Platform> platforms;
-    if (!getPlatforms(&platformNames, &platforms, rpgmakerVersion, errorLogger))
+    if (!getPlatforms(&platformNames, &platforms, rpgmakerVersion, loggers))
         return EXIT_FAILURE;
 
     if (rpgmakerVersion == RPGMakerVersion::MZ) {
@@ -219,7 +221,7 @@ var = toml::find<type>(tomlConfig, name);\
         logger->info("Finished cleaning the output directory in {} seconds deleting {} things", sw, result);
     }
 
-    if (!ensureDirectory(outputPath, errorLogger))
+    if (!ensureDirectory(outputPath, loggers))
         return EXIT_FAILURE;
 
     tf::Executor executor(workerThreads);
@@ -227,7 +229,7 @@ var = toml::find<type>(tomlConfig, name);\
     struct ParsedData parsedData;
     struct InputPaths inputPaths;
 
-    if (!getInputPaths(inputPath, &inputPaths, rpgmakerVersion, errorLogger))
+    if (!getInputPaths(inputPath, &inputPaths, rpgmakerVersion, loggers))
         return EXIT_FAILURE;
 
     if (excludeUnused) {
@@ -237,7 +239,7 @@ var = toml::find<type>(tomlConfig, name);\
             return EXIT_FAILURE;
         }
 
-        if (!parseData(dataFolder, &parsedData, rpgmakerVersion, logger, errorLogger)) {
+        if (!parseData(dataFolder, &parsedData, rpgmakerVersion, loggers)) {
             return EXIT_FAILURE;
         }
     }
@@ -247,7 +249,7 @@ var = toml::find<type>(tomlConfig, name);\
         spdlog::stopwatch sw;
         logger->debug("Platform {}", platform);
         auto platformOutputPath = ghc::filesystem::path(outputPath).append(PlatformNames[(int)platform]);
-        if (!ensureDirectory(platformOutputPath, errorLogger))
+        if (!ensureDirectory(platformOutputPath, loggers))
             return EXIT_FAILURE;
 
         std::vector<Operation> operations;
@@ -277,7 +279,7 @@ var = toml::find<type>(tomlConfig, name);\
                 }
 
                 if (p.is_directory(ec)) {
-                    if (!ensureDirectory(entryOutputPath, errorLogger))
+                    if (!ensureDirectory(entryOutputPath, loggers))
                         return EXIT_FAILURE;
                 } else if (p.is_regular_file(ec)) {
                     if (filterFile(&path, &entryOutputPath, FolderType::RPGMaker, rpgmakerVersion, platform))
@@ -302,7 +304,7 @@ var = toml::find<type>(tomlConfig, name);\
                 : rpgmakerVersion == RPGMakerVersion::MV
                     ? ghc::filesystem::path(platformOutputPath).append("www")
                     : ghc::filesystem::path(platformOutputPath);
-        if (!ensureDirectory(wwwPath, errorLogger))
+        if (!ensureDirectory(wwwPath, loggers))
             return EXIT_FAILURE;
 
         auto sInputPath = inputPath.wstring();
@@ -312,7 +314,7 @@ var = toml::find<type>(tomlConfig, name);\
             auto entryOutputPath = ghc::filesystem::path(wwwPath).append(sPath.substr(sInputPath.length()+1));
 
             if (p.is_directory(ec)) {
-                if (!ensureDirectory(entryOutputPath, errorLogger))
+                if (!ensureDirectory(entryOutputPath, loggers))
                     return EXIT_FAILURE;
             } else if (p.is_regular_file(ec)) {
                 auto filename = path.filename().u8string();
@@ -340,7 +342,7 @@ var = toml::find<type>(tomlConfig, name);\
 
                     //updating System.json with the encryption data
                     if (filename == "System.json") {
-                        if (!updateSystemJson(path, entryOutputPath, encryptAudio, encryptImages, encryptionHash, logger, errorLogger))
+                        if (!updateSystemJson(path, entryOutputPath, encryptAudio, encryptImages, encryptionHash, loggers))
                             return EXIT_FAILURE;
                         continue;
                     }
@@ -360,13 +362,13 @@ var = toml::find<type>(tomlConfig, name);\
                 ? canUseHardlinksInputToOutput
                 : canUseHardlinksRPGMakerToOutput;
             if (operation.type == OperationType::Copy) {
-                if(copyFile(operation.from, operation.to, canUseHardlinks, logger, errorLogger)) {
+                if(copyFile(operation.from, operation.to, canUseHardlinks, loggers)) {
                     succeeded++;
                 } else {
                     failed++;
                 }
             } else if (operation.type == OperationType::Encrypt) {
-                if(encryptFile(operation.from, operation.to, hash, useCache, canUseHardlinks, platform, rpgmakerVersion, logger, errorLogger)) {
+                if(encryptFile(operation.from, operation.to, hash, useCache, canUseHardlinks, platform, rpgmakerVersion, loggers)) {
                     succeeded++;
                 } else {
                     failed++;
