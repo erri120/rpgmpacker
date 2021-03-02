@@ -3,9 +3,9 @@ name: CI CMake Build
 on:
   push:
     paths:
-      - 'src/**'
-      - 'include/**'
-      - 'tests/**'
+      - 'RPGMPacker/**'
+      - 'RPGMPackerLib/**'
+      - 'RPGMPackerTests/**'
       - '.github/workflows/**'
       - 'CMakeLists.txt'
       - '**.cmake'
