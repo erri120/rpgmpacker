@@ -9,16 +9,16 @@
 #include <ghc/filesystem.hpp>
 #include <taskflow/taskflow.hpp>
 #include <toml.hpp>
-#include "md5.h"
+#include <md5.h>
 
-#include "loggers.h"
-#include "platform.hpp"
-#include "formatters.hpp"
-#include "utility.hpp"
-#include "foldertype.hpp"
-#include "operation.hpp"
-#include "parseData.hpp"
-#include "inputPaths.hpp"
+#include <loggers.h>
+#include <platform.hpp>
+#include <formatters.hpp>
+#include <utility.hpp>
+#include <foldertype.hpp>
+#include <operation.hpp>
+#include <parseData.hpp>
+#include <inputPaths.hpp>
 
 int main(int argc, char** argv) {
     std::error_code ec;
