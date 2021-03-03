@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <set>
 
 #include <doctest/doctest.h>
 #include <parseData.hpp>
@@ -316,6 +317,65 @@ TEST_SUITE("Parsing data files") {
             CHECK_DATA(battleback1Names, battleback1Names)
             CHECK_DATA(battleback2Names, battleback2Names)
             CHECK_DATA(parallaxNames, parallaxNames)
+        }
+    }
+
+    TEST_CASE("Parse Animations") {
+        SUBCASE("MV: Animations") {
+            auto loggers = getLoggers();
+            auto parsedData = createParsedData();
+
+            auto items = ghc::filesystem::path(getTestFilesFolder()).append("MV").append("data").append("Items.json");
+            FILE_EXISTS(items)
+            CHECK(parseItems(items, parsedData, RPGMakerVersion::MV, *loggers));
+
+            auto skills = ghc::filesystem::path(getTestFilesFolder()).append("MV").append("data").append("Skills.json");
+            FILE_EXISTS(skills)
+            CHECK(parseSkills(skills, parsedData, RPGMakerVersion::MV, *loggers));
+
+            auto weapons = ghc::filesystem::path(getTestFilesFolder()).append("MV").append("data").append("Weapons.json");
+            FILE_EXISTS(weapons)
+            CHECK(parseWeapons(weapons, parsedData, RPGMakerVersion::MV, *loggers));
+
+            static const std::set<std::uint64_t> animationIds = {1, 6, 11, 41, 45, 49, 66, 78};
+            CHECK_DATA(animationIds, animationIds)
+
+            auto animations = ghc::filesystem::path(getTestFilesFolder()).append("MV").append("data").append("Animations.json");
+            FILE_EXISTS(animations)
+            CHECK(parseAnimations(animations, parsedData, RPGMakerVersion::MV, *loggers));
+
+            static const std::vector<std::string> animationNames = {"", "Cure1", "Fire1", "Hit1", "Recovery1", "Revival1", "Slash", "Stick", "Thunder1"};
+            static const std::vector<std::string> seNames = {"Fire3", "Heal3", "Ice1", "Ice5", "Magic1", "Paralyze1",
+                                                             "Recovery", "Saint2", "Skill1", "Slash1", "Starlight",
+                                                             "Sword5", "Thunder1", "Thunder5", "Thunder6"};
+
+            CHECK_DATA(animationNames, animationNames)
+            CHECK_DATA(seNames, seNames)
+        }
+
+        SUBCASE("MZ: Animations") {
+            auto loggers = getLoggers();
+            auto parsedData = createParsedData();
+
+            auto items = ghc::filesystem::path(getTestFilesFolder()).append("MZ").append("data").append("Items.json");
+            FILE_EXISTS(items)
+            CHECK(parseItems(items, parsedData, RPGMakerVersion::MZ, *loggers));
+
+            auto skills = ghc::filesystem::path(getTestFilesFolder()).append("MZ").append("data").append("Skills.json");
+            FILE_EXISTS(skills)
+            CHECK(parseSkills(skills, parsedData, RPGMakerVersion::MZ, *loggers));
+
+            auto weapons = ghc::filesystem::path(getTestFilesFolder()).append("MZ").append("data").append("Weapons.json");
+            FILE_EXISTS(weapons)
+            CHECK(parseWeapons(weapons, parsedData, RPGMakerVersion::MZ, *loggers));
+
+            CHECK_EQ(parsedData->animationIds.size(), 74);
+
+            auto animations = ghc::filesystem::path(getTestFilesFolder()).append("MZ").append("data").append("Animations.json");
+            FILE_EXISTS(animations)
+            CHECK(parseAnimations(animations, parsedData, RPGMakerVersion::MZ, *loggers));
+
+            CHECK_EQ(parsedData->effectNames.size(), 74);
         }
     }
 }
