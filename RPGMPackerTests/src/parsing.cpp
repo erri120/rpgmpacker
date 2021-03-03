@@ -11,8 +11,8 @@ REQUIRE(!file.empty());                                                         
 REQUIRE_MESSAGE(ghc::filesystem::is_regular_file(file), "File does not exist: ", file); \
 }
 
-#define CHECK_DATA(parsed, values) {                        \
-CHECK(parsedData->parsed.size() == values.size());          \
+#define CHECK_DATA(parsed, values) { \
+CHECK_EQ(parsedData->parsed.size(), values.size());         \
 for (const auto& s : parsedData->parsed) {                  \
     auto it = std::find(values.begin(), values.end(), s);   \
     auto res = it == values.end();                          \
