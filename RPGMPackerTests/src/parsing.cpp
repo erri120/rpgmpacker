@@ -58,4 +58,32 @@ TEST_SUITE("Parsing data files") {
             CHECK_DATA(faceNames, faceNames)
         }
     }
+
+    TEST_CASE("Parse Enemies.json") {
+        SUBCASE("MV: Enemies.json") {
+            auto file = ghc::filesystem::path(getTestFilesFolder()).append("MV").append("data").append("Enemies.json");
+            FILE_EXISTS(file)
+
+            auto loggers = getLoggers();
+            auto parsedData = createParsedData();
+
+            CHECK(parseEnemies(file, parsedData, RPGMakerVersion::MV, *loggers));
+
+            static const std::vector<std::string> enemyBattlerNames = {"Bat", "Minotaur", "Orc", "Slime"};
+            CHECK_DATA(enemyBattlerNames, enemyBattlerNames)
+        }
+
+        SUBCASE("MZ: Enemies.json") {
+            auto file = ghc::filesystem::path(getTestFilesFolder()).append("MZ").append("data").append("Enemies.json");
+            FILE_EXISTS(file)
+
+            auto loggers = getLoggers();
+            auto parsedData = createParsedData();
+
+            CHECK(parseEnemies(file, parsedData, RPGMakerVersion::MZ, *loggers));
+
+            static const std::vector<std::string> enemyBattlerNames = {"Crow", "Gnome", "Goblin", "Hi_monster", "Treant"};
+            CHECK_DATA(enemyBattlerNames, enemyBattlerNames)
+        }
+    }
 }
