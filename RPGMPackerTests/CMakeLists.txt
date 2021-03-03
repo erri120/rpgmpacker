@@ -12,7 +12,7 @@ if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
     )
 endif()
 
-add_executable(RPGMPackerTests src/main.cpp src/parsing.cpp include/testingUtils.h src/testingUtils.cpp)
+add_executable(RPGMPackerTests src/main.cpp src/parsing.cpp include/testingUtils.h src/testingUtils.cpp src/hash.cpp)
 
 target_include_directories(
         RPGMPackerTests PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
