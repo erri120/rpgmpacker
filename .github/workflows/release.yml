@@ -26,18 +26,28 @@ jobs:
         path: "**/cpm_modules"
         key: ${{ github.workflow }}-cpm-modules-${{ runner.os }}-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake') }}
 
-    - name: Create Build Environment
-      run: cmake -E make_directory ${{github.workspace}}/build
-
-    - name: Configure CMake
-      shell: bash
-      working-directory: ${{github.workspace}}/build
-      run: cmake -S $GITHUB_WORKSPACE -B . -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-
     - name: Build
-      working-directory: ${{github.workspace}}/build
       shell: bash
-      run: cmake --build . --config $BUILD_TYPE --target $TARGET
+      working-directory: ${{github.workspace}}
+      run: |
+        cmake -E make_directory build/
+        cmake -S . -B build/ -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        cmake --build build/ --config $BUILD_TYPE
+
+    - name: Test (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: bash
+      working-directory: ${{github.workspace}}
+      run: |
+        cd build/$TEST_TARGET/$BUILD_TYPE
+        ./$TEST_TARGET.exe
+    - name: Test (Ubuntu & macOS)
+      if: matrix.os != 'windows-latest'
+      shell: bash
+      working-directory: ${{github.workspace}}
+      run: |
+        cd build/$TEST_TARGET
+        ./$TEST_TARGET
     
     - name: Upload Artifact - Windows
       if: matrix.os == 'windows-latest'
