@@ -15,7 +15,8 @@ REQUIRE_MESSAGE(ghc::filesystem::is_regular_file(file), "File does not exist: ",
 CHECK(parsedData->parsed.size() == values.size());          \
 for (const auto& s : parsedData->parsed) {                  \
     auto it = std::find(values.begin(), values.end(), s);   \
-    CHECK_MESSAGE(it != values.end(), "Unable to find \"", s, "\" from parsed data vector ", #parsed, " in ", #values); \
+    auto res = it == values.end();                          \
+    CHECK_MESSAGE(!res, "Unable to find \"", s, "\" from parsed data vector ", #parsed, " in ", #values); \
 }                                                           \
 }
 
