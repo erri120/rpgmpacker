@@ -244,4 +244,78 @@ TEST_SUITE("Parsing data files") {
             CHECK_DATA(parallaxNames, parallaxNames)
         }
     }
+
+    TEST_CASE("Parse CommonEvents.json") {
+        SUBCASE("MV: CommonEvents.json") {
+            auto file = ghc::filesystem::path(getTestFilesFolder()).append("MV").append("data").append("CommonEvents.json");
+            FILE_EXISTS(file)
+
+            auto loggers = getLoggers();
+            auto parsedData = createParsedData();
+
+            CHECK(parseCommonEvents(file, parsedData, RPGMakerVersion::MV, *loggers));
+
+            static const std::vector<std::string> actorBattlerNames = {"Actor1_2"};
+            static const std::vector<std::string> characterNames = {"Actor1", "People2"};
+            static const std::vector<std::string> faceNames = {"Actor1", "Vehicle"};
+            static const std::vector<std::string> bgmNames = {"Battle1", "Battle3", "Ship2"};
+            static const std::vector<std::string> bgsNames = {"Darkness"};
+            static const std::vector<std::string> meNames = {"Defeat1", "Fanfare2", "Musical2"};
+            static const std::vector<std::string> seNames = {"Battle1", "Battle2"};
+            static const std::vector<std::string> pictureNames = {"nice"};
+            static const std::vector<std::string> movieNames = {"dorime-output-web"};
+            static const std::vector<std::string> battleback1Names = {"Clouds", "Crystal"};
+            static const std::vector<std::string> battleback2Names = {"", "Fort1"};
+            static const std::vector<std::string> parallaxNames = {"Mountains5"};
+
+            CHECK_DATA(actorBattlerNames, actorBattlerNames)
+            CHECK_DATA(characterNames, characterNames)
+            CHECK_DATA(faceNames, faceNames)
+            CHECK_DATA(bgmNames, bgmNames)
+            CHECK_DATA(bgsNames, bgsNames)
+            CHECK_DATA(meNames, meNames)
+            CHECK_DATA(seNames, seNames)
+            CHECK_DATA(pictureNames, pictureNames)
+            CHECK_DATA(movieNames, movieNames)
+            CHECK_DATA(battleback1Names, battleback1Names)
+            CHECK_DATA(battleback2Names, battleback2Names)
+            CHECK_DATA(parallaxNames, parallaxNames)
+        }
+
+        SUBCASE("MZ: CommonEvents.json") {
+            auto file = ghc::filesystem::path(getTestFilesFolder()).append("MZ").append("data").append("CommonEvents.json");
+            FILE_EXISTS(file)
+
+            auto loggers = getLoggers();
+            auto parsedData = createParsedData();
+
+            CHECK(parseCommonEvents(file, parsedData, RPGMakerVersion::MZ, *loggers));
+
+            static const std::vector<std::string> actorBattlerNames = {"Actor2_5"};
+            static const std::vector<std::string> characterNames = {"Actor1", "Evil"};
+            static const std::vector<std::string> faceNames = {"Actor1", "People1", "Vehicle"};
+            static const std::vector<std::string> bgmNames = {"Battle7", "Castle2", "Theme3"};
+            static const std::vector<std::string> bgsNames = {"Rain1"};
+            static const std::vector<std::string> meNames = {"Inn2", "Organ"};
+            static const std::vector<std::string> seNames = {"Autodoor", "Bell1"};
+            static const std::vector<std::string> pictureNames = {"Actor3_6"};
+            static const std::vector<std::string> movieNames = {""};
+            static const std::vector<std::string> battleback1Names = {"DecorativeTile1"};
+            static const std::vector<std::string> battleback2Names = {"Clouds"};
+            static const std::vector<std::string> parallaxNames = {"River"};
+
+            CHECK_DATA(actorBattlerNames, actorBattlerNames)
+            CHECK_DATA(characterNames, characterNames)
+            CHECK_DATA(faceNames, faceNames)
+            CHECK_DATA(bgmNames, bgmNames)
+            CHECK_DATA(bgsNames, bgsNames)
+            CHECK_DATA(meNames, meNames)
+            CHECK_DATA(seNames, seNames)
+            CHECK_DATA(pictureNames, pictureNames)
+            CHECK_DATA(movieNames, movieNames)
+            CHECK_DATA(battleback1Names, battleback1Names)
+            CHECK_DATA(battleback2Names, battleback2Names)
+            CHECK_DATA(parallaxNames, parallaxNames)
+        }
+    }
 }
