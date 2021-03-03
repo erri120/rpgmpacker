@@ -12,7 +12,7 @@ if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
     )
 endif()
 
-add_executable(RPGMPackerTests src/main.cpp src/parsing.cpp include/testingUtils.h src/testingUtils.cpp)
+add_executable(RPGMPackerTests src/main.cpp src/parsing.cpp include/testingUtils.h src/testingUtils.cpp src/hash.cpp)
 
 target_include_directories(
         RPGMPackerTests PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -36,3 +36,8 @@ doctest_discover_tests(RPGMPackerTests)
 add_custom_command(TARGET RPGMPackerTests POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_LIST_DIR}/files $<TARGET_FILE_DIR:RPGMPackerTests>/files)
+
+if(ENABLE_TEST_COVERAGE)
+    target_compile_options(RPGMPackerTests PUBLIC -O0 -g -fprofile-arcs -ftest-coverage)
+    target_link_options(RPGMPackerTests PUBLIC -fprofile-arcs -ftest-coverage)
+endif()
