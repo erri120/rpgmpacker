@@ -1,15 +1,13 @@
 #include <string>
-#include <iterator>
-#include <algorithm>
 
 #include <doctest/doctest.h>
 #include <parseData.hpp>
 
 #include "testingUtils.h"
 
-#define FILE_EXISTS(file) {                     \
-CHECK(!file.empty());                           \
-CHECK(ghc::filesystem::is_regular_file(file));  \
+#define FILE_EXISTS(file) {                                                             \
+REQUIRE(!file.empty());                                                                 \
+REQUIRE_MESSAGE(ghc::filesystem::is_regular_file(file), "File does not exist: ", file); \
 }
 
 #define CHECK_DATA(vector, values) {            \
@@ -21,7 +19,7 @@ for (const auto& s : parsedData->vector) {      \
             break;                              \
         }                                       \
     }                                           \
-    CHECK(res);                                 \
+    CHECK_MESSAGE(res, "Unable to find \"", s, "\" from parsed data vector ", #vector, " in ", #values); \
 }                                               \
 }
 
