@@ -86,4 +86,108 @@ TEST_SUITE("Parsing data files") {
             CHECK_DATA(enemyBattlerNames, enemyBattlerNames)
         }
     }
+
+    TEST_CASE("Parse Tilesets.json") {
+        static const std::vector<std::string> tilesetNames = {"Dungeon_A1", "Dungeon_A2", "Dungeon_A4",
+                                                              "Dungeon_A5", "Dungeon_B",
+                                                              "Dungeon_C", "Inside_A1", "Inside_A2", "Inside_A4",
+                                                              "Inside_A5",
+                                                              "Inside_B", "Inside_C", "Outside_A1", "Outside_A2",
+                                                              "Outside_A3",
+                                                              "Outside_A4", "Outside_A5", "Outside_B", "Outside_C",
+                                                              "SF_Inside_A4",
+                                                              "SF_Inside_B", "SF_Inside_C", "SF_Outside_A3",
+                                                              "SF_Outside_A4", "SF_Outside_A5",
+                                                              "SF_Outside_B", "SF_Outside_C", "World_A1",
+                                                              "World_A2",
+                                                              "World_B", "World_C"};
+
+        SUBCASE("MV: Tilesets.json") {
+            auto file = ghc::filesystem::path(getTestFilesFolder()).append("MV").append("data").append("Tilesets.json");
+            FILE_EXISTS(file)
+
+            auto loggers = getLoggers();
+            auto parsedData = createParsedData();
+
+            CHECK(parseTilesets(file, parsedData, RPGMakerVersion::MV, *loggers));
+            CHECK_DATA(tilesetNames, tilesetNames)
+        }
+
+        SUBCASE("MZ: Tilesets.json") {
+            auto file = ghc::filesystem::path(getTestFilesFolder()).append("MZ").append("data").append("Tilesets.json");
+            FILE_EXISTS(file)
+
+            auto loggers = getLoggers();
+            auto parsedData = createParsedData();
+
+            CHECK(parseTilesets(file, parsedData, RPGMakerVersion::MZ, *loggers));
+            CHECK_DATA(tilesetNames, tilesetNames)
+        }
+    }
+
+    TEST_CASE("Parse System.json") {
+        SUBCASE("MV: System.json") {
+            auto file = ghc::filesystem::path(getTestFilesFolder()).append("MV").append("data").append("System.json");
+            FILE_EXISTS(file)
+
+            auto loggers = getLoggers();
+            auto parsedData = createParsedData();
+
+            CHECK(parseSystem(file, parsedData, RPGMakerVersion::MV, *loggers));
+
+            static const std::vector<std::string> enemyBattlerNames = {"Dragon"};
+            static const std::vector<std::string> title1Names = {"Castle"};
+            static const std::vector<std::string> title2Names = {"Medieval"};
+            static const std::vector<std::string> bgmNames = {"Battle1", "Ship1", "Ship2", "Ship3", "Theme6"};
+            static const std::vector<std::string> meNames = {"Defeat1", "Gameover1", "Victory1"};
+            static const std::vector<std::string> seNames = {"Attack3", "Battle1", "Buzzer1", "Cancel2", "Collapse1",
+                                                             "Collapse2", "Collapse3", "Collapse4", "Cursor2",
+                                                             "Damage4", "Damage5", "Decision1", "Equip1", "Evasion1",
+                                                             "Evasion2", "Item3", "Load", "Miss", "Recovery",
+                                                             "Reflection", "Run", "Save", "Shop1"};
+            static const std::vector<std::string> battleback1Names = {"Lava2"};
+            static const std::vector<std::string> battleback2Names = {"DemonCastle3"};
+
+            CHECK_DATA(enemyBattlerNames, enemyBattlerNames)
+            CHECK_DATA(title1Names, title1Names)
+            CHECK_DATA(title2Names, title2Names)
+            CHECK_DATA(bgmNames, bgmNames)
+            CHECK_DATA(meNames, meNames)
+            CHECK_DATA(seNames, seNames)
+            CHECK_DATA(battleback1Names, battleback1Names)
+            CHECK_DATA(battleback2Names, battleback2Names)
+        }
+
+        SUBCASE("MZ: System.json") {
+            auto file = ghc::filesystem::path(getTestFilesFolder()).append("MZ").append("data").append("System.json");
+            FILE_EXISTS(file)
+
+            auto loggers = getLoggers();
+            auto parsedData = createParsedData();
+
+            CHECK(parseSystem(file, parsedData, RPGMakerVersion::MZ, *loggers));
+
+            static const std::vector<std::string> enemyBattlerNames = {"Hi_monster"};
+            static const std::vector<std::string> title1Names = {"Ruins"};
+            static const std::vector<std::string> title2Names = {"Medieval"};
+            static const std::vector<std::string> bgmNames = {"Battle1", "Ship1", "Ship2", "Ship3", "Theme4"};
+            static const std::vector<std::string> meNames = {"Defeat1", "Gameover1", "Victory1"};
+            static const std::vector<std::string> seNames = {"Attack3", "Battle1", "Buzzer1", "Cancel2", "Collapse1",
+                                                             "Collapse2", "Collapse3", "Collapse4", "Cursor3",
+                                                             "Damage4", "Damage5", "Decision2", "Equip1", "Evasion1",
+                                                             "Evasion2", "Item3", "Load2", "Miss", "Recovery",
+                                                             "Reflection", "Run", "Save2", "Shop1"};
+            static const std::vector<std::string> battleback1Names = {"GrassMaze"};
+            static const std::vector<std::string> battleback2Names = {"GrassMaze"};
+
+            CHECK_DATA(enemyBattlerNames, enemyBattlerNames)
+            CHECK_DATA(title1Names, title1Names)
+            CHECK_DATA(title2Names, title2Names)
+            CHECK_DATA(bgmNames, bgmNames)
+            CHECK_DATA(meNames, meNames)
+            CHECK_DATA(seNames, seNames)
+            CHECK_DATA(battleback1Names, battleback1Names)
+            CHECK_DATA(battleback2Names, battleback2Names)
+        }
+    }
 }
