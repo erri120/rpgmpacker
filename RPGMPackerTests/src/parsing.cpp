@@ -190,4 +190,58 @@ TEST_SUITE("Parsing data files") {
             CHECK_DATA(battleback2Names, battleback2Names)
         }
     }
+
+    TEST_CASE("Parse Map.json") {
+        SUBCASE("MV: Map.json") {
+            auto file = ghc::filesystem::path(getTestFilesFolder()).append("MV").append("data").append("Map001.json");
+            FILE_EXISTS(file)
+
+            auto loggers = getLoggers();
+            auto parsedData = createParsedData();
+
+            CHECK(parseMap(file, parsedData, RPGMakerVersion::MV, *loggers));
+
+            static const std::vector<std::string> characterNames = {"Vehicle"};
+            static const std::vector<std::string> faceNames = {"Evil"};
+            static const std::vector<std::string> bgmNames = {"Town1"};
+            static const std::vector<std::string> bgsNames = {"River"};
+            static const std::vector<std::string> battleback1Names = {"Clouds"};
+            static const std::vector<std::string> battleback2Names = {"Bridge"};
+            static const std::vector<std::string> parallaxNames = {"Sunset"};
+
+            CHECK_DATA(characterNames, characterNames)
+            CHECK_DATA(faceNames, faceNames)
+            CHECK_DATA(bgmNames, bgmNames)
+            CHECK_DATA(bgsNames, bgsNames)
+            CHECK_DATA(battleback1Names, battleback1Names)
+            CHECK_DATA(battleback2Names, battleback2Names)
+            CHECK_DATA(parallaxNames, parallaxNames)
+        }
+
+        SUBCASE("MZ: Map.json") {
+            auto file = ghc::filesystem::path(getTestFilesFolder()).append("MZ").append("data").append("Map001.json");
+            FILE_EXISTS(file)
+
+            auto loggers = getLoggers();
+            auto parsedData = createParsedData();
+
+            CHECK(parseMap(file, parsedData, RPGMakerVersion::MZ, *loggers));
+
+            static const std::vector<std::string> characterNames = {"Nature"};
+            static const std::vector<std::string> faceNames = {"People4"};
+            static const std::vector<std::string> bgmNames = {"Field1"};
+            static const std::vector<std::string> bgsNames = {"City"};
+            static const std::vector<std::string> battleback1Names = {"Castle1"};
+            static const std::vector<std::string> battleback2Names = {"Brick"};
+            static const std::vector<std::string> parallaxNames = {"BlueSky"};
+
+            CHECK_DATA(characterNames, characterNames)
+            CHECK_DATA(faceNames, faceNames)
+            CHECK_DATA(bgmNames, bgmNames)
+            CHECK_DATA(bgsNames, bgsNames)
+            CHECK_DATA(battleback1Names, battleback1Names)
+            CHECK_DATA(battleback2Names, battleback2Names)
+            CHECK_DATA(parallaxNames, parallaxNames)
+        }
+    }
 }
