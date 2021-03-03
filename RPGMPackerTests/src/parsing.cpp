@@ -1,16 +1,13 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
+#include <tuple>
 
 #include <doctest/doctest.h>
 #include <parseData.hpp>
 
 #include "testingUtils.h"
-
-#define FILE_EXISTS(file) {                                                             \
-REQUIRE(!file.empty());                                                                 \
-REQUIRE_MESSAGE(ghc::filesystem::is_regular_file(file), "File does not exist: ", file); \
-}
 
 #define CHECK_DATA(parsed, values) { \
 CHECK_EQ(parsedData->parsed.size(), values.size());         \
@@ -376,6 +373,38 @@ TEST_SUITE("Parsing data files") {
             CHECK(parseAnimations(animations, parsedData, RPGMakerVersion::MZ, *loggers));
 
             CHECK_EQ(parsedData->effectNames.size(), 74);
+        }
+    }
+}
+
+TEST_CASE("Parsing Effects") {
+    auto testFile = "Death.efkefc";
+
+    auto effectsFolder = ghc::filesystem::path(getTestFilesFolder()).append("MZ").append("effects");
+    auto file = ghc::filesystem::path(effectsFolder).append(testFile);
+    FILE_EXISTS(file)
+
+    auto loggers = getLoggers();
+    auto parsedData = createParsedData();
+
+    CHECK_MESSAGE(parseEffect(file, effectsFolder, parsedData, *loggers), "Unable to parse ", testFile);
+
+    static const std::vector<std::string> textures = {"ParticleAlpha.png", "LightRing.png", "Star.png", "Fog.png", "Particle100.png"};
+    static const std::vector<std::string> models = {"Skull.efkmodel"};
+
+    for (const auto& s : parsedData->effectResources) {
+        auto p = ghc::filesystem::path(s);
+        auto isTexture = p.extension().u8string() == ".png";
+        auto fileName = p.filename().u8string();
+
+        if (isTexture) {
+            auto it = std::find(textures.begin(), textures.end(), fileName);
+            auto res = it == textures.end();
+            CHECK_MESSAGE(!res, "Unable to find \"", fileName, "\" in textures");
+        } else {
+            auto it = std::find(models.begin(), models.end(), fileName);
+            auto res = it == models.end();
+            CHECK_MESSAGE(!res, "Unable to find \"", fileName, "\" in models");
         }
     }
 }
