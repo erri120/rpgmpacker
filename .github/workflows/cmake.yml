@@ -39,20 +39,23 @@ jobs:
 
     - name: Build
       shell: bash
+      working-directory: ${{github.workspace}}
       run: |
-        cmake -E make_directory ${{github.workspace}}/build
-        cmake -S $GITHUB_WORKSPACE -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-        cmake --build ${{github.workspace}}/build --config $BUILD_TYPE
+        cmake -E make_directory build/
+        cmake -S . -B build/ -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        cmake --build build/ --config $BUILD_TYPE
 
     - name: Test (Windows)
       if: matrix.os == 'windows-latest'
       shell: bash
+      working-directory: ${{github.workspace}}
       run: |
-        cd ${{github.workspace}}/build/$TEST_TARGET/$BUILD_TYPE
+        cd build/$TEST_TARGET/$BUILD_TYPE
         ./$TEST_TARGET.exe
     - name: Test (Ubuntu & macOS)
       if: matrix.os != 'windows-latest'
       shell: bash
+      working-directory: ${{github.workspace}}
       run: |
-        cd ${{github.workspace}}/build/$TEST_TARGET
+        cd build/$TEST_TARGET
         ./$TEST_TARGET
