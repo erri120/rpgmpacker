@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Unreleased]
 
+## 1.x.x
+
+### Changed
+
+- Updated CPM from 0.31.1 to [0.32.0](https://github.com/cpm-cmake/CPM.cmake/releases/tag/v0.32.0) ([#36](https://github.com/erri120/rpgmpacker/issues/36))
+- Updated toml11 from 3.6.0 to [3.6.1](https://github.com/ToruNiina/toml11/releases/tag/v3.6.1) ([#37](https://github.com/erri120/rpgmpacker/issues/37))
+- Updated spdlog 1.8.2 to [1.8.5](https://github.com/gabime/spdlog/releases/tag/v1.8.5) ([#35](https://github.com/erri120/rpgmpacker/issues/35))
+- Updated ghc::filesystem 1.5.2 to [1.5.4](https://github.com/gulrak/filesystem/releases/tag/v1.5.4) ([#34](https://github.com/erri120/rpgmpacker/issues/34))
+
 ## [Released]
 
 ## [1.5.4] - 2021-02-28
