@@ -166,13 +166,7 @@ var = toml::find<type>(tomlConfig, name);\
     if (!getPlatforms(&platformNames, &platforms, rpgmakerVersion, loggers))
         return EXIT_FAILURE;
 
-    if (rpgmakerVersion == RPGMakerVersion::MZ) {
-        auto it = std::find(platforms.begin(), platforms.end(), Platform::Linux);
-        if (it != platforms.end()) {
-            errorLogger->error("Linux is not supported as an export target for MZ!");
-            return EXIT_FAILURE;
-        }
-    } else {
+    if (rpgmakerVersion == RPGMakerVersion::MV) {
         auto it = std::find(platforms.begin(), platforms.end(), Platform::Mobile);
         if (it != platforms.end()) {
             errorLogger->error("Mobile is not supported as an export target for MV using this tool!");

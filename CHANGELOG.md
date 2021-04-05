@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## 1.x.x
 
+### Added
+
+- Added Linux support for MZ. This requires manual configuration, see the README for more information.
+
 ### Changed
 
 - Updated CPM from 0.31.1 to [0.32.0](https://github.com/cpm-cmake/CPM.cmake/releases/tag/v0.32.0) ([#36](https://github.com/erri120/rpgmpacker/issues/36))

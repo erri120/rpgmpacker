@@ -17,6 +17,7 @@ Simple CLI program for packaging RPG Maker games to use in an automated build/de
   - RPG Maker MZ
     - Windows
     - OSX
+    - Linux: requires manual configuration, see [Linux for MZ](#linux-for-mz)
     - Browser/Mobile
 - Supported deployment features:
   - audio filtering depending on platform
@@ -109,6 +110,14 @@ For testing I used the following options:
 - RPGMaker Version: `MZ`
 - Can use hardlinking from RPGMaker Folder to Output: `false`
 - Can use hardlinking from Input Folder to Output: `true`
+
+### Linux for MZ
+
+RPG Maker MZ does not include a Linux build of nwjs. If you want to provide a Linux build of your game you have to manually download the build from [nwjs.io](https://nwjs.io/downloads/) and extract it to your MZ installation folder:
+
+![linux-for-mz](assets/linux-for-mz.png)
+
+You can then add "linux" to the platforms argument and the tool will output a Linux build of your game. Do note that RPG Maker MZ did not include the nwjs Linux build for a reason so you might run into issues with it. Test the build before you ship it.
 
 ### TOML Config
 

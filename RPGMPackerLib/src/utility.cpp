@@ -69,10 +69,6 @@ bool getPlatforms(std::vector<std::string>* names, std::vector<Platform>* platfo
         }
 
         if (current == "linux") {
-            if (version == RPGMakerVersion::MZ) {
-                loggers.errorLogger->error("Linux is not supported in MZ!");
-                return false;
-            }
             platforms->emplace_back(Platform::Linux);
             continue;
         }
@@ -531,7 +527,7 @@ std::string getPlatformFolder(RPGMakerVersion version, Platform platform) {
     } else {
         GET_PLATFORM(Platform::Windows, "nwjs-win")
         GET_PLATFORM(Platform::OSX, "nwjs-mac")
-        GET_PLATFORM(Platform::Linux, "")
+        GET_PLATFORM(Platform::Linux, "nwjs-linux")
         GET_PLATFORM(Platform::Browser, "")
         GET_PLATFORM(Platform::Mobile, "")
     }
