@@ -135,8 +135,9 @@ This change does not change anything for the end-consumer of the tool but is a h
 [Semantic Versioning]: https://semver.org/
 
 <!-- Versions -->
-[Unreleased]: https://github.com/erri120/rpgmpacker/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/erri120/rpgmpacker/compare/v1.6.1...HEAD
 [Released]: https://github.com/erri120/rpgmpacker/releases/
+[1.6.1]: https://github.com/erri120/rpgmpacker/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/erri120/rpgmpacker/compare/v1.5.4...v1.6.0
 [1.5.4]: https://github.com/erri120/rpgmpacker/compare/v1.5.3...v1.5.4
 [1.5.3]: https://github.com/erri120/rpgmpacker/compare/v1.5.2...v1.5.3
