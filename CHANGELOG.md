@@ -6,7 +6,15 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Unreleased]
 
-## 1.x.x
+## 1.6.x
+
+This release changed the structure of the project so it is easier to work with. I split the project into 3 sub-projects:
+
+1) A main executable project
+2) A lib project containing everything without the CLI
+3) A test project that uses the functions in the lib project
+
+This change does not change anything for the end-consumer of the tool but is a huge change on the development side of things so I wanted to include it in the changelog.
 
 ### Added
 
