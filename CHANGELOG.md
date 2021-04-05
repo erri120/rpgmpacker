@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Released]
 
+## [1.6.1] - 2021-04-05
+
+### Added
+
+- Change file `nw` to `Game` on Linux for MZ ([#39](https://github.com/erri120/rpgmpacker/issues/39))
+
 ## [1.6.0] - 2021-04-05
 
 This release changed the structure of the project so it is easier to work with. I split the project into 3 sub-projects:

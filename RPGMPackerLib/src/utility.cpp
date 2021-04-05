@@ -399,6 +399,11 @@ bool filterFile(ghc::filesystem::path* from, ghc::filesystem::path* to, FolderTy
 
                 if (filename == "v8_context_snapshot.bin" && parentName != "Resources") return true;
                 if (filename == "libffmpeg.dylib" && parentName != "80.0.3987.149") return true;
+            } else if (platform == Platform::Linux) {
+                if (filename == "nw") {
+                    to->replace_filename("Game");
+                    return false;
+                }
             }
         }
     } else if (folderType == FolderType::Project) {
