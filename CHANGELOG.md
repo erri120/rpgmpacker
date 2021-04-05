@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Unreleased]
 
-## 1.6.x
+## [Released]
+
+## [1.6.0] - 2021-04-05
 
 This release changed the structure of the project so it is easier to work with. I split the project into 3 sub-projects:
 
@@ -27,7 +29,9 @@ This change does not change anything for the end-consumer of the tool but is a h
 - Updated spdlog 1.8.2 to [1.8.5](https://github.com/gabime/spdlog/releases/tag/v1.8.5) ([#35](https://github.com/erri120/rpgmpacker/issues/35))
 - Updated ghc::filesystem 1.5.2 to [1.5.4](https://github.com/gulrak/filesystem/releases/tag/v1.5.4) ([#34](https://github.com/erri120/rpgmpacker/issues/34))
 
-## [Released]
+### Fixed
+
+- Fixed multiple bugs that appeared during testing, most of them are just bugs that came from specific combinations.
 
 ## [1.5.4] - 2021-02-28
 
@@ -125,8 +129,9 @@ This change does not change anything for the end-consumer of the tool but is a h
 [Semantic Versioning]: https://semver.org/
 
 <!-- Versions -->
-[Unreleased]: https://github.com/erri120/rpgmpacker/compare/v1.5.4...HEAD
+[Unreleased]: https://github.com/erri120/rpgmpacker/compare/v1.6.0...HEAD
 [Released]: https://github.com/erri120/rpgmpacker/releases/
+[1.6.0]: https://github.com/erri120/rpgmpacker/compare/v1.5.4...v1.6.0
 [1.5.4]: https://github.com/erri120/rpgmpacker/compare/v1.5.3...v1.5.4
 [1.5.3]: https://github.com/erri120/rpgmpacker/compare/v1.5.2...v1.5.3
 [1.5.2]: https://github.com/erri120/rpgmpacker/compare/v1.5.1...v1.5.2
