@@ -2,6 +2,7 @@
 
 [![CI CMake Build](https://github.com/erri120/rpgmpacker/workflows/CI%20CMake%20Build/badge.svg)](https://github.com/erri120/rpgmpacker/actions?query=workflow%3A%22CI+CMake+Build%22)
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/erri120/rpgmpacker)](https://github.com/erri120/rpgmpacker/releases/latest)
+[![Chocolatey Version](https://img.shields.io/chocolatey/v/rpgmpacker)](https://community.chocolatey.org/packages/rpgmpacker)
 [![codecov](https://codecov.io/gh/erri120/rpgmpacker/branch/master/graph/badge.svg?token=42XI32HBFD)](https://codecov.io/gh/erri120/rpgmpacker)
 
 Simple CLI program for packaging RPG Maker games to use in an automated build/deploy pipeline.
@@ -23,6 +24,11 @@ Simple CLI program for packaging RPG Maker games to use in an automated build/de
   - using hardlinks instead of creating copies
   - deploying for multiple platforms at once
   - excluding unused files
+
+## Download
+
+- [GitHub Release](https://github.com/erri120/rpgmpacker/releases)
+- [Chocolatey Build](https://community.chocolatey.org/packages/rpgmpacker) (provided by [deogracia](https://github.com/erri120/rpgmpacker/issues/38))
 
 ## Usage
 
