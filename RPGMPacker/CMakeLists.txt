@@ -36,3 +36,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU"
     # GCC/Clang
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 endif()
+
+if(RPGMPACKER_VERSION)
+    add_compile_definitions(RPGMPACKER_VERSION="${RPGMPACKER_VERSION}")
+endif()

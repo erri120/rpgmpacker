@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Released]
 
+## [1.6.2] - 2021-04-07
+
+### Added
+
+- Added `--version` argument for printing the program version ([#40](https://github.com/erri120/rpgmpacker/issues/40))
+
 ## [1.6.1] - 2021-04-05
 
 ### Added
@@ -135,8 +141,9 @@ This change does not change anything for the end-consumer of the tool but is a h
 [Semantic Versioning]: https://semver.org/
 
 <!-- Versions -->
-[Unreleased]: https://github.com/erri120/rpgmpacker/compare/v1.6.1...HEAD
+[Unreleased]: https://github.com/erri120/rpgmpacker/compare/v1.6.2...HEAD
 [Released]: https://github.com/erri120/rpgmpacker/releases/
+[1.6.1]: https://github.com/erri120/rpgmpacker/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/erri120/rpgmpacker/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/erri120/rpgmpacker/compare/v1.5.4...v1.6.0
 [1.5.4]: https://github.com/erri120/rpgmpacker/compare/v1.5.3...v1.5.4

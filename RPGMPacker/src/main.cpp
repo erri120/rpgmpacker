@@ -20,6 +20,10 @@
 #include <parseData.hpp>
 #include <inputPaths.hpp>
 
+#ifndef RPGMPACKER_VERSION
+#define RPGMPACKER_VERSION "1.0.0"
+#endif
+
 int main(int argc, char** argv) {
     std::error_code ec;
     auto logger = spdlog::stdout_color_mt("console");
@@ -41,6 +45,7 @@ int main(int argc, char** argv) {
         ("cache", "Use a path cache for already encrypted files when multi-targeting and using hardlinks. (default: false)", cxxopts::value<bool>()->default_value("false"))
         ("threads", "Amount of worker threads to use. Min: 1, Max: 10", cxxopts::value<int>()->default_value("2"))
         ("d,debug", "Enable debugging output (very noisy). (default: false)", cxxopts::value<bool>()->default_value("false"))
+        ("v,version", "Print version")
         ("h,help", "Print usage");
 
     std::string input, output, rpgmaker, encryptionKey;
@@ -53,6 +58,12 @@ int main(int argc, char** argv) {
 
         if (result.count("help")) {
             std::cout << options.help() << std::endl;
+            std::cout << RPGMPACKER_VERSION << std::endl;
+            return EXIT_SUCCESS;
+        }
+
+        if (result.count("version")) {
+            std::cout << RPGMPACKER_VERSION << std::endl;
             return EXIT_SUCCESS;
         }
 
@@ -129,6 +140,7 @@ var = toml::find<type>(tomlConfig, name);\
     }
 
     //input dump
+    logger->info("Version: {}", RPGMPACKER_VERSION);
     logger->info("Input: {}", input);
     logger->info("Output: {}", output);
     logger->info("RPG Maker: {}", rpgmaker);

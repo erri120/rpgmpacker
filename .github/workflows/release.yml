@@ -21,6 +21,14 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
+    - name: Get version from input
+      id: tag_name
+      shell: bash
+      env:
+        INPUT_VERSION: ${{ github.event.inputs.version }}
+      run: |
+        echo ::set-output name=current_version::${INPUT_VERSION}
+
     - uses: actions/checkout@v2
     - uses: actions/cache@v2
       with:
@@ -32,7 +40,7 @@ jobs:
       working-directory: ${{github.workspace}}
       run: |
         cmake -E make_directory build/
-        cmake -S . -B build/ -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        cmake -S . -B build/ -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DRPGMPACKER_VERSION=${{ steps.tag_name.outputs.current_version }}
         cmake --build build/ --config $BUILD_TYPE
 
     - name: Test (Windows)

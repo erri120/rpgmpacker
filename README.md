@@ -62,6 +62,7 @@ Simple CLI program for packaging RPG Maker games to use in an automated build/de
                            (default: 2)
   -d, --debug              Enable debugging output (very noisy). (default:
                            false)
+  -v, --version            Print version
   -h, --help               Print usage
 ```
 
