@@ -1,3 +1,1 @@
-build/*
-build-*/*
-cmake-build-*/*
+/node_modules/

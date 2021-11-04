@@ -1,5 +1,0 @@
-ignore:
-  - "RPGMPackerTests"
-
-comment:
-  require_change: true

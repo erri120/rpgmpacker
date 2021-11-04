@@ -1,0 +1,34 @@
+{
+  "name": "rpgmpacker",
+  "version": "2.0.0",
+  "description": "Packaging RPG Maker games in an automated pipeline.",
+  "main": "./dist/index.js",
+  "bin": {
+    "rpgmpacket": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "watch": "tsc -p . --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "MIT",
+  "author": "erri120 <erri120@protonmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/erri120/rpgmpacker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/erri120/rpgmpacker/issues"
+  },
+  "homepage": "https://github.com/erri120/rpgmpacker#readme",
+  "devDependencies": {
+    "@types/node": "^16.11.6",
+    "@types/yargs": "^17.0.5",
+    "nodemon": "^2.0.14",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "yargs": "^17.2.1"
+  }
+}
