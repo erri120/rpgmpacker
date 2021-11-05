@@ -1,0 +1,5 @@
+*.js text eol=clrf
+*.ts text eol=clrf
+*.json text eol=clrf
+*.yaml text eol=clrf
+*.md text eol=clrf
