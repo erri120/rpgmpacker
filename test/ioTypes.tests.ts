@@ -10,6 +10,8 @@ describe("ioTypes", () => {
       expect(p.dirName).to.equal("C:\\");
       expect(p.baseName).to.equal("README");
       expect(p.extension).to.equal(".md");
+      expect(p.isFile).to.be.true;
+      expect(p.isDir).to.be.false;
     });
 
     it("should clone correctly", () => {
@@ -19,6 +21,8 @@ describe("ioTypes", () => {
       expect(p2.dirName).to.equal(p1.dirName);
       expect(p2.baseName).to.equal(p1.baseName);
       expect(p2.extension).to.equal(p1.extension);
+      expect(p2.isFile).to.equal(p2.isFile);
+      expect(p2.isDir).to.equal(p2.isDir);
     });
 
     it("should replace extension correctly", () => {
