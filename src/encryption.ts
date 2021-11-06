@@ -1,5 +1,4 @@
 import fs from "fs";
-import path from "path";
 import { createHash, Hash } from "crypto";
 
 import logger from "./logging";
@@ -123,4 +122,17 @@ export function encryptFile(from: Path, to: Path, hash: Buffer, useCache: boolea
   fs.closeSync(fromFd);
   fs.closeSync(toFd);
   return to;
+}
+
+export function updateSystemJson(from: Path, to: Path, encryptAudio: boolean, encryptImages: boolean, hash: Hash) {
+  logger.debug(`Updating System.json from ${from} to ${to} with encryption data`);
+
+  let json = fs.readFileSync(from.fullPath, { encoding: "utf-8" });
+  const system = JSON.parse(json);
+  system["encryptionKey"] = hash.digest("hex");
+  system["hasEncryptedAudio"] = encryptAudio;
+  system["hasEncryptedImages"] = encryptImages;
+
+  json = JSON.stringify(system);
+  fs.writeFileSync(to.fullPath, json);
 }

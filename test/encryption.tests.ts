@@ -1,10 +1,11 @@
 import { before, describe } from "mocha";
 import { expect } from "chai";
-import { encryptFile, getMD5Hash } from "../src/encryption";
+import { encryptFile, getMD5Hash, updateSystemJson } from "../src/encryption";
 import { RPGMakerVersion } from "../src/rpgmakerTypes";
 import { getFileHash } from "./testutils";
 import logger, { Level } from "../src/logging";
 import { Path } from "../src/ioTypes";
+import { readFileSync, writeFileSync } from "fs";
 
 describe("encryption", () => {
   before(() => {
@@ -50,6 +51,21 @@ describe("encryption", () => {
 
       encryptFile(input, output, digset, false, false, RPGMakerVersion.MZ);
       expect(getFileHash("./test-output/erri120.m4a_")).to.equal(fileHash);
+    });
+  });
+
+  describe("updateSystemJson", () => {
+    it("should update json", () => {
+      const input = new Path("./test-files/System.json");
+      const output = new Path("./test-output/System.json");
+      updateSystemJson(input, output, true, true, getMD5Hash("1337"));
+
+      const json = readFileSync(output.fullPath, { encoding: "utf-8" });
+      const system = JSON.parse(json);
+
+      expect(system["encryptionKey"]).to.equal("e48e13207341b6bffb7fb1622282247b");
+      expect(system["hasEncryptedAudio"]).to.be.true;
+      expect(system["hasEncryptedImages"]).to.be.true;
     });
   });
 });
