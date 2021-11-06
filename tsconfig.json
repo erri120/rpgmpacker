@@ -5,11 +5,15 @@
     "lib": ["ES6", "ES2015", "DOM"],
     "declaration": true,
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "noImplicitAny": true,
     "strictNullChecks": true
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
