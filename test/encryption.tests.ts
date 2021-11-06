@@ -5,7 +5,7 @@ import { RPGMakerVersion } from "../src/rpgmakerTypes";
 import { getFileHash } from "./testutils";
 import logger, { Level } from "../src/logging";
 import { Path } from "../src/ioTypes";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync } from "fs";
 
 describe("encryption", () => {
   before(() => {

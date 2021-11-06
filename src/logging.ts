@@ -21,7 +21,7 @@ class Logger {
 
     switch (level) {
     case Level.DEBUG:
-      console.log(message);
+      console.log(chalk.grey(message));
       break;
     case Level.INFO:
       console.log(message);
