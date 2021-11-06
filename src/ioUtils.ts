@@ -1,4 +1,4 @@
-import fs, { constants } from "fs";
+import fs from "fs";
 
 import logger from "./logging";
 import { FolderType } from "./fileOperations";
@@ -60,4 +60,15 @@ export function transferFile(from: Path, to: Path, useHardlink: boolean) {
     logger.debug(`Copying file from ${from} to ${to}`);
     fs.copyFileSync(from.fullPath, to.fullPath);
   }
+}
+
+export function isSameDevice(a: Path, b: Path): boolean {
+  // works on both Windows and Unix
+  const statsA = fs.statSync(a.fullPath);
+  const statsB = fs.statSync(b.fullPath);
+
+  const devA = statsA.dev;
+  const devB = statsB.dev;
+
+  return devA === devB;
 }

@@ -2,7 +2,7 @@ import { describe } from "mocha";
 import { expect } from "chai";
 
 import { Path } from "../src/ioTypes";
-import { shouldEncryptFile, shouldFilterFile, transferFile } from "../src/ioUtils";
+import { isSameDevice, shouldEncryptFile, shouldFilterFile, transferFile } from "../src/ioUtils";
 import { FolderType } from "../src/fileOperations";
 import { RPGMakerPlatform, RPGMakerVersion } from "../src/rpgmakerTypes";
 import { accessSync, constants } from "fs";
@@ -63,6 +63,15 @@ describe("ioUtils", () => {
       const dest = new Path("./test-output/erri120.png");
       transferFile(src, dest, true);
       accessSync(dest.fullPath, constants.R_OK);
+    });
+  });
+
+  describe("isSameDevice", () => {
+    it("should return true", () => {
+      const a = new Path("./test-files/erri120.png");
+      const b = a.clone();
+
+      expect(isSameDevice(a, b)).to.be.true;
     });
   });
 });
