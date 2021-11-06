@@ -4,6 +4,7 @@ import { createHash, Hash } from "crypto";
 
 import logger from "./logging";
 import { RPGMakerVersion } from "./rpgmakerTypes";
+import { Path } from "./ioTypes";
 
 export function getMD5Hash(input: string): Hash {
   const hash = createHash("md5");
@@ -38,17 +39,13 @@ const extensions = {
 
 const superTopSecretEncryptionHeader = new Uint8Array([0x52, 0x50, 0x47, 0x4D, 0x56, 0x00, 0x00, 0x00, 0x00, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00]);
 
-export function encryptFile(from: string, to: string, hash: Buffer, useCache: boolean, useHardlink: boolean, version: RPGMakerVersion): string | null {
+export function encryptFile(from: Path, to: Path, hash: Buffer, useCache: boolean, useHardlink: boolean, version: RPGMakerVersion): Path | null {
   if (hash.length !== 16) {
     throw new Error("Hash Buffer does not have a length of 16!");
   }
 
-  from = path.resolve(from);
-  to = path.resolve(to);
-
-  const ext = path.extname(from);
   let newExt: string | null = null;
-  switch (ext.toLowerCase()) {
+  switch (from.extension) {
   case ".ogg": newExt = extensions[".ogg"](version); break;
   case ".m4a": newExt = extensions[".m4a"](version); break;
   case ".png": newExt = extensions[".png"](version); break;
@@ -56,15 +53,15 @@ export function encryptFile(from: string, to: string, hash: Buffer, useCache: bo
   }
 
   if (newExt === null) {
-    logger.error(`Unknown file extension ${ext} of file ${from}`);
+    logger.error(`Unknown file extension ${from.extension} of file ${from}`);
     return null;
   }
 
-  to = path.resolve(path.dirname(to), path.basename(to, ext) + newExt);
+  to = to.replaceExtension(newExt);
   logger.debug(`Encrypting file from ${from} to ${to}`);
 
-  const fromFd = fs.openSync(from, "r", 0o666);
-  const toFd = fs.openSync(to, "w+", 0o666);
+  const fromFd = fs.openSync(from.fullPath, "r", 0o666);
+  const toFd = fs.openSync(to.fullPath, "w+", 0o666);
 
   const stats = fs.fstatSync(fromFd);
   const filesize = stats.size;
