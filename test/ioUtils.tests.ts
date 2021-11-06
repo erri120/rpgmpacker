@@ -1,9 +1,11 @@
 import { describe } from "mocha";
 import { expect } from "chai";
+
 import { Path } from "../src/ioTypes";
-import { shouldEncryptFile, shouldFilterFile } from "../src/ioUtils";
+import { shouldEncryptFile, shouldFilterFile, transferFile } from "../src/ioUtils";
 import { FolderType } from "../src/fileOperations";
 import { RPGMakerPlatform, RPGMakerVersion } from "../src/rpgmakerTypes";
+import { accessSync, constants } from "fs";
 
 describe("ioUtils", () => {
   describe("shouldFilterFile", () => {
@@ -45,6 +47,22 @@ describe("ioUtils", () => {
 
     it("should not encrypt image files", () => {
       expect(shouldEncryptFile(new Path("Music.png"), false, false)).to.be.false;
+    });
+  });
+
+  describe("transferFile", () => {
+    it("should copy a file", () => {
+      const src = new Path("./test-files/erri120.png");
+      const dest = new Path("./test-output/erri120.png");
+      transferFile(src, dest, false);
+      accessSync(dest.fullPath, constants.R_OK);
+    });
+
+    it("should hardlink a file", () => {
+      const src = new Path("./test-files/erri120.png");
+      const dest = new Path("./test-output/erri120.png");
+      transferFile(src, dest, true);
+      accessSync(dest.fullPath, constants.R_OK);
     });
   });
 });

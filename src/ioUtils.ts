@@ -1,6 +1,9 @@
+import fs, { constants } from "fs";
+
+import logger from "./logging";
 import { FolderType } from "./fileOperations";
 import { Path } from "./ioTypes";
-import { RPGMakerInfo, RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
+import { RPGMakerInfo, RPGMakerPlatform } from "./rpgmakerTypes";
 
 export function shouldFilterFile(from: Path, folder: FolderType, rpgmakerInfo: RPGMakerInfo): boolean {
   switch (folder) {
@@ -44,4 +47,17 @@ export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImag
   }
 
   return false;
+}
+
+export function transferFile(from: Path, to: Path, useHardlink: boolean) {
+  if (useHardlink) {
+    logger.debug(`Creating hardlink from ${from} to ${to}`);
+    if (to.exists()) {
+      fs.rmSync(to.fullPath);
+    }
+    fs.linkSync(from.fullPath, to.fullPath);
+  } else {
+    logger.debug(`Copying file from ${from} to ${to}`);
+    fs.copyFileSync(from.fullPath, to.fullPath);
+  }
 }

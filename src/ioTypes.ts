@@ -1,4 +1,5 @@
 import { dirname, basename, resolve, extname } from "path";
+import { accessSync, constants } from "fs";
 
 export class Path {
   fullPath: string;
@@ -45,5 +46,14 @@ export class Path {
   isInDirectory(dir: Path): boolean {
     if (this.dirName === dir.fullPath) return true;
     return this.fullPath.startsWith(dir.fullPath);
+  }
+
+  exists(): boolean {
+    try {
+      accessSync(this.fullPath, constants.W_OK);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
