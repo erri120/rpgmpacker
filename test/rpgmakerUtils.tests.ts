@@ -8,6 +8,10 @@ import { RPGMakerPlatform, RPGMakerVersion } from "../src/rpgmakerTypes";
 import logger, { Level } from "../src/logging";
 
 describe("rpgmakerUtils", () => {
+  before(() => {
+    logger.minLevel = Level.SILENT;
+  });
+
   describe("getTemplateFolderNames", () => {
     it("should return correct values for correct inputs", () => {
       expect(getTemplateFolderName(RPGMakerVersion.MV, RPGMakerPlatform.Windows)).to.equal("nwjs-win");
@@ -30,7 +34,6 @@ describe("rpgmakerUtils", () => {
 
   describe("identifyRPGMakerVersion", () => {
     beforeEach(() => {
-      logger.minLevel = Level.SILENT;
       sinon.restore();
     });
 

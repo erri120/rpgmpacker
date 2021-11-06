@@ -11,4 +11,9 @@ export enum RPGMakerPlatform {
   Mobile = "Mobile"
 }
 
+export interface RPGMakerInfo {
+  Version: RPGMakerVersion,
+  Platform: RPGMakerPlatform
+}
+
 export type TemplateFolderName = "nwjs-win" | "nwjs-osx-unsigned" | "nwjs-lnx" | "nwjs-mac" | "nwjs-linux";
