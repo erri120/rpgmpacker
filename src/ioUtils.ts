@@ -4,6 +4,7 @@ import logger from "./logging";
 import { FolderType } from "./fileOperations";
 import { Path } from "./ioTypes";
 import { RPGMakerInfo, RPGMakerPlatform } from "./rpgmakerTypes";
+import { Stack } from "./javascriptDoesNotHaveAFuckingStack";
 
 export function shouldFilterFile(from: Path, folder: FolderType, rpgmakerInfo: RPGMakerInfo): boolean {
   switch (folder) {
@@ -71,4 +72,34 @@ export function isSameDevice(a: Path, b: Path): boolean {
   const devB = statsB.dev;
 
   return devA === devB;
+}
+
+export function* walkDirectoryRecursively(directory: Path) {
+  const stack: Stack<Path> = new Stack();
+  const items = fs.readdirSync(directory.fullPath, { encoding: "utf8" });
+  for (const item of items) {
+    const path = directory.join(item);
+    if (path.isDir) {
+      stack.push(path);
+    }
+
+    yield path;
+  }
+
+  if (stack.size === 0) {
+    return;
+  }
+
+  while (stack.peak) {
+    const dir = stack.pop;
+    const items = fs.readdirSync(dir.fullPath, { encoding: "utf8" });
+    for (const item of items) {
+      const path = dir.join(item);
+      if (path.isDir) {
+        stack.push(path);
+      }
+
+      yield path;
+    }
+  }
 }

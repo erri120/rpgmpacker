@@ -1,5 +1,7 @@
 import fs from "fs";
 import path from "path";
+
+import { Path } from "./ioTypes";
 import logger from "./logging";
 import { RPGMakerPlatform, RPGMakerVersion, TemplateFolderName } from "./rpgmakerTypes";
 
@@ -25,11 +27,10 @@ export function getTemplateFolderName(version: RPGMakerVersion, platform: RPGMak
   }
 }
 
-export function identifyRPGMakerVersion(inputPath: string): RPGMakerVersion | null {
-  inputPath = path.resolve(inputPath);
-  logger.debug(`Identifying RPG Maker version in ${inputPath}`);
+export function identifyRPGMakerVersion(input: Path): RPGMakerVersion | null {
+  logger.debug(`Identifying RPG Maker version in ${input}`);
 
-  const dirents = fs.readdirSync(inputPath, { encoding: "utf8", withFileTypes: true });
+  const dirents = fs.readdirSync(input.fullPath, { encoding: "utf8", withFileTypes: true });
   for (let i = 0; i < dirents.length; i++) {
     const dirent = dirents[i];
     if (!dirent.isFile()) continue;
@@ -46,6 +47,6 @@ export function identifyRPGMakerVersion(inputPath: string): RPGMakerVersion | nu
     }
   }
 
-  logger.error(`Unable to find a RPG Maker project file in ${inputPath}`);
+  logger.error(`Unable to find a RPG Maker project file in ${input}`);
   return null;
 }

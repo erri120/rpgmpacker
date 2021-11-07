@@ -68,26 +68,27 @@ export function createOptionsFromYargs(opt: {
   }
 
   const platforms: RPGMakerPlatform[] = [];
-  for (const p in opt.platforms) {
+  for (let i = 0; i < opt.platforms.length; i++) {
+    const p = opt.platforms[i];
     switch (p) {
     case RPGMakerPlatform.Windows:
-    case "0":
+    case 0:
       platforms.push(RPGMakerPlatform.Windows);
       break;
     case RPGMakerPlatform.OSX:
-    case "1":
+    case 1:
       platforms.push(RPGMakerPlatform.OSX);
       break;
     case RPGMakerPlatform.Linux:
-    case "2":
+    case 2:
       platforms.push(RPGMakerPlatform.Linux);
       break;
     case RPGMakerPlatform.Browser:
-    case "3":
+    case 3:
       platforms.push(RPGMakerPlatform.Browser);
       break;
     case RPGMakerPlatform.Mobile:
-    case "4":
+    case 4:
       platforms.push(RPGMakerPlatform.Mobile);
       break;
     default:

@@ -56,4 +56,18 @@ export class Path {
       return false;
     }
   }
+
+  join(s: string): Path {
+    if (!this.isDir) {
+      throw new Error("Unable to join paths because this is not a directory!");
+    }
+
+    const newPath = resolve(this.fullPath, s);
+    return new Path(newPath);
+  }
+
+  relativeTo(other: Path): string {
+    // +1 because of path separator
+    return this.fullPath.substring(other.fullPath.length + 1);
+  }
 }

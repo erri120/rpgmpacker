@@ -6,6 +6,7 @@ import fs from "fs";
 import { getTemplateFolderName, identifyRPGMakerVersion } from "../src/rpgmakerUtils";
 import { RPGMakerPlatform, RPGMakerVersion } from "../src/rpgmakerTypes";
 import logger, { Level } from "../src/logging";
+import { Path } from "../src/ioTypes";
 
 describe("rpgmakerUtils", () => {
   before(() => {
@@ -48,18 +49,18 @@ describe("rpgmakerUtils", () => {
 
     it("should return RPGMakerVersion.MV", () => {
       mockReadDir("Game.rpgproject");
-      const res = identifyRPGMakerVersion("./");
+      const res = identifyRPGMakerVersion(new Path("./"));
       expect(res).to.equal(RPGMakerVersion.MV);
     });
 
     it("should return RPGMakerVersion.MZ", () => {
       mockReadDir("Game.rmmzproject");
-      const res = identifyRPGMakerVersion("./");
+      const res = identifyRPGMakerVersion(new Path("./"));
       expect(res).to.equal(RPGMakerVersion.MZ);
     });
 
     it("should return null", () => {
-      const res = identifyRPGMakerVersion("./");
+      const res = identifyRPGMakerVersion(new Path("./"));
       expect(res).to.be.null;
     });
   });
