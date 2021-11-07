@@ -5,12 +5,14 @@ import { hideBin } from "yargs/helpers";
 
 import fs from "fs";
 
-import { getMD5Hash } from "./encryption";
-import { isSameDevice, walkDirectoryRecursively } from "./ioUtils";
+import { encryptFile, getMD5Hash } from "./encryption";
+import { isSameDevice, transferFile, walkDirectoryRecursively } from "./ioUtils";
 import logger, { Level } from "./logging";
 import { createOptionsFromYargs } from "./options";
 import { RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
 import { getTemplateFolderName, identifyRPGMakerVersion } from "./rpgmakerUtils";
+import { FileOperation, FolderType, OperationType } from "./fileOperations";
+import exp from "constants";
 
 function main() {
   const yargsResult = yargs(hideBin(process.argv))
@@ -129,6 +131,9 @@ function main() {
 
     fs.mkdirSync(platformOutputPath.fullPath, { recursive: true });
 
+    // TODO: set initial capacity to 1024
+    const fileOperations: FileOperation[] = [];
+
     // the browser does not need a template folder
     const templateFolderName = getTemplateFolderName(rpgmakerVersion, p);
     if (templateFolderName !== null) {
@@ -141,7 +146,35 @@ function main() {
       logger.debug(`Template folder is ${templateFolderPath}`);
 
       for (const path of walkDirectoryRecursively(templateFolderPath)) {
-        logger.debug(path.fullPath);
+        const relativeToTemplateFolder = path.relativeTo(templateFolderPath);
+        const itemOutputPath = platformOutputPath.join(relativeToTemplateFolder);
+
+        // TODO: filter
+
+        if (path.isDir) {
+          fs.mkdirSync(itemOutputPath.fullPath);
+        } else {
+          fileOperations.push({
+            Folder: FolderType.TemplateFolder,
+            Operation: OperationType.Copy,
+            From: path,
+            To: itemOutputPath
+          });
+        }
+      }
+    }
+
+    // TODO: make this run in parallel with options.NumThreads
+
+    for (const operation of fileOperations) {
+      const canUseHardlinks = operation.Folder === FolderType.TemplateFolder
+        ? canHardlinkRPGMakerToOutput
+        : canHardlinkInputToOutput;
+
+      if (operation.Operation === OperationType.Copy) {
+        transferFile(operation.From, operation.To, canUseHardlinks);
+      } else if (operation.Operation === OperationType.Encrypt) {
+        encryptFile(operation.From, operation.To, hash!, true, canUseHardlinks, rpgmakerVersion);
       }
     }
   }

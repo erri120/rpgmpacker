@@ -1,3 +1,5 @@
+import { Path } from "./ioTypes";
+
 export enum FolderType {
   TemplateFolder,
   ProjectFolder
@@ -9,8 +11,8 @@ export enum OperationType {
 }
 
 export interface FileOperation {
-  From: string,
-  To: string,
+  From: Path,
+  To: Path,
   Operation: OperationType,
   Folder: FolderType
 }
