@@ -129,6 +129,11 @@ function main() {
     const platformOutputPath = options.Output.join(p);
     logger.debug(`Current Platform: ${p}, Output path: ${platformOutputPath}`);
 
+    if (platformOutputPath.exists()) {
+      logger.debug(`Removing old files in ${platformOutputPath}`);
+      fs.rmSync(platformOutputPath.fullPath, { recursive: true });
+    }
+
     fs.mkdirSync(platformOutputPath.fullPath, { recursive: true });
 
     // TODO: set initial capacity to 1024
@@ -146,13 +151,14 @@ function main() {
       logger.debug(`Template folder is ${templateFolderPath}`);
 
       for (const path of walkDirectoryRecursively(templateFolderPath)) {
-        const relativeToTemplateFolder = path.relativeTo(templateFolderPath);
-        const itemOutputPath = platformOutputPath.join(relativeToTemplateFolder);
+        const relativePart = path.relativeTo(templateFolderPath);
+        const itemOutputPath = platformOutputPath.join(relativePart);
 
         // TODO: filter
 
         if (path.isDir) {
-          fs.mkdirSync(itemOutputPath.fullPath);
+          if (!itemOutputPath.exists())
+            fs.mkdirSync(itemOutputPath.fullPath);
         } else {
           fileOperations.push({
             Folder: FolderType.TemplateFolder,
@@ -164,8 +170,33 @@ function main() {
       }
     }
 
-    // TODO: make this run in parallel with options.NumThreads
+    // TODO:
+    // MV has a www folder, MZ does not
+    // on OSX the stuff also goes into "Game.app/Contents/Resources/app.nw"
+    const wwwPath = platformOutputPath.join("www");
+    if (!wwwPath.exists())
+      fs.mkdirSync(wwwPath.fullPath);
 
+    for (const path of walkDirectoryRecursively(options.Input)) {
+      const relativePart = path.relativeTo(options.Input);
+      const itemOutputPath = wwwPath.join(relativePart);
+
+      // TODO: filter
+
+      if (path.isDir) {
+        if (!itemOutputPath.exists())
+          fs.mkdirSync(itemOutputPath.fullPath);
+      } else {
+        fileOperations.push({
+          Folder: FolderType.ProjectFolder,
+          Operation: OperationType.Copy,
+          From: path,
+          To: itemOutputPath
+        });
+      }
+    }
+
+    // TODO: make this run in parallel with options.NumThreads
     for (const operation of fileOperations) {
       const canUseHardlinks = operation.Folder === FolderType.TemplateFolder
         ? canHardlinkRPGMakerToOutput
