@@ -1,11 +1,13 @@
 import { before, describe } from "mocha";
 import { expect } from "chai";
+
+import { readFileSync } from "fs";
+
 import { encryptFile, getMD5Hash, updateSystemJson } from "../src/encryption";
 import { RPGMakerVersion } from "../src/rpgmakerTypes";
 import { getFileHash } from "./testutils";
 import logger, { Level } from "../src/logging";
 import { Path } from "../src/ioTypes";
-import { readFileSync } from "fs";
 
 describe("encryption", () => {
   before(() => {
