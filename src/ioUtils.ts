@@ -5,6 +5,7 @@ import { FolderType } from "./fileOperations";
 import { Path } from "./ioTypes";
 import { RPGMakerInfo, RPGMakerPlatform } from "./rpgmakerTypes";
 import { Stack } from "./javascriptDoesNotHaveAFuckingStack";
+import { PathRegistry } from "./paths";
 
 export function shouldFilterFile(from: Path, folder: FolderType, rpgmakerInfo: RPGMakerInfo): boolean {
   switch (folder) {
@@ -33,7 +34,7 @@ export function shouldFilterFile(from: Path, folder: FolderType, rpgmakerInfo: R
   return false;
 }
 
-export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImages: boolean): boolean {
+export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImages: boolean, pathRegistry: PathRegistry): boolean {
   const ext = from.extension;
   if (ext !== ".png" && ext !== ".ogg" && ext !== ".m4a") {
     return false;
@@ -44,16 +45,15 @@ export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImag
   }
 
   if (encryptImages && ext === ".png") {
-    if (from.parent.baseName === "system" && from.parent.parent.baseName === "img") {
+    if (from.parent.equals(pathRegistry.Img_System)) {
       // these are for some reason not encrypted in MV
       if (from.fileName === "Loading.png") return false;
       if (from.fileName === "Window.png") return false;
       return true;
     }
 
-    // TODO: path registry or something
     // game icon
-    if (from.parent.baseName === "icon" && from.fileName === "icon.png") {
+    if (from.parent.equals(pathRegistry.Icon) && from.fileName === "icon.png") {
       return false;
     }
 

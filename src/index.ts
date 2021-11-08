@@ -6,13 +6,14 @@ import { hideBin } from "yargs/helpers";
 import fs from "fs";
 
 import { encryptFile, getMD5Hash, updateSystemJson } from "./encryption";
-import { isSameDevice, shouldEncryptFile, transferFile, walkDirectoryRecursively } from "./ioUtils";
+import { isSameDevice, shouldEncryptFile, shouldFilterFile, transferFile, walkDirectoryRecursively } from "./ioUtils";
 import logger, { Level } from "./logging";
 import { createOptionsFromYargs } from "./options";
 import { RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
 import { getTemplateFolderName, identifyRPGMakerVersion } from "./rpgmakerUtils";
 import { FileOperation, FolderType, OperationType } from "./fileOperations";
 import exp from "constants";
+import { createPathRegistry } from "./paths";
 
 function main() {
   const yargsResult = yargs(hideBin(process.argv))
@@ -171,6 +172,8 @@ function main() {
       }
     }
 
+    const pathRegistry = createPathRegistry(options.Input);
+
     // TODO:
     // MV has a www folder, MZ does not
     // on OSX the stuff also goes into "Game.app/Contents/Resources/app.nw"
@@ -190,6 +193,10 @@ function main() {
         continue;
       }
 
+      if(shouldFilterFile(path, FolderType.ProjectFolder, { Version: rpgmakerVersion, Platform: p })) {
+        continue;
+      }
+
       const operation: FileOperation = {
         Folder: FolderType.ProjectFolder,
         Operation: OperationType.Copy,
@@ -198,7 +205,7 @@ function main() {
       };
 
       if (options.EncryptionOptions) {
-        if (shouldEncryptFile(operation.From, options.EncryptionOptions.EncryptAudio, options.EncryptionOptions.EncryptImages)) {
+        if (shouldEncryptFile(operation.From, options.EncryptionOptions.EncryptAudio, options.EncryptionOptions.EncryptImages, pathRegistry)) {
           operation.Operation = OperationType.Encrypt;
         }
 
