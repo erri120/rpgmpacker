@@ -3,17 +3,28 @@ import { accessSync, constants } from "fs";
 
 export class Path {
   fullPath: string;
-  dirName: string;
+  parent: Path;
   baseName: string;
   extension: string;
+  fileName: string;
   isFile: boolean;
   isDir: boolean;
 
-  constructor(path: string, dirName?: string, baseName?: string, extension?: string) {
+  constructor(path: string, parent?: Path, baseName?: string, extension?: string) {
     this.fullPath = resolve(path);
-    this.dirName = dirName === undefined ? dirname(this.fullPath) : dirName;
+
+    // dirname("C:\\") -> "C:\\"
+    // dirname("/") -> "/"
+    const dirName = dirname(this.fullPath);
+    if (dirName === this.fullPath) {
+      this.parent = this;
+    } else {
+      this.parent = parent === undefined ? new Path(dirname(this.fullPath)) : parent;
+    }
+
     this.extension = (extension === undefined ? extname(this.fullPath) : extension).toLowerCase();
     this.baseName = baseName === undefined ? basename(this.fullPath, this.extension) : baseName;
+    this.fileName = this.baseName + this.extension;
 
     this.isFile = this.extension !== "";
     this.isDir = this.extension === "";
@@ -22,7 +33,7 @@ export class Path {
   }
 
   clone(): Path {
-    return new Path(this.fullPath, this.dirName, this.baseName, this.extension);
+    return new Path(this.fullPath, this.parent, this.baseName, this.extension);
   }
 
   replaceExtension(newExtension: string): Path {
@@ -32,19 +43,22 @@ export class Path {
 
     const p = this.clone();
     p.extension = newExtension.toLowerCase();
-    p.fullPath = resolve(p.dirName, p.baseName + p.extension);
+    p.fileName = p.baseName + p.extension;
+    p.fullPath = resolve(p.parent.fullPath, p.fileName);
     return p;
   }
 
   changeDirectory(newDirectory: string): Path {
-    const p = this.clone();
-    p.dirName = resolve(newDirectory);
-    p.fullPath = resolve(p.dirName, p.baseName + p.extension);
-    return p;
+    const parent = new Path(newDirectory);
+    return parent.join(this.fileName);
+    // const p = this.clone();
+    // p.parent = new Path(newDirectory);
+    // p.fullPath = resolve(p.dirName, p.fileName);
+    // return p;
   }
 
   isInDirectory(dir: Path): boolean {
-    if (this.dirName === dir.fullPath) return true;
+    if (this.parent.equals(dir)) return true;
     return this.fullPath.startsWith(dir.fullPath);
   }
 
@@ -69,5 +83,9 @@ export class Path {
   relativeTo(other: Path): string {
     // +1 because of path separator
     return this.fullPath.substring(other.fullPath.length + 1);
+  }
+
+  equals(other: Path): boolean {
+    return this.fullPath === other.fullPath;
   }
 }

@@ -44,6 +44,19 @@ export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImag
   }
 
   if (encryptImages && ext === ".png") {
+    if (from.parent.baseName === "system" && from.parent.parent.baseName === "img") {
+      // these are for some reason not encrypted in MV
+      if (from.fileName === "Loading.png") return false;
+      if (from.fileName === "Window.png") return false;
+      return true;
+    }
+
+    // TODO: path registry or something
+    // game icon
+    if (from.parent.baseName === "icon" && from.fileName === "icon.png") {
+      return false;
+    }
+
     return true;
   }
 

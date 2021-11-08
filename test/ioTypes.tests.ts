@@ -8,7 +8,7 @@ describe("ioTypes", () => {
       it("should be correct", () => {
         const p = new Path("C:\\README.md");
         expect(p.fullPath).to.equal("C:\\README.md");
-        expect(p.dirName).to.equal("C:\\");
+        expect(p.parent.fullPath).to.equal("C:\\");
         expect(p.baseName).to.equal("README");
         expect(p.extension).to.equal(".md");
         expect(p.isFile).to.be.true;
@@ -21,7 +21,7 @@ describe("ioTypes", () => {
         const p1 = new Path("C:\\README.md");
         const p2 = p1.clone();
         expect(p2.fullPath).to.equal(p1.fullPath);
-        expect(p2.dirName).to.equal(p1.dirName);
+        expect(p2.parent.fullPath).to.equal(p1.parent.fullPath);
         expect(p2.baseName).to.equal(p1.baseName);
         expect(p2.extension).to.equal(p1.extension);
         expect(p2.isFile).to.equal(p2.isFile);
@@ -43,7 +43,7 @@ describe("ioTypes", () => {
         let p = new Path("C:\\README.md");
         p = p.changeDirectory("D:\\");
         expect(p.fullPath).to.equal("D:\\README.md");
-        expect(p.dirName).to.equal("D:\\");
+        expect(p.parent.fullPath).to.equal("D:\\");
       });
     });
 

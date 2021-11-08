@@ -60,7 +60,7 @@ describe("encryption", () => {
     it("should update json", () => {
       const input = new Path("./test-files/System.json");
       const output = new Path("./test-output/System.json");
-      updateSystemJson(input, output, true, true, getMD5Hash("1337"));
+      updateSystemJson(input, output, true, true, getMD5Hash("1337").digest());
 
       const json = readFileSync(output.fullPath, { encoding: "utf-8" });
       const system = JSON.parse(json);

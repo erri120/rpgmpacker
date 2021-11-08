@@ -124,12 +124,12 @@ export function encryptFile(from: Path, to: Path, hash: Buffer, useCache: boolea
   return to;
 }
 
-export function updateSystemJson(from: Path, to: Path, encryptAudio: boolean, encryptImages: boolean, hash: Hash) {
+export function updateSystemJson(from: Path, to: Path, encryptAudio: boolean, encryptImages: boolean, hash: Buffer) {
   logger.debug(`Updating System.json from ${from} to ${to} with encryption data`);
 
   let json = fs.readFileSync(from.fullPath, { encoding: "utf-8" });
   const system = JSON.parse(json);
-  system["encryptionKey"] = hash.digest("hex");
+  system["encryptionKey"] = hash.toString("hex");
   system["hasEncryptedAudio"] = encryptAudio;
   system["hasEncryptedImages"] = encryptImages;
 

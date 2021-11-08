@@ -5,8 +5,8 @@ import { hideBin } from "yargs/helpers";
 
 import fs from "fs";
 
-import { encryptFile, getMD5Hash } from "./encryption";
-import { isSameDevice, transferFile, walkDirectoryRecursively } from "./ioUtils";
+import { encryptFile, getMD5Hash, updateSystemJson } from "./encryption";
+import { isSameDevice, shouldEncryptFile, transferFile, walkDirectoryRecursively } from "./ioUtils";
 import logger, { Level } from "./logging";
 import { createOptionsFromYargs } from "./options";
 import { RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
@@ -87,7 +87,7 @@ function main() {
     logger.setMinLevel(Level.INFO);
   }
 
-  logger.debug(JSON.stringify(options, undefined, 2));
+  // logger.debug(JSON.stringify(options, undefined, 2));
 
   const rpgmakerVersion = identifyRPGMakerVersion(options.Input);
   if (rpgmakerVersion === null) {
@@ -159,14 +159,15 @@ function main() {
         if (path.isDir) {
           if (!itemOutputPath.exists())
             fs.mkdirSync(itemOutputPath.fullPath);
-        } else {
-          fileOperations.push({
-            Folder: FolderType.TemplateFolder,
-            Operation: OperationType.Copy,
-            From: path,
-            To: itemOutputPath
-          });
+          continue;
         }
+
+        fileOperations.push({
+          Folder: FolderType.TemplateFolder,
+          Operation: OperationType.Copy,
+          From: path,
+          To: itemOutputPath
+        });
       }
     }
 
@@ -186,14 +187,28 @@ function main() {
       if (path.isDir) {
         if (!itemOutputPath.exists())
           fs.mkdirSync(itemOutputPath.fullPath);
-      } else {
-        fileOperations.push({
-          Folder: FolderType.ProjectFolder,
-          Operation: OperationType.Copy,
-          From: path,
-          To: itemOutputPath
-        });
+        continue;
       }
+
+      const operation: FileOperation = {
+        Folder: FolderType.ProjectFolder,
+        Operation: OperationType.Copy,
+        From: path,
+        To: itemOutputPath
+      };
+
+      if (options.EncryptionOptions) {
+        if (shouldEncryptFile(operation.From, options.EncryptionOptions.EncryptAudio, options.EncryptionOptions.EncryptImages)) {
+          operation.Operation = OperationType.Encrypt;
+        }
+
+        if (path.fileName === "System.json") {
+          updateSystemJson(path, itemOutputPath, options.EncryptionOptions.EncryptAudio, options.EncryptionOptions.EncryptImages, hash!);
+          continue;
+        }
+      }
+
+      fileOperations.push(operation);
     }
 
     // TODO: make this run in parallel with options.NumThreads
