@@ -3,7 +3,7 @@ import path from "path";
 
 import { Path } from "./ioTypes";
 import logger from "./logging";
-import { RPGMakerPlatform, RPGMakerVersion, TemplateFolderName } from "./rpgmakerTypes";
+import { RPGMakerInfo, RPGMakerPlatform, RPGMakerVersion, TemplateFolderName } from "./rpgmakerTypes";
 
 export function getTemplateFolderName(version: RPGMakerVersion, platform: RPGMakerPlatform): TemplateFolderName | null {
   switch (version) {
@@ -49,4 +49,16 @@ export function identifyRPGMakerVersion(input: Path): RPGMakerVersion | null {
 
   logger.error(`Unable to find a RPG Maker project file in ${input}`);
   return null;
+}
+
+export function getWWWPath(output: Path, info: RPGMakerInfo): Path {
+  if (info.Platform === RPGMakerPlatform.OSX) {
+    return output.join("Game.app/Contents/Resources/app.nw");
+  }
+
+  if (info.Version === RPGMakerVersion.MV) {
+    return output.join("www");
+  }
+
+  return output;
 }

@@ -11,8 +11,6 @@ describe("ioTypes", () => {
         expect(p.parent.fullPath).to.equal("C:\\");
         expect(p.baseName).to.equal("README");
         expect(p.extension).to.equal(".md");
-        expect(p.isFile).to.be.true;
-        expect(p.isDir).to.be.false;
       });
     });
 
@@ -24,8 +22,6 @@ describe("ioTypes", () => {
         expect(p2.parent.fullPath).to.equal(p1.parent.fullPath);
         expect(p2.baseName).to.equal(p1.baseName);
         expect(p2.extension).to.equal(p1.extension);
-        expect(p2.isFile).to.equal(p2.isFile);
-        expect(p2.isDir).to.equal(p2.isDir);
       });
     });
 

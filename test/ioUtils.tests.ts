@@ -30,25 +30,25 @@ describe("ioUtils", () => {
     });
   });
 
-  describe("shouldEncryptFile", () => {
-    it("should encrypt audio files", () => {
-      expect(shouldEncryptFile(new Path("Music.ogg"), true, false)).to.be.true;
-      expect(shouldEncryptFile(new Path("Music.m4a"), true, false)).to.be.true;
-    });
+  // describe("shouldEncryptFile", () => {
+  //   it("should encrypt audio files", () => {
+  //     expect(shouldEncryptFile(new Path("Music.ogg"), true, false)).to.be.true;
+  //     expect(shouldEncryptFile(new Path("Music.m4a"), true, false)).to.be.true;
+  //   });
 
-    it("should encrypt image files", () => {
-      expect(shouldEncryptFile(new Path("Music.png"), false, true)).to.be.true;
-    });
+  //   it("should encrypt image files", () => {
+  //     expect(shouldEncryptFile(new Path("Music.png"), false, true)).to.be.true;
+  //   });
 
-    it("should not encrypt audio files", () => {
-      expect(shouldEncryptFile(new Path("Music.ogg"), false, false)).to.be.false;
-      expect(shouldEncryptFile(new Path("Music.m4a"), false, false)).to.be.false;
-    });
+  //   it("should not encrypt audio files", () => {
+  //     expect(shouldEncryptFile(new Path("Music.ogg"), false, false)).to.be.false;
+  //     expect(shouldEncryptFile(new Path("Music.m4a"), false, false)).to.be.false;
+  //   });
 
-    it("should not encrypt image files", () => {
-      expect(shouldEncryptFile(new Path("Music.png"), false, false)).to.be.false;
-    });
-  });
+  //   it("should not encrypt image files", () => {
+  //     expect(shouldEncryptFile(new Path("Music.png"), false, false)).to.be.false;
+  //   });
+  // });
 
   describe("transferFile", () => {
     it("should copy a file", () => {

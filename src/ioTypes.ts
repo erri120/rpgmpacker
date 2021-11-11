@@ -1,5 +1,5 @@
 import { dirname, basename, resolve, extname } from "path";
-import { accessSync, constants } from "fs";
+import { accessSync, constants, statSync } from "fs";
 
 export class Path {
   fullPath: string;
@@ -7,8 +7,6 @@ export class Path {
   baseName: string;
   extension: string;
   fileName: string;
-  isFile: boolean;
-  isDir: boolean;
 
   constructor(path: string, parent?: Path, baseName?: string, extension?: string) {
     this.fullPath = resolve(path);
@@ -26,10 +24,17 @@ export class Path {
     this.baseName = baseName === undefined ? basename(this.fullPath, this.extension) : baseName;
     this.fileName = this.baseName + this.extension;
 
-    this.isFile = this.extension !== "";
-    this.isDir = this.extension === "";
-
     Object.prototype.toString = () => this.fullPath;
+  }
+
+  isFile(): boolean {
+    const stats = statSync(this.fullPath);
+    return stats.isFile();
+  }
+
+  isDir(): boolean {
+    const stats = statSync(this.fullPath);
+    return stats.isDirectory();
   }
 
   clone(): Path {
@@ -72,7 +77,7 @@ export class Path {
   }
 
   join(s: string): Path {
-    if (!this.isDir) {
+    if (!this.isDir()) {
       throw new Error("Unable to join paths because this is not a directory!");
     }
 

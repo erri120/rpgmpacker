@@ -92,7 +92,7 @@ export function* walkDirectoryRecursively(directory: Path) {
   const items = fs.readdirSync(directory.fullPath, { encoding: "utf8" });
   for (const item of items) {
     const path = directory.join(item);
-    if (path.isDir) {
+    if (path.isDir()) {
       stack.push(path);
     }
 
@@ -108,7 +108,7 @@ export function* walkDirectoryRecursively(directory: Path) {
     const items = fs.readdirSync(dir.fullPath, { encoding: "utf8" });
     for (const item of items) {
       const path = dir.join(item);
-      if (path.isDir) {
+      if (path.isDir()) {
         stack.push(path);
       }
 

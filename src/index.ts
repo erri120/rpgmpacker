@@ -10,7 +10,7 @@ import { isSameDevice, shouldEncryptFile, shouldFilterFile, transferFile, walkDi
 import logger, { Level } from "./logging";
 import { createOptionsFromYargs } from "./options";
 import { RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
-import { getTemplateFolderName, identifyRPGMakerVersion } from "./rpgmakerUtils";
+import { getTemplateFolderName, getWWWPath, identifyRPGMakerVersion } from "./rpgmakerUtils";
 import { FileOperation, FolderType, OperationType } from "./fileOperations";
 import exp from "constants";
 import { createPathRegistry } from "./paths";
@@ -157,7 +157,7 @@ function main() {
 
         // TODO: filter
 
-        if (path.isDir) {
+        if (path.isDir()) {
           if (!itemOutputPath.exists())
             fs.mkdirSync(itemOutputPath.fullPath);
           continue;
@@ -177,9 +177,10 @@ function main() {
     // TODO:
     // MV has a www folder, MZ does not
     // on OSX the stuff also goes into "Game.app/Contents/Resources/app.nw"
-    const wwwPath = platformOutputPath.join("www");
+    const wwwPath = getWWWPath(platformOutputPath, { Platform: p, Version: rpgmakerVersion });
+    logger.debug(`www Path is ${wwwPath}`);
     if (!wwwPath.exists())
-      fs.mkdirSync(wwwPath.fullPath);
+      fs.mkdirSync(wwwPath.fullPath, { recursive: true });
 
     for (const path of walkDirectoryRecursively(options.Input)) {
       const relativePart = path.relativeTo(options.Input);
@@ -187,7 +188,7 @@ function main() {
 
       // TODO: filter
 
-      if (path.isDir) {
+      if (path.isDir()) {
         if (!itemOutputPath.exists())
           fs.mkdirSync(itemOutputPath.fullPath);
         continue;
