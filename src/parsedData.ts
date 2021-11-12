@@ -2,6 +2,7 @@ import fs from "fs";
 import { resolve } from "path";
 
 import { Path } from "./ioTypes";
+import logger from "./logging";
 import { RPGMakerVersion } from "./rpgmakerTypes";
 
 export interface ParsedData {
@@ -60,7 +61,7 @@ export interface ParsedData {
     parallaxNames: string[],
 }
 
-export function parseData(dataPath: Path, version: RPGMakerVersion): ParsedData {
+export function parseData(dataPath: Path, version: RPGMakerVersion): ParsedData | null {
   const res: ParsedData = {
     actorBattlerNames: [],
     animationIds: [],
@@ -120,7 +121,8 @@ export function parseData(dataPath: Path, version: RPGMakerVersion): ParsedData 
   // parsing Animations.json last because we need the animationIds from other files
   const animationsPath = dataPath.join("Animations.json");
   if (!animationsPath.exists()) {
-    // TODO:
+    logger.error(`Animations.json at ${animationsPath} does not exist!`);
+    return null;
   }
 
   parseAnimations(animationsPath, res, version);

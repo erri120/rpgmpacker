@@ -131,7 +131,12 @@ function main() {
 
   let parsedData: ParsedData | undefined;
   if (options.ExcludeUnused) {
-    parsedData = parseData(options.Input.join("data"), rpgmakerVersion);
+    const tempParsedData = parseData(options.Input.join("data"), rpgmakerVersion);
+    if (tempParsedData === null) {
+      logger.error("Unable to parse data!");
+      return;
+    }
+    parsedData = tempParsedData;
   }
 
   logger.log(`Building output for ${options.Platforms.length} targets`);
@@ -147,7 +152,6 @@ function main() {
 
     fs.mkdirSync(platformOutputPath.fullPath, { recursive: true });
 
-    // TODO: set initial capacity to 1024
     const fileOperations: FileOperation[] = [];
 
     // the browser does not need a template folder
