@@ -5,60 +5,67 @@ import { Path } from "./ioTypes";
 import logger from "./logging";
 import { RPGMakerVersion } from "./rpgmakerTypes";
 
+export enum BattleSystem {
+  FrontView,
+  BackView
+}
+
 export interface ParsedData {
-    //Actors.json
-    //img/sv_actors/{}.png
-    actorBattlerNames: string[],
+  //Actors.json
+  //img/sv_actors/{}.png
+  actorBattlerNames: string[],
 
-    //Animations.json
-    animationIds: number[],
-    //MV only: img/animations/{}.png
-    animationNames: string[],
-    //MZ only: effects/{}.efkefc
-    effectNames: string[],
-    //MZ only: effects/{}
-    effectResources: Path[],
+  //Animations.json
+  animationIds: number[],
+  //MV only: img/animations/{}.png
+  animationNames: string[],
+  //MZ only: effects/{}.efkefc
+  effectNames: string[],
+  //MZ only: effects/{}
+  effectResources: Path[],
 
-    //Enemies.json
-    //img/enemies/{}.png
-    enemyBattlerNames: string[],
+  //Enemies.json
+  //img/enemies/{}.png
+  enemyBattlerNames: string[],
 
-    //Tilesets.json
-    //img/tilesets/{}.png+{}.txt
-    tilesetNames: string[],
+  useSideView: boolean,
 
-    //System.json
-    //img/titles1/{}.png
-    title1Names: string[],
-    //img/titles2/{}.png
-    title2Names: string[],
+  //Tilesets.json
+  //img/tilesets/{}.png+{}.txt
+  tilesetNames: string[],
 
-    //other
-    //img/characters/{}.png
-    characterNames: string[],
-    //img/faces/{}.png
-    faceNames: string[],
+  //System.json
+  //img/titles1/{}.png
+  title1Names: string[],
+  //img/titles2/{}.png
+  title2Names: string[],
 
-    //audio/bgm/{}.m4a/ogg
-    bgmNames: string[],
-    //audio/bgs/{}.m4a/ogg
-    bgsNames: string[],
-    //audio/me/{}.m4a/ogg
-    meNames: string[],
-    //audio/se/{}.m4a/ogg
-    seNames: string[],
+  //other
+  //img/characters/{}.png
+  characterNames: string[],
+  //img/faces/{}.png
+  faceNames: string[],
 
-    //img/pictures/{}.png
-    pictureNames: string[],
-    //movies/{}.webm
-    movieNames: string[],
+  //audio/bgm/{}.m4a/ogg
+  bgmNames: string[],
+  //audio/bgs/{}.m4a/ogg
+  bgsNames: string[],
+  //audio/me/{}.m4a/ogg
+  meNames: string[],
+  //audio/se/{}.m4a/ogg
+  seNames: string[],
 
-    //img/battlebacks1/{}.png
-    battleback1Names: string[],
-    //img/battlebacks2/{}.png
-    battleback2Names: string[],
-    //img/parallaxes/{}.png
-    parallaxNames: string[],
+  //img/pictures/{}.png
+  pictureNames: string[],
+  //movies/{}.webm
+  movieNames: string[],
+
+  //img/battlebacks1/{}.png
+  battleback1Names: string[],
+  //img/battlebacks2/{}.png
+  battleback2Names: string[],
+  //img/parallaxes/{}.png
+  parallaxNames: string[],
 }
 
 export function parseData(dataPath: Path, version: RPGMakerVersion): ParsedData | null {
@@ -82,7 +89,8 @@ export function parseData(dataPath: Path, version: RPGMakerVersion): ParsedData 
     seNames: [],
     tilesetNames: [],
     title1Names: [],
-    title2Names: []
+    title2Names: [],
+    useSideView: false
   };
 
   const items = fs.readdirSync(dataPath.fullPath, { encoding: "utf8" });
@@ -392,6 +400,8 @@ interface System {
 
   battlerName: string,
 
+  optSideView: boolean,
+
   title1Name: string,
   title2Name: string,
 
@@ -464,6 +474,8 @@ function parseSystem(path: Path, res: ParsedData) {
   res.battleback2Names.push(system.battleback2Name);
 
   res.enemyBattlerNames.push(system.battlerName);
+
+  res.useSideView = system.optSideView;
 
   res.title1Names.push(system.title1Name);
   res.title2Names.push(system.title2Name);

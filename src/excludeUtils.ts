@@ -40,8 +40,22 @@ export function filterUnusedFiles(path: Path, parsedData: ParsedData, pathRegist
     return !parsedData.characterNames.includes(name);
   }
 
-  if (path.isInDirectory(pathRegistry.img_enemies) || path.isInDirectory(pathRegistry.img_sv_enemies)) {
-    return !parsedData.enemyBattlerNames.includes(name);
+  if (parsedData.useSideView) {
+    if (path.isInDirectory(pathRegistry.img_enemies)) {
+      return true;
+    }
+
+    if (path.isInDirectory(pathRegistry.img_sv_enemies)) {
+      return !parsedData.enemyBattlerNames.includes(name);
+    }
+  } else {
+    if (path.isInDirectory(pathRegistry.img_sv_enemies)) {
+      return true;
+    }
+
+    if (path.isInDirectory(pathRegistry.img_enemies)) {
+      return !parsedData.enemyBattlerNames.includes(name);
+    }
   }
 
   if (path.isInDirectory(pathRegistry.img_faces)) {
