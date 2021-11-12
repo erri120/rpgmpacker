@@ -11,6 +11,7 @@ export interface Options {
   ExcludeUnused: boolean;
   UseHardlinks: boolean;
   NumThreads: number;
+  RemoveEmpty: boolean,
   Debug: boolean;
 }
 
@@ -31,6 +32,7 @@ export function createOptionsFromYargs(opt: {
   exclude: boolean;
   debug: boolean | undefined,
   hardlinks: boolean | undefined,
+  noempty: boolean | undefined,
   threads: number
 }): Options | null {
 
@@ -120,6 +122,7 @@ export function createOptionsFromYargs(opt: {
     ExcludeUnused: opt.exclude,
     NumThreads: opt.threads,
     UseHardlinks: opt.hardlinks === true,
-    Debug: opt.debug === true
+    Debug: opt.debug === true,
+    RemoveEmpty: opt.noempty === true
   };
 }

@@ -105,14 +105,29 @@ export function* walkDirectoryRecursively(directory: Path) {
 
   while (stack.peak) {
     const dir = stack.pop;
-    const items = fs.readdirSync(dir.fullPath, { encoding: "utf8" });
-    for (const item of items) {
-      const path = dir.join(item);
-      if (path.isDir()) {
-        stack.push(path);
-      }
+    try {
+      const items = fs.readdirSync(dir.fullPath, { encoding: "utf8" });
+      for (const item of items) {
+        const path = dir.join(item);
+        if (path.isDir()) {
+          stack.push(path);
+        }
 
-      yield path;
+        yield path;
+      }
+    } catch {
+      // ignored
+    }
+  }
+}
+
+export function removeEmptyFolders(path: Path) {
+  for (const p of walkDirectoryRecursively(path)) {
+    if (p.exists() && p.isDir()) {
+      const items = fs.readdirSync(p.fullPath, { encoding: "utf8" });
+      if (items.length === 0) {
+        fs.rmdirSync(p.fullPath);
+      }
     }
   }
 }

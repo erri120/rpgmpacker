@@ -6,7 +6,7 @@ import { hideBin } from "yargs/helpers";
 import fs from "fs";
 
 import { encryptFile, getMD5Hash, updateSystemJson } from "./encryption";
-import { isSameDevice, shouldEncryptFile, shouldFilterFile, transferFile, walkDirectoryRecursively } from "./ioUtils";
+import { isSameDevice, removeEmptyFolders, shouldEncryptFile, shouldFilterFile, transferFile, walkDirectoryRecursively } from "./ioUtils";
 import logger, { Level } from "./logging";
 import { createOptionsFromYargs } from "./options";
 import { RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
@@ -70,6 +70,10 @@ function main() {
       type: "number",
       description: "Number of threads to use",
       default: 2
+    })
+    .option("noempty", {
+      type: "boolean",
+      description: "Remove empty folders after execution"
     })
     .option("debug", {
       alias: "d",
@@ -244,6 +248,13 @@ function main() {
         encryptFile(operation.From, operation.To, hash!, true, canUseHardlinks, rpgmakerVersion);
       }
     }
+
+    if (options.RemoveEmpty) {
+      logger.debug("Removing empty folders from output path");
+      removeEmptyFolders(platformOutputPath);
+    }
+
+    logger.log(`Finished with Platform ${p}`);
   }
 }
 
