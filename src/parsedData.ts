@@ -181,7 +181,7 @@ function parseEvents(events: Array<Event>, res: ParsedData) {
       *
       * - 205: set movement route (see 505)
       *
-      * - 212: show animation, [2] is index of animation
+      * - 212: show animation, [1] is index of animation
       * - 231: show picture, [1] is picture name
       *
       * - 241: play bgm, [0].name is bgm name
@@ -225,7 +225,7 @@ function parseEvents(events: Array<Event>, res: ParsedData) {
       res.bgmNames.push(params[1].name);
     } else if (code === 212 || code === 337) {
       const params = event.parameters as number[];
-      res.animationIds.push(code === 212 ? params[2] : params[1]);
+      res.animationIds.push(params[1]);
     } else if (code === 231) {
       const params = event.parameters as string[];
       res.pictureNames.push(params[1]);

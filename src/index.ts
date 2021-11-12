@@ -138,6 +138,7 @@ function main() {
     }
 
     parsedData = tempParsedData;
+    // fs.writeFileSync("out.json", JSON.stringify(parsedData, undefined, 2));
     // console.log(parsedData);
     // return;
   }

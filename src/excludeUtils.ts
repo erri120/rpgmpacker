@@ -40,6 +40,11 @@ export function filterUnusedFiles(path: Path, parsedData: ParsedData, pathRegist
     return !parsedData.characterNames.includes(name);
   }
 
+  // there are two display modes: front-view and side-view
+  // this dictates what images are used
+  // font-view will use the images in img/enemies
+  // side-view will use the images in img/sv_enemies
+  // weirdly enough, this doesn't matter for actors
   if (parsedData.useSideView) {
     if (path.isInDirectory(pathRegistry.img_enemies)) {
       return true;
