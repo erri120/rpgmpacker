@@ -12,7 +12,7 @@ import { createOptionsFromYargs } from "./options";
 import { RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
 import { getTemplateFolderName, getWWWPath, identifyRPGMakerVersion } from "./rpgmakerUtils";
 import { FileOperation, FolderType, OperationType } from "./fileOperations";
-import { createPathRegistry } from "./paths";
+import { createPathRegistry, createTemplatePathRegistry, TemplatePathRegistry } from "./paths";
 import { filterUnusedFiles } from "./excludeUtils";
 import { parseData, ParsedData } from "./parsedData";
 
@@ -139,6 +139,8 @@ function main() {
     parsedData = tempParsedData;
   }
 
+  const pathRegistry = createPathRegistry(options.Input);
+
   logger.log(`Building output for ${options.Platforms.length} targets`);
   for (let i = 0; i < options.Platforms.length; i++) {
     const p = options.Platforms[i];
@@ -154,6 +156,8 @@ function main() {
 
     const fileOperations: FileOperation[] = [];
 
+    let templatePathRegistry: TemplatePathRegistry | undefined;
+
     // the browser does not need a template folder
     const templateFolderName = getTemplateFolderName(rpgmakerVersion, p);
     if (templateFolderName !== null) {
@@ -165,15 +169,36 @@ function main() {
 
       logger.debug(`Template folder is ${templateFolderPath}`);
 
+      templatePathRegistry = createTemplatePathRegistry(templateFolderPath);
+
       for (const path of walkDirectoryRecursively(templateFolderPath)) {
         const relativePart = path.relativeTo(templateFolderPath);
-        const itemOutputPath = platformOutputPath.join(relativePart);
+        let itemOutputPath = platformOutputPath.join(relativePart);
 
-        // TODO: filter
+        if (rpgmakerVersion === RPGMakerVersion.MZ) {
+          if (p === RPGMakerPlatform.Windows) {
+            if (path.fileName === "nwjs.exe" && path.isInDirectory(templatePathRegistry.top)) {
+              itemOutputPath = itemOutputPath.replaceFileName("Game.exe");
+            }
+          } else if (p === RPGMakerPlatform.OSX) {
+            if (path.isInDirectory(templatePathRegistry.nwjs_app)) {
+              const nwjsRelative = path.relativeTo(templatePathRegistry.nwjs_app);
+              itemOutputPath = platformOutputPath.join("Game.app").join(nwjsRelative);
+            }
+          } else if (p === RPGMakerPlatform.Linux) {
+            if (path.fileName === "nw" && path.isInDirectory(templatePathRegistry.top)) {
+              itemOutputPath = itemOutputPath.replaceFileName("Game");
+            }
+          }
+        }
 
         if (path.isDir()) {
           if (!itemOutputPath.exists())
             fs.mkdirSync(itemOutputPath.fullPath);
+          continue;
+        }
+
+        if (shouldFilterFile(path, FolderType.TemplateFolder, { Version: rpgmakerVersion, Platform: p }, pathRegistry, templatePathRegistry)) {
           continue;
         }
 
@@ -186,9 +211,6 @@ function main() {
       }
     }
 
-    const pathRegistry = createPathRegistry(options.Input);
-
-    // TODO:
     // MV has a www folder, MZ does not
     // on OSX the stuff also goes into "Game.app/Contents/Resources/app.nw"
     const wwwPath = getWWWPath(platformOutputPath, { Platform: p, Version: rpgmakerVersion });
@@ -199,8 +221,6 @@ function main() {
     for (const path of walkDirectoryRecursively(options.Input)) {
       const relativePart = path.relativeTo(options.Input);
       const itemOutputPath = wwwPath.join(relativePart);
-
-      // TODO: filter
 
       if (path.isDir()) {
         if (!itemOutputPath.exists())
@@ -214,7 +234,7 @@ function main() {
         }
       }
 
-      if(shouldFilterFile(path, FolderType.ProjectFolder, { Version: rpgmakerVersion, Platform: p })) {
+      if (shouldFilterFile(path, FolderType.ProjectFolder, { Version: rpgmakerVersion, Platform: p }, pathRegistry, templatePathRegistry)) {
         continue;
       }
 

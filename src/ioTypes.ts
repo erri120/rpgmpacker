@@ -53,6 +53,23 @@ export class Path {
     return p;
   }
 
+  replaceName(newName: string): Path {
+    const p = this.clone();
+    p.baseName = newName;
+    p.fileName = p.baseName + p.extension;
+    p.fullPath = resolve(p.parent.fullPath, p.fileName);
+    return p;
+  }
+
+  replaceFileName(newFileName: string): Path {
+    const p = this.clone();
+    p.extension = extname(newFileName);
+    p.baseName = basename(newFileName, p.extension);
+    p.fileName = newFileName;
+    p.fullPath = resolve(p.parent.fullPath, p.fileName);
+    return p;
+  }
+
   changeDirectory(newDirectory: string): Path {
     const parent = new Path(newDirectory);
     return parent.join(this.fileName);
@@ -77,10 +94,9 @@ export class Path {
   }
 
   join(s: string): Path {
-    if (!this.isDir()) {
-      throw new Error("Unable to join paths because this is not a directory!");
-    }
-
+    // if (!this.isDir()) {
+    //   throw new Error("Unable to join paths because this is not a directory!");
+    // }
     const newPath = resolve(this.fullPath, s);
     return new Path(newPath);
   }

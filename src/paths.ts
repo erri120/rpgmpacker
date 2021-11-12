@@ -1,7 +1,5 @@
 import { Path } from "./ioTypes";
 
-// TODO: MZ paths
-
 export interface PathRegistry {
   audio: Path,
   audio_bgm: Path,
@@ -33,6 +31,16 @@ export interface PathRegistry {
   js: Path,
   movies: Path,
   save: Path
+}
+
+export interface TemplatePathRegistry {
+  top: Path,
+
+  // portable native client, Windows only
+  pnacl: Path,
+
+  // nwjs.app, OSX only
+  nwjs_app: Path
 }
 
 export function createPathRegistry(p: Path): PathRegistry {
@@ -72,6 +80,18 @@ export function createPathRegistry(p: Path): PathRegistry {
     js: p.join("js"),
     movies: p.join("movies"),
     save: p.join("save")
+  };
+
+  return res;
+}
+
+export function createTemplatePathRegistry(p: Path): TemplatePathRegistry {
+  const res: TemplatePathRegistry = {
+    top: p,
+
+    pnacl: p.join("pnacl"),
+
+    nwjs_app: p.join("nwjs.app"),
   };
 
   return res;

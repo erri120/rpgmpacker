@@ -3,14 +3,48 @@ import fs from "fs";
 import logger from "./logging";
 import { FolderType } from "./fileOperations";
 import { Path } from "./ioTypes";
-import { RPGMakerInfo, RPGMakerPlatform } from "./rpgmakerTypes";
+import { RPGMakerInfo, RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
 import { Stack } from "./javascriptDoesNotHaveAFuckingStack";
-import { PathRegistry } from "./paths";
+import { PathRegistry, TemplatePathRegistry } from "./paths";
 
-export function shouldFilterFile(from: Path, folder: FolderType, rpgmakerInfo: RPGMakerInfo): boolean {
+export function shouldFilterFile(from: Path, folder: FolderType, rpgmakerInfo: RPGMakerInfo, pathRegistry: PathRegistry, templatePathRegistry: TemplatePathRegistry | undefined): boolean {
   switch (folder) {
-  // TODO: MZ does not copy all files from the template folder
-  case FolderType.TemplateFolder: return false;
+  case FolderType.TemplateFolder: {
+    if (rpgmakerInfo.Version !== RPGMakerVersion.MZ) {
+      return false;
+    }
+
+    if (templatePathRegistry === undefined) {
+      // TODO: error or something
+      return false;
+    }
+
+    if (rpgmakerInfo.Platform === RPGMakerPlatform.Windows) {
+      // portable native client is apparently not used
+      if (from.isInDirectory(templatePathRegistry.pnacl)) {
+        return true;
+      }
+
+      // other chromium related files are also ignored
+      if (from.parent.equals(templatePathRegistry.top)) {
+        if (from.fileName === "chromedriver.exe") return true;
+        if (from.fileName === "nacl_irt_x86_64.nexe") return true;
+        if (from.fileName === "nwjc.exe") return true;
+        if (from.fileName === "payload.exe") return true;
+      }
+    } else if (rpgmakerInfo.Platform === RPGMakerPlatform.OSX) {
+      if (from.parent.equals(templatePathRegistry.top)) {
+        if (from.fileName === "chromedriver") return true;
+        if (from.fileName === "libffmpeg.dylib") return true;
+        if (from.fileName === "minidump_stackwalk") return true;
+        if (from.fileName === "nwjc") return true;
+        if (from.fileName === "payload") return true;
+        if (from.fileName === "v8_context_snapshot.bin") return true;
+      }
+    }
+
+    return false;
+  }
   case FolderType.ProjectFolder: {
     // Desktop: only ogg
     // Mobile: only m4a
