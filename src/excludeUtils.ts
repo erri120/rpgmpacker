@@ -1,8 +1,9 @@
 import { Path } from "./ioTypes";
 import { ParsedData } from "./parsedData";
 import { PathRegistry } from "./paths";
+import { RPGMakerVersion } from "./rpgmakerTypes";
 
-export function filterUnusedFiles(path: Path, parsedData: ParsedData, pathRegistry: PathRegistry): boolean {
+export function filterUnusedFiles(path: Path, parsedData: ParsedData, pathRegistry: PathRegistry, version: RPGMakerVersion): boolean {
   const name = path.baseName;
 
   // Audio
@@ -74,6 +75,15 @@ export function filterUnusedFiles(path: Path, parsedData: ParsedData, pathRegist
   // Other
   if (path.isInDirectory(pathRegistry.movies)) {
     return !parsedData.movieNames.includes(name);
+  }
+
+  // MZ effects
+  if (version === RPGMakerVersion.MZ) {
+    if (path.isInDirectory(pathRegistry.effects)) {
+      if (parsedData.effectNames.includes(name)) return false;
+      if (parsedData.effectResources.some(x => x.equals(path))) return false;
+      return true;
+    }
   }
 
   return false;

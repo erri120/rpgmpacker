@@ -17,7 +17,7 @@ export interface ParsedData {
     //MZ only: effects/{}.efkefc
     effectNames: string[],
     //MZ only: effects/{}
-    effectResources: string[],
+    effectResources: Path[],
 
     //Enemies.json
     //img/enemies/{}.png
@@ -128,7 +128,24 @@ export function parseData(dataPath: Path, version: RPGMakerVersion): ParsedData 
   parseAnimations(animationsPath, res, version);
 
   if (version === RPGMakerVersion.MZ) {
-    // TODO: effect parsing
+    // MZ uses Effekseer (https://github.com/effekseer/Effekseer) for the effects
+    // we have to read and parse all .efkefc to find which files are unused
+
+    const effectsPath = dataPath.parent.join("effects");
+    logger.debug(`Parsing effects in ${effectsPath}`);
+
+    const items = fs.readdirSync(effectsPath.fullPath, { encoding: "utf8" });
+    for (const item of items) {
+      const p = new Path(resolve(effectsPath.fullPath, item));
+      if (!p.isFile()) continue;
+      if (p.extension !== ".efkefc") continue;
+      if (!res.effectNames.includes(p.baseName)) continue;
+
+      if (!parseEffect(p, effectsPath, res)) {
+        logger.error(`Error parsing effect ${p}`);
+        return null;
+      }
+    }
   }
 
   return res;
@@ -665,4 +682,135 @@ function parseAnimations(path: Path, res: ParsedData, version: RPGMakerVersion) 
       }
     }
   }
+}
+
+function readResource(fd: number, effectsPath: Path, count: number, res: ParsedData, p: Path) {
+  for (let i = 0; i < count; i++) {
+    const lengthBuf = new Uint32Array(1);
+    let bytesRead = fs.readSync(fd, lengthBuf, { length: lengthBuf.byteLength });
+    if (bytesRead != lengthBuf.byteLength) {
+      logger.error(`Tried reading ${lengthBuf.length} bytes but read ${bytesRead} from file ${p}`);
+      return false;
+    }
+
+    // name is utf16le encoded and null terminated
+    // length is the amount of characters not bytes
+    const nameBuf = new Uint16Array(lengthBuf[0]);
+    bytesRead = fs.readSync(fd, nameBuf, { length: nameBuf.byteLength });
+    if (bytesRead != nameBuf.byteLength) {
+      logger.error(`Tried reading ${nameBuf.length} bytes but read ${bytesRead} from file ${p}`);
+      return false;
+    }
+
+    const name = String.fromCharCode(... nameBuf.slice(0, nameBuf.length - 1));
+    const effectResPath = effectsPath.join(name);
+    res.effectResources.push(effectResPath);
+  }
+
+  return true;
+}
+
+function parseEffect(p: Path, effectsPath: Path, res: ParsedData): boolean {
+  const fd = fs.openSync(p.fullPath, "r", 0o666);
+  const stats = fs.fstatSync(fd);
+  const filesize = stats.size;
+
+  const headerBuf = new Uint32Array(2);
+  let bytesRead = fs.readSync(fd, headerBuf, { length: headerBuf.byteLength });
+  if (bytesRead != headerBuf.byteLength) {
+    logger.error(`Tried reading ${headerBuf.length} bytes but read ${bytesRead} from file ${p}`);
+    fs.closeSync(fd);
+    return false;
+  }
+
+  // 0x454B4645 = EFKE
+  if (headerBuf[0] != 0x454B4645) {
+    logger.error(`Invalid header in effect file ${p}: ${headerBuf[0]}`);
+    fs.closeSync(fd);
+    return false;
+  }
+
+  // version number
+  if (headerBuf[1] != 0) {
+    logger.error(`Invalid version in effect file ${p}: ${headerBuf[1]}`);
+    fs.closeSync(fd);
+    return false;
+  }
+
+  const infoChunkBuf = new Uint32Array(3);
+  bytesRead = fs.readSync(fd, infoChunkBuf, { length: infoChunkBuf.byteLength });
+  if (bytesRead != infoChunkBuf.byteLength) {
+    logger.error(`Tried reading ${infoChunkBuf.length} bytes but read ${bytesRead} from file ${p}`);
+    fs.closeSync(fd);
+    return false;
+  }
+
+  // 0x4F464E49 = INFO
+  if (infoChunkBuf[0] != 0x4F464E49) {
+    logger.error(`Invalid info chunk in effect file ${p}: ${infoChunkBuf[0]}`);
+    fs.closeSync(fd);
+    return false;
+  }
+
+  if (infoChunkBuf[1] >= filesize) {
+    logger.error(`Info chunk in effect file ${p} is bigger than file itself: ${infoChunkBuf[1]}`);
+    fs.closeSync(fd);
+    return false;
+  }
+
+  // Textures
+  const numTextureElementsBuf = new Uint32Array(1);
+  bytesRead = fs.readSync(fd, numTextureElementsBuf, { length: numTextureElementsBuf.byteLength });
+  if (bytesRead != numTextureElementsBuf.byteLength) {
+    logger.error(`Tried reading ${numTextureElementsBuf.length} bytes but read ${bytesRead} from file ${p}`);
+    fs.closeSync(fd);
+    return false;
+  }
+
+  if (!readResource(fd, effectsPath, numTextureElementsBuf[0], res, p)) {
+    logger.error(`Error parsing resources in effect file ${p}`);
+    fs.closeSync(fd);
+    return false;
+  }
+
+  const unknownBuf = new Uint32Array(1);
+  bytesRead = fs.readSync(fd, unknownBuf, { length: unknownBuf.byteLength });
+  if (bytesRead != unknownBuf.byteLength) {
+    logger.error(`Tried reading ${unknownBuf.length} bytes but read ${bytesRead} from file ${p}`);
+    fs.closeSync(fd);
+    return false;
+  }
+
+  // Alpha
+  const numAlphaElementsBuf = new Uint32Array(1);
+  bytesRead = fs.readSync(fd, numAlphaElementsBuf, { length: numAlphaElementsBuf.byteLength });
+  if (bytesRead != numAlphaElementsBuf.byteLength) {
+    logger.error(`Tried reading ${numAlphaElementsBuf.length} bytes but read ${bytesRead} from file ${p}`);
+    fs.closeSync(fd);
+    return false;
+  }
+
+  if (!readResource(fd, effectsPath, numAlphaElementsBuf[0], res, p)) {
+    logger.error(`Error parsing resources in effect file ${p}`);
+    fs.closeSync(fd);
+    return false;
+  }
+
+  // Models
+  const numModelElementsBuf = new Uint32Array(1);
+  bytesRead = fs.readSync(fd, numModelElementsBuf, { length: numModelElementsBuf.byteLength });
+  if (bytesRead != numModelElementsBuf.byteLength) {
+    logger.error(`Tried reading ${numModelElementsBuf.length} bytes but read ${bytesRead} from file ${p}`);
+    fs.closeSync(fd);
+    return false;
+  }
+
+  if (!readResource(fd, effectsPath, numModelElementsBuf[0], res, p)) {
+    logger.error(`Error parsing resources in effect file ${p}`);
+    fs.closeSync(fd);
+    return false;
+  }
+
+  fs.closeSync(fd);
+  return true;
 }

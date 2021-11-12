@@ -136,7 +136,10 @@ function main() {
       logger.error("Unable to parse data!");
       return;
     }
+
     parsedData = tempParsedData;
+    // console.log(parsedData);
+    // return;
   }
 
   const pathRegistry = createPathRegistry(options.Input);
@@ -229,7 +232,7 @@ function main() {
       }
 
       if (options.ExcludeUnused) {
-        if (filterUnusedFiles(path, parsedData!, pathRegistry)) {
+        if (filterUnusedFiles(path, parsedData!, pathRegistry, rpgmakerVersion)) {
           continue;
         }
       }
