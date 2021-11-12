@@ -9,7 +9,7 @@ import { PathRegistry } from "./paths";
 
 export function shouldFilterFile(from: Path, folder: FolderType, rpgmakerInfo: RPGMakerInfo): boolean {
   switch (folder) {
-  // TODO:
+  // TODO: MZ does not copy all files from the template folder
   case FolderType.TemplateFolder: return false;
   case FolderType.ProjectFolder: {
     // Desktop: only ogg

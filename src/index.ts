@@ -12,7 +12,6 @@ import { createOptionsFromYargs } from "./options";
 import { RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
 import { getTemplateFolderName, getWWWPath, identifyRPGMakerVersion } from "./rpgmakerUtils";
 import { FileOperation, FolderType, OperationType } from "./fileOperations";
-import exp from "constants";
 import { createPathRegistry } from "./paths";
 import { filterUnusedFiles } from "./excludeUtils";
 import { parseData, ParsedData } from "./parsedData";
@@ -66,11 +65,11 @@ function main() {
       type: "boolean",
       description: "Use hardlinks instead of copying files"
     })
-    .option("threads", {
-      type: "number",
-      description: "Number of threads to use",
-      default: 2
-    })
+    // .option("threads", {
+    //   type: "number",
+    //   description: "Number of threads to use",
+    //   default: 2
+    // })
     .option("noempty", {
       type: "boolean",
       description: "Remove empty folders after execution"

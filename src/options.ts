@@ -10,7 +10,7 @@ export interface Options {
   EncryptionOptions?: EncryptionOptions;
   ExcludeUnused: boolean;
   UseHardlinks: boolean;
-  NumThreads: number;
+  // NumThreads: number;
   RemoveEmpty: boolean,
   Debug: boolean;
 }
@@ -33,7 +33,7 @@ export function createOptionsFromYargs(opt: {
   debug: boolean | undefined,
   hardlinks: boolean | undefined,
   noempty: boolean | undefined,
-  threads: number
+  // threads: number
 }): Options | null {
 
   const inputPath = new Path(opt.input);
@@ -120,7 +120,7 @@ export function createOptionsFromYargs(opt: {
     Platforms: platforms,
     EncryptionOptions: encryptionOptions,
     ExcludeUnused: opt.exclude,
-    NumThreads: opt.threads,
+    // NumThreads: opt.threads,
     UseHardlinks: opt.hardlinks === true,
     Debug: opt.debug === true,
     RemoveEmpty: opt.noempty === true
