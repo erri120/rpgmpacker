@@ -68,7 +68,7 @@ export function shouldFilterFile(from: Path, folder: FolderType, rpgmakerInfo: R
   return false;
 }
 
-export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImages: boolean, pathRegistry: PathRegistry): boolean {
+export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImages: boolean, pathRegistry: PathRegistry, version: RPGMakerVersion): boolean {
   const ext = from.extension;
   if (ext !== ".png" && ext !== ".ogg" && ext !== ".m4a") {
     return false;
@@ -79,14 +79,21 @@ export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImag
   }
 
   if (encryptImages && ext === ".png") {
-    if (from.parent.equals(pathRegistry.img_system)) {
-      // these are for some reason not encrypted in MV
-      if (from.fileName === "Loading.png") return false;
-      if (from.fileName === "Window.png") return false;
-      return true;
+    if (version === RPGMakerVersion.MZ) {
+      // effect textures are not encrypted because those are loaded by an external library
+      if (from.parent.equals(pathRegistry.effects_texture)) {
+        return false;
+      }
+    } else {
+      if (from.parent.equals(pathRegistry.img_system)) {
+        // these are for some reason not encrypted in MV
+        if (from.fileName === "Loading.png") return false;
+        if (from.fileName === "Window.png") return false;
+        return true;
+      }
     }
 
-    // game icon
+    // game icon for the window
     if (from.parent.equals(pathRegistry.icon) && from.fileName === "icon.png") {
       return false;
     }

@@ -177,7 +177,7 @@ function main() {
 
         if (rpgmakerVersion === RPGMakerVersion.MZ) {
           if (p === RPGMakerPlatform.Windows) {
-            if (path.fileName === "nwjs.exe" && path.isInDirectory(templatePathRegistry.top)) {
+            if (path.fileName === "nw.exe" && path.parent.equals(templatePathRegistry.top)) {
               itemOutputPath = itemOutputPath.replaceFileName("Game.exe");
             }
           } else if (p === RPGMakerPlatform.OSX) {
@@ -186,7 +186,7 @@ function main() {
               itemOutputPath = platformOutputPath.join("Game.app").join(nwjsRelative);
             }
           } else if (p === RPGMakerPlatform.Linux) {
-            if (path.fileName === "nw" && path.isInDirectory(templatePathRegistry.top)) {
+            if (path.fileName === "nw" && path.parent.equals(templatePathRegistry.top)) {
               itemOutputPath = itemOutputPath.replaceFileName("Game");
             }
           }
@@ -246,7 +246,7 @@ function main() {
       };
 
       if (options.EncryptionOptions) {
-        if (shouldEncryptFile(operation.From, options.EncryptionOptions.EncryptAudio, options.EncryptionOptions.EncryptImages, pathRegistry)) {
+        if (shouldEncryptFile(operation.From, options.EncryptionOptions.EncryptAudio, options.EncryptionOptions.EncryptImages, pathRegistry, rpgmakerVersion)) {
           operation.Operation = OperationType.Encrypt;
         }
 

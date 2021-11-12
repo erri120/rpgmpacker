@@ -8,7 +8,11 @@ export interface PathRegistry {
   audio_se: Path,
 
   data: Path,
-  effects: Path, // MZ only
+
+  // MZ only
+  effects: Path,
+  effects_texture: Path,
+
   fonts: Path,
   icon: Path,
 
@@ -48,6 +52,7 @@ export function createPathRegistry(p: Path): PathRegistry {
 
   const img = p.join("img");
   const audio = p.join("audio");
+  const effects = p.join("effects");
 
   const res: PathRegistry = {
     audio,
@@ -57,7 +62,10 @@ export function createPathRegistry(p: Path): PathRegistry {
     audio_se: audio.join("se"),
 
     data: p.join("data"),
-    effects: p.join("effects"),
+
+    effects,
+    effects_texture: effects.join("Texture"),
+
     fonts: p.join("fonts"),
     icon: p.join("icon"),
 
