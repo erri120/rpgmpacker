@@ -1,5 +1,5 @@
 import fs from "fs";
-import { resolve } from "path";
+import { resolve, sep } from "path";
 
 import { Path } from "./ioTypes";
 import logger from "./logging";
@@ -206,47 +206,47 @@ function parseEvents(events: Array<Event>, res: ParsedData) {
 
     if (code === 101) {
       const params = event.parameters as string[];
-      res.faceNames.push(params[0]);
+      specialPush(res.faceNames, params[0]);
     } else if (code === 132 || code === 133 || code === 139 || code === 241 || code === 245 || code === 249 || code === 250) {
       const params = event.parameters as Array<{ name: string }>;
       const audioName = params[0].name;
 
       if (code === 132 || code === 241) {
-        res.bgmNames.push(audioName);
+        specialPush(res.bgmNames, audioName);
       } else if (code === 133 || code === 139 || code === 249) {
-        res.meNames.push(audioName);
+        specialPush(res.meNames, audioName);
       } else if (code === 245) {
-        res.bgsNames.push(audioName);
+        specialPush(res.bgsNames, audioName);
       } else if (code === 250) {
-        res.seNames.push(audioName);
+        specialPush(res.seNames, audioName);
       }
     } else if (code === 140) {
       const params = event.parameters as Array<{ name: string }>;
-      res.bgmNames.push(params[1].name);
+      specialPush(res.bgmNames, params[1].name);
     } else if (code === 212 || code === 337) {
       const params = event.parameters as number[];
       res.animationIds.push(params[1]);
     } else if (code === 231) {
       const params = event.parameters as string[];
-      res.pictureNames.push(params[1]);
+      specialPush(res.pictureNames, params[1]);
     } else if (code === 261) {
       const params = event.parameters as string[];
-      res.movieNames.push(params[0]);
+      specialPush(res.movieNames, params[0]);
     } else if (code === 283) {
       const params = event.parameters as string[];
-      res.battleback1Names.push(params[0]);
-      res.battleback2Names.push(params[1]);
+      specialPush(res.battleback1Names, params[0]);
+      specialPush(res.battleback2Names, params[1]);
     } else if (code === 284) {
       const params = event.parameters as string[];
-      res.parallaxNames.push(params[0]);
+      specialPush(res.parallaxNames, params[0]);
     } else if (code === 322) {
       const params = event.parameters as string[];
-      res.faceNames.push(params[1]);
-      res.characterNames.push(params[3]);
-      res.actorBattlerNames.push(params[5]);
+      specialPush(res.faceNames, params[1]);
+      specialPush(res.characterNames, params[3]);
+      specialPush(res.actorBattlerNames, params[5]);
     } else if (code === 323) {
       const params = event.parameters as string[];
-      res.faceNames.push(params[1]);
+      specialPush(res.faceNames, params[1]);
     } else if (code === 505) {
       const params = event.parameters as Array<{
         code: number,
@@ -260,13 +260,13 @@ function parseEvents(events: Array<Event>, res: ParsedData) {
 
       if (extraCode === 41) {
         const extraParams = extraObj.parameters as string[];
-        res.characterNames.push(extraParams[0]);
+        specialPush(res.characterNames, extraParams[0]);
       } else if (extraCode === 44) {
         const extraParams = extraObj.parameters as Array<{
           name: string
         }>;
 
-        res.seNames.push(extraParams[0].name);
+        specialPush(res.seNames, extraParams[0].name);
       }
     }
   }
@@ -292,9 +292,9 @@ function parseActors(path: Path, res: ParsedData) {
       * faceName (w/ index) => img/faces/{faceName}.png
     */
 
-    res.actorBattlerNames.push(item.battlerName);
-    res.characterNames.push(item.characterName);
-    res.faceNames.push(item.faceName);
+    specialPush(res.actorBattlerNames, item.battlerName);
+    specialPush(res.characterNames, item.characterName);
+    specialPush(res.faceNames, item.faceName);
   }
 }
 
@@ -329,7 +329,7 @@ function parseEnemies(path: Path, res: ParsedData) {
       * battlerName => img/enemies/{battlerName}.png
     */
 
-    res.enemyBattlerNames.push(item.battlerName);
+    specialPush(res.enemyBattlerNames, item.battlerName);
   }
 }
 
@@ -462,34 +462,34 @@ function parseSystem(path: Path, res: ParsedData) {
   const contents = fs.readFileSync(path.fullPath, { encoding: "utf-8" });
   const system: System = JSON.parse(contents);
 
-  res.bgmNames.push(system.airship.bgm.name);
-  res.bgmNames.push(system.boat.bgm.name);
-  res.bgmNames.push(system.ship.bgm.name);
+  specialPush(res.bgmNames, system.airship.bgm.name);
+  specialPush(res.bgmNames, system.boat.bgm.name);
+  specialPush(res.bgmNames, system.ship.bgm.name);
 
-  res.characterNames.push(system.airship.characterName);
-  res.characterNames.push(system.boat.characterName);
-  res.characterNames.push(system.ship.characterName);
+  specialPush(res.characterNames, system.airship.characterName);
+  specialPush(res.characterNames, system.boat.characterName);
+  specialPush(res.characterNames, system.ship.characterName);
 
-  res.battleback1Names.push(system.battleback1Name);
-  res.battleback2Names.push(system.battleback2Name);
+  specialPush(res.battleback1Names, system.battleback1Name);
+  specialPush(res.battleback2Names, system.battleback2Name);
 
-  res.enemyBattlerNames.push(system.battlerName);
+  specialPush(res.enemyBattlerNames, system.battlerName);
 
   res.useSideView = system.optSideView;
 
-  res.title1Names.push(system.title1Name);
-  res.title2Names.push(system.title2Name);
+  specialPush(res.title1Names, system.title1Name);
+  specialPush(res.title2Names, system.title2Name);
 
-  res.bgmNames.push(system.battleBgm.name);
-  res.bgmNames.push(system.titleBgm.name);
+  specialPush(res.bgmNames, system.battleBgm.name);
+  specialPush(res.bgmNames, system.titleBgm.name);
 
-  res.meNames.push(system.defeatMe.name);
-  res.meNames.push(system.gameoverMe.name);
-  res.meNames.push(system.victoryMe.name);
+  specialPush(res.meNames, system.defeatMe.name);
+  specialPush(res.meNames, system.gameoverMe.name);
+  specialPush(res.meNames, system.victoryMe.name);
 
   for (const sound of system.sounds) {
     if (sound === null) continue;
-    res.seNames.push(sound.name);
+    specialPush(res.seNames, sound.name);
   }
 }
 
@@ -510,7 +510,7 @@ function parseTilesets(path: Path, res: ParsedData) {
     */
 
     for (const name of item.tilesetNames) {
-      res.tilesetNames.push(name);
+      specialPush(res.tilesetNames, name);
     }
   }
 }
@@ -606,20 +606,20 @@ function parseMap(path: Path, res: ParsedData) {
   const contents = fs.readFileSync(path.fullPath, { encoding: "utf-8" });
   const map: Map = JSON.parse(contents);
 
-  res.battleback1Names.push(map.battleback1Name);
-  res.battleback2Names.push(map.battleback2Name);
+  specialPush(res.battleback1Names, map.battleback1Name);
+  specialPush(res.battleback2Names, map.battleback2Name);
 
-  res.bgmNames.push(map.bgm.name);
-  res.bgsNames.push(map.bgs.name);
+  specialPush(res.bgmNames, map.bgm.name);
+  specialPush(res.bgsNames, map.bgs.name);
 
-  res.parallaxNames.push(map.parallaxName);
+  specialPush(res.parallaxNames, map.parallaxName);
 
   for (const event of map.events) {
     if (event === null) continue;
     for (const page of event.pages) {
       if (page === null) continue;
 
-      res.characterNames.push(page.image.characterName);
+      specialPush(res.characterNames, page.image.characterName);
 
       parseEvents(page.list, res);
     }
@@ -674,23 +674,23 @@ function parseAnimations(path: Path, res: ParsedData, version: RPGMakerVersion) 
     if (version === RPGMakerVersion.MV) {
       const mvAnimation = animation as MVAnimation;
 
-      res.animationNames.push(mvAnimation.animation1Name);
-      res.animationNames.push(mvAnimation.animation2Name);
+      specialPush(res.animationNames, mvAnimation.animation1Name);
+      specialPush(res.animationNames, mvAnimation.animation2Name);
 
       for (const timing of mvAnimation.timings) {
         if (timing === null) continue;
         if (timing.se === null) continue;
-        res.seNames.push(timing.se.name);
+        specialPush(res.seNames, timing.se.name);
       }
     } else if (version === RPGMakerVersion.MZ) {
       const mzAnimation = animation as MZAnimation;
 
-      res.effectNames.push(mzAnimation.effectName);
+      specialPush(res.effectNames, mzAnimation.effectName);
 
       for (const timing of mzAnimation.soundTimings) {
         if (timing === null) continue;
         if (timing.se === null) continue;
-        res.seNames.push(timing.se.name);
+        specialPush(res.seNames, timing.se.name);
       }
     }
   }
@@ -716,6 +716,7 @@ function readResource(fd: number, effectsPath: Path, count: number, res: ParsedD
 
     const name = String.fromCharCode(... nameBuf.slice(0, nameBuf.length - 1));
     const effectResPath = effectsPath.join(name);
+    // specialPush(res.effectResources, effectResPath);
     res.effectResources.push(effectResPath);
   }
 
@@ -825,4 +826,17 @@ function parseEffect(p: Path, effectsPath: Path, res: ParsedData): boolean {
 
   fs.closeSync(fd);
   return true;
+}
+
+function specialPush(arr: string[], s: string) {
+  if (s === undefined) return;
+  if (s === null) return;
+  if (s.length === 0) return;
+  arr.push(normalizeName(s));
+}
+
+function normalizeName(s: string) {
+  if (sep === "\\")
+    return s.replace("/", sep);
+  return s.replace("\\", sep);
 }
