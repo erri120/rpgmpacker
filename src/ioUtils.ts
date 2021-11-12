@@ -45,7 +45,7 @@ export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImag
   }
 
   if (encryptImages && ext === ".png") {
-    if (from.parent.equals(pathRegistry.Img_System)) {
+    if (from.parent.equals(pathRegistry.img_system)) {
       // these are for some reason not encrypted in MV
       if (from.fileName === "Loading.png") return false;
       if (from.fileName === "Window.png") return false;
@@ -53,7 +53,7 @@ export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImag
     }
 
     // game icon
-    if (from.parent.equals(pathRegistry.Icon) && from.fileName === "icon.png") {
+    if (from.parent.equals(pathRegistry.icon) && from.fileName === "icon.png") {
       return false;
     }
 

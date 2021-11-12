@@ -14,6 +14,8 @@ import { getTemplateFolderName, getWWWPath, identifyRPGMakerVersion } from "./rp
 import { FileOperation, FolderType, OperationType } from "./fileOperations";
 import exp from "constants";
 import { createPathRegistry } from "./paths";
+import { filterUnusedFiles } from "./excludeUtils";
+import { parseData, ParsedData } from "./parsedData";
 
 function main() {
   const yargsResult = yargs(hideBin(process.argv))
@@ -124,6 +126,11 @@ function main() {
     hash = getMD5Hash(options.EncryptionOptions.EncryptionKey).digest();
   }
 
+  let parsedData: ParsedData | undefined;
+  if (options.ExcludeUnused) {
+    parsedData = parseData(options.Input.join("data"), rpgmakerVersion);
+  }
+
   logger.log(`Building output for ${options.Platforms.length} targets`);
   for (let i = 0; i < options.Platforms.length; i++) {
     const p = options.Platforms[i];
@@ -192,6 +199,12 @@ function main() {
         if (!itemOutputPath.exists())
           fs.mkdirSync(itemOutputPath.fullPath);
         continue;
+      }
+
+      if (options.ExcludeUnused) {
+        if (filterUnusedFiles(path, parsedData!, pathRegistry)) {
+          continue;
+        }
       }
 
       if(shouldFilterFile(path, FolderType.ProjectFolder, { Version: rpgmakerVersion, Platform: p })) {
