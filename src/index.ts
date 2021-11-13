@@ -1,9 +1,9 @@
 #!/usr/bin/env node
+import fs from "fs";
 
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
-import fs from "fs";
 
 import { encryptFile, getMD5Hash, updateSystemJson } from "./encryption";
 import { isSameDevice, removeEmptyFolders, shouldEncryptFile, shouldFilterFile, transferFile, walkDirectoryRecursively } from "./ioUtils";
