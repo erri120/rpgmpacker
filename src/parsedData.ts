@@ -129,7 +129,7 @@ export function parseData(dataPath: Path, version: RPGMakerVersion): ParsedData 
   // parsing Animations.json last because we need the animationIds from other files
   const animationsPath = dataPath.join("Animations.json");
   if (!animationsPath.exists()) {
-    logger.error(`Animations.json at ${animationsPath} does not exist!`);
+    logger.error(`Animations.json at ${animationsPath.fullPath} does not exist!`);
     return null;
   }
 
@@ -140,7 +140,7 @@ export function parseData(dataPath: Path, version: RPGMakerVersion): ParsedData 
     // we have to read and parse all .efkefc to find which files are unused
 
     const effectsPath = dataPath.parent.join("effects");
-    logger.debug(`Parsing effects in ${effectsPath}`);
+    logger.debug(`Parsing effects in ${effectsPath.fullPath}`);
 
     const items = fs.readdirSync(effectsPath.fullPath, { encoding: "utf8" });
     for (const item of items) {
@@ -701,7 +701,7 @@ function readResource(fd: number, effectsPath: Path, count: number, res: ParsedD
     const lengthBuf = new Uint32Array(1);
     let bytesRead = fs.readSync(fd, lengthBuf, { length: lengthBuf.byteLength });
     if (bytesRead != lengthBuf.byteLength) {
-      logger.error(`Tried reading ${lengthBuf.length} bytes but read ${bytesRead} from file ${p}`);
+      logger.error(`Tried reading ${lengthBuf.length} bytes but read ${bytesRead} from file ${p.fullPath}`);
       return false;
     }
 
@@ -710,7 +710,7 @@ function readResource(fd: number, effectsPath: Path, count: number, res: ParsedD
     const nameBuf = new Uint16Array(lengthBuf[0]);
     bytesRead = fs.readSync(fd, nameBuf, { length: nameBuf.byteLength });
     if (bytesRead != nameBuf.byteLength) {
-      logger.error(`Tried reading ${nameBuf.length} bytes but read ${bytesRead} from file ${p}`);
+      logger.error(`Tried reading ${nameBuf.length} bytes but read ${bytesRead} from file ${p.fullPath}`);
       return false;
     }
 
@@ -731,7 +731,7 @@ function parseEffect(p: Path, effectsPath: Path, res: ParsedData): boolean {
   const headerBuf = new Uint32Array(2);
   let bytesRead = fs.readSync(fd, headerBuf, { length: headerBuf.byteLength });
   if (bytesRead != headerBuf.byteLength) {
-    logger.error(`Tried reading ${headerBuf.length} bytes but read ${bytesRead} from file ${p}`);
+    logger.error(`Tried reading ${headerBuf.length} bytes but read ${bytesRead} from file ${p.fullPath}`);
     fs.closeSync(fd);
     return false;
   }
@@ -753,7 +753,7 @@ function parseEffect(p: Path, effectsPath: Path, res: ParsedData): boolean {
   const infoChunkBuf = new Uint32Array(3);
   bytesRead = fs.readSync(fd, infoChunkBuf, { length: infoChunkBuf.byteLength });
   if (bytesRead != infoChunkBuf.byteLength) {
-    logger.error(`Tried reading ${infoChunkBuf.length} bytes but read ${bytesRead} from file ${p}`);
+    logger.error(`Tried reading ${infoChunkBuf.length} bytes but read ${bytesRead} from file ${p.fullPath}`);
     fs.closeSync(fd);
     return false;
   }
@@ -775,13 +775,13 @@ function parseEffect(p: Path, effectsPath: Path, res: ParsedData): boolean {
   const numTextureElementsBuf = new Uint32Array(1);
   bytesRead = fs.readSync(fd, numTextureElementsBuf, { length: numTextureElementsBuf.byteLength });
   if (bytesRead != numTextureElementsBuf.byteLength) {
-    logger.error(`Tried reading ${numTextureElementsBuf.length} bytes but read ${bytesRead} from file ${p}`);
+    logger.error(`Tried reading ${numTextureElementsBuf.length} bytes but read ${bytesRead} from file ${p.fullPath}`);
     fs.closeSync(fd);
     return false;
   }
 
   if (!readResource(fd, effectsPath, numTextureElementsBuf[0], res, p)) {
-    logger.error(`Error parsing resources in effect file ${p}`);
+    logger.error(`Error parsing resources in effect file ${p.fullPath}`);
     fs.closeSync(fd);
     return false;
   }
@@ -789,7 +789,7 @@ function parseEffect(p: Path, effectsPath: Path, res: ParsedData): boolean {
   const unknownBuf = new Uint32Array(1);
   bytesRead = fs.readSync(fd, unknownBuf, { length: unknownBuf.byteLength });
   if (bytesRead != unknownBuf.byteLength) {
-    logger.error(`Tried reading ${unknownBuf.length} bytes but read ${bytesRead} from file ${p}`);
+    logger.error(`Tried reading ${unknownBuf.length} bytes but read ${bytesRead} from file ${p.fullPath}`);
     fs.closeSync(fd);
     return false;
   }
@@ -798,13 +798,13 @@ function parseEffect(p: Path, effectsPath: Path, res: ParsedData): boolean {
   const numAlphaElementsBuf = new Uint32Array(1);
   bytesRead = fs.readSync(fd, numAlphaElementsBuf, { length: numAlphaElementsBuf.byteLength });
   if (bytesRead != numAlphaElementsBuf.byteLength) {
-    logger.error(`Tried reading ${numAlphaElementsBuf.length} bytes but read ${bytesRead} from file ${p}`);
+    logger.error(`Tried reading ${numAlphaElementsBuf.length} bytes but read ${bytesRead} from file ${p.fullPath}`);
     fs.closeSync(fd);
     return false;
   }
 
   if (!readResource(fd, effectsPath, numAlphaElementsBuf[0], res, p)) {
-    logger.error(`Error parsing resources in effect file ${p}`);
+    logger.error(`Error parsing resources in effect file ${p.fullPath}`);
     fs.closeSync(fd);
     return false;
   }
@@ -813,13 +813,13 @@ function parseEffect(p: Path, effectsPath: Path, res: ParsedData): boolean {
   const numModelElementsBuf = new Uint32Array(1);
   bytesRead = fs.readSync(fd, numModelElementsBuf, { length: numModelElementsBuf.byteLength });
   if (bytesRead != numModelElementsBuf.byteLength) {
-    logger.error(`Tried reading ${numModelElementsBuf.length} bytes but read ${bytesRead} from file ${p}`);
+    logger.error(`Tried reading ${numModelElementsBuf.length} bytes but read ${bytesRead} from file ${p.fullPath}`);
     fs.closeSync(fd);
     return false;
   }
 
   if (!readResource(fd, effectsPath, numModelElementsBuf[0], res, p)) {
-    logger.error(`Error parsing resources in effect file ${p}`);
+    logger.error(`Error parsing resources in effect file ${p.fullPath}`);
     fs.closeSync(fd);
     return false;
   }

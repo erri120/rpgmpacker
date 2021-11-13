@@ -23,8 +23,6 @@ export class Path {
     this.extension = (extension === undefined ? extname(this.fullPath) : extension).toLowerCase();
     this.baseName = baseName === undefined ? basename(this.fullPath, this.extension) : baseName;
     this.fileName = this.baseName + this.extension;
-
-    Object.prototype.toString = () => this.fullPath;
   }
 
   isFile(): boolean {

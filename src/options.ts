@@ -38,34 +38,34 @@ export function createOptionsFromYargs(opt: {
 
   const inputPath = new Path(opt.input);
   if (!inputPath.exists()) {
-    logger.error(`Input folder ${inputPath} does not exist!`);
+    logger.error(`Input folder ${inputPath.fullPath} does not exist!`);
     return null;
   }
 
   if (!inputPath.isDir) {
-    logger.error(`Input path ${inputPath} is not a folder!`);
+    logger.error(`Input path ${inputPath.fullPath} is not a folder!`);
     return null;
   }
 
   const outputPath = new Path(opt.output);
   if (!outputPath.exists()) {
-    logger.error(`Output folder ${outputPath} does not exist!`);
+    logger.error(`Output folder ${outputPath.fullPath} does not exist!`);
     return null;
   }
 
   if (!outputPath.isDir) {
-    logger.error(`Output path ${inputPath} is not a folder!`);
+    logger.error(`Output path ${inputPath.fullPath} is not a folder!`);
     return null;
   }
 
   const rpgmakerPath = new Path(opt.rpgmaker);
   if (!rpgmakerPath.exists()) {
-    logger.error(`RPG Maker folder ${rpgmakerPath} does not exist!`);
+    logger.error(`RPG Maker folder ${rpgmakerPath.fullPath} does not exist!`);
     return null;
   }
 
   if (!rpgmakerPath.isDir) {
-    logger.error(`RPG Maker path ${inputPath} is not a folder!`);
+    logger.error(`RPG Maker path ${inputPath.fullPath} is not a folder!`);
     return null;
   }
 

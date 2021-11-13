@@ -52,12 +52,12 @@ export function encryptFile(from: Path, to: Path, hash: Buffer, useCache: boolea
   }
 
   if (newExt === null) {
-    logger.error(`Unknown file extension ${from.extension} of file ${from}`);
+    logger.error(`Unknown file extension ${from.extension} of file ${from.fullPath}`);
     return null;
   }
 
   to = to.replaceExtension(newExt);
-  logger.debug(`Encrypting file from ${from} to ${to}`);
+  logger.debug(`Encrypting file from ${from.fullPath} to ${to.fullPath}`);
 
   const fromFd = fs.openSync(from.fullPath, "r", 0o666);
   const toFd = fs.openSync(to.fullPath, "w+", 0o666);
@@ -66,13 +66,13 @@ export function encryptFile(from: Path, to: Path, hash: Buffer, useCache: boolea
   const filesize = stats.size;
 
   if (filesize < 16) {
-    logger.error(`Input file ${from} is less than 16 bytes long!`);
+    logger.error(`Input file ${from.fullPath} is less than 16 bytes long!`);
     return null;
   }
 
   let bytesWritten = fs.writeSync(toFd, superTopSecretEncryptionHeader, 0, superTopSecretEncryptionHeader.length);
   if (bytesWritten !== superTopSecretEncryptionHeader.length) {
-    logger.error(`Tried writing ${superTopSecretEncryptionHeader.length} bytes but only wrote ${bytesWritten} to file ${to}`);
+    logger.error(`Tried writing ${superTopSecretEncryptionHeader.length} bytes but only wrote ${bytesWritten} to file ${to.fullPath}`);
     fs.closeSync(fromFd);
     fs.closeSync(toFd);
     return null;
@@ -81,7 +81,7 @@ export function encryptFile(from: Path, to: Path, hash: Buffer, useCache: boolea
   const buffer = new Uint8Array(16);
   let bytesRead = fs.readSync(fromFd, buffer, { length: buffer.length });
   if (bytesRead !== buffer.length) {
-    logger.error(`Tried reading ${buffer.length} bytes but only read ${bytesRead} from file ${from}`);
+    logger.error(`Tried reading ${buffer.length} bytes but only read ${bytesRead} from file ${from.fullPath}`);
     fs.closeSync(fromFd);
     fs.closeSync(toFd);
     return null;
@@ -96,7 +96,7 @@ export function encryptFile(from: Path, to: Path, hash: Buffer, useCache: boolea
 
   bytesWritten = fs.writeSync(toFd, buffer, 0, buffer.length);
   if (bytesWritten !== buffer.length) {
-    logger.error(`Tried writing ${buffer.length} bytes but only wrote ${bytesWritten} to file ${to}`);
+    logger.error(`Tried writing ${buffer.length} bytes but only wrote ${bytesWritten} to file ${to.fullPath}`);
     fs.closeSync(fromFd);
     fs.closeSync(toFd);
     return null;
@@ -105,7 +105,7 @@ export function encryptFile(from: Path, to: Path, hash: Buffer, useCache: boolea
   const remaining = new Uint8Array(filesize - 16);
   bytesRead = fs.readSync(fromFd, remaining, { length: remaining.byteLength });
   if (bytesRead !== remaining.length) {
-    logger.error(`Tried reading ${buffer.length} bytes but only read ${bytesRead} from file ${from}`);
+    logger.error(`Tried reading ${buffer.length} bytes but only read ${bytesRead} from file ${from.fullPath}`);
     fs.closeSync(fromFd);
     fs.closeSync(toFd);
     return null;
@@ -113,7 +113,7 @@ export function encryptFile(from: Path, to: Path, hash: Buffer, useCache: boolea
 
   bytesWritten = fs.writeSync(toFd, remaining, 0, remaining.length);
   if (bytesWritten !== remaining.length) {
-    logger.error(`Tried writing ${remaining.length} bytes but only wrote ${bytesWritten} to file ${to}`);
+    logger.error(`Tried writing ${remaining.length} bytes but only wrote ${bytesWritten} to file ${to.fullPath}`);
     fs.closeSync(fromFd);
     fs.closeSync(toFd);
     return null;
@@ -125,7 +125,7 @@ export function encryptFile(from: Path, to: Path, hash: Buffer, useCache: boolea
 }
 
 export function updateSystemJson(from: Path, to: Path, encryptAudio: boolean, encryptImages: boolean, hash: Buffer) {
-  logger.debug(`Updating System.json from ${from} to ${to} with encryption data`);
+  logger.debug(`Updating System.json from ${from.fullPath} to ${to.fullPath} with encryption data`);
 
   let json = fs.readFileSync(from.fullPath, { encoding: "utf-8" });
   const system = JSON.parse(json);

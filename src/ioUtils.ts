@@ -106,13 +106,13 @@ export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImag
 
 export function transferFile(from: Path, to: Path, useHardlink: boolean) {
   if (useHardlink) {
-    logger.debug(`Creating hardlink from ${from} to ${to}`);
+    logger.debug(`Creating hardlink from ${from.fullPath} to ${to.fullPath}`);
     if (to.exists()) {
       fs.rmSync(to.fullPath);
     }
     fs.linkSync(from.fullPath, to.fullPath);
   } else {
-    logger.debug(`Copying file from ${from} to ${to}`);
+    logger.debug(`Copying file from ${from.fullPath} to ${to.fullPath}`);
     fs.copyFileSync(from.fullPath, to.fullPath);
   }
 }

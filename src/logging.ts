@@ -30,7 +30,6 @@ class Logger {
 
     const date = new Date();
     const logMessage = `${date.toISOString()}|${levelToString(level)}|${message}`;
-
     console.log(logMessage);
   }
 

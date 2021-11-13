@@ -28,7 +28,7 @@ export function getTemplateFolderName(version: RPGMakerVersion, platform: RPGMak
 }
 
 export function identifyRPGMakerVersion(input: Path): RPGMakerVersion | null {
-  logger.debug(`Identifying RPG Maker version in ${input}`);
+  logger.debug(`Identifying RPG Maker version in ${input.fullPath}`);
 
   const dirents = fs.readdirSync(input.fullPath, { encoding: "utf8", withFileTypes: true });
   for (let i = 0; i < dirents.length; i++) {
@@ -47,7 +47,7 @@ export function identifyRPGMakerVersion(input: Path): RPGMakerVersion | null {
     }
   }
 
-  logger.error(`Unable to find a RPG Maker project file in ${input}`);
+  logger.error(`Unable to find a RPG Maker project file in ${input.fullPath}`);
   return null;
 }
 

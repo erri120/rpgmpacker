@@ -149,10 +149,10 @@ function main() {
   for (let i = 0; i < options.Platforms.length; i++) {
     const p = options.Platforms[i];
     const platformOutputPath = options.Output.join(p);
-    logger.debug(`Current Platform: ${p}, Output path: ${platformOutputPath}`);
+    logger.debug(`Current Platform: ${p}, Output path: ${platformOutputPath.fullPath}`);
 
     if (platformOutputPath.exists()) {
-      logger.debug(`Removing old files in ${platformOutputPath}`);
+      logger.debug(`Removing old files in ${platformOutputPath.fullPath}`);
       fs.rmSync(platformOutputPath.fullPath, { recursive: true });
     }
 
@@ -167,11 +167,11 @@ function main() {
     if (templateFolderName !== null) {
       const templateFolderPath = options.RPGMaker.join(templateFolderName);
       if (!templateFolderPath.exists()) {
-        logger.error(`The template folder ${templateFolderPath} does not exist!`);
+        logger.error(`The template folder ${templateFolderPath.fullPath} does not exist!`);
         return;
       }
 
-      logger.debug(`Template folder is ${templateFolderPath}`);
+      logger.debug(`Template folder is ${templateFolderPath.fullPath}`);
 
       templatePathRegistry = createTemplatePathRegistry(templateFolderPath);
 
@@ -218,7 +218,7 @@ function main() {
     // MV has a www folder, MZ does not
     // on OSX the stuff also goes into "Game.app/Contents/Resources/app.nw"
     const wwwPath = getWWWPath(platformOutputPath, { Platform: p, Version: rpgmakerVersion });
-    logger.debug(`www Path is ${wwwPath}`);
+    logger.debug(`www Path is ${wwwPath.fullPath}`);
     if (!wwwPath.exists())
       fs.mkdirSync(wwwPath.fullPath, { recursive: true });
 
