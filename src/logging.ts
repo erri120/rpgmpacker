@@ -8,6 +8,17 @@ export enum Level {
   ERROR = 4
 }
 
+function levelToString(level: Level): string {
+  switch (level) {
+  case Level.SILENT: return "SILENT";
+  case Level.DEBUG: return "DEBUG";
+  case Level.INFO: return "INFO";
+  case Level.WARNING: return "WARNING";
+  case Level.ERROR: return "ERROR";
+  default: return "UNKNOWN";
+  }
+}
+
 class Logger {
   minLevel: Level;
 
@@ -19,18 +30,21 @@ class Logger {
     if (level === Level.SILENT || this.minLevel === Level.SILENT) return;
     if (level < this.minLevel) return;
 
+    const date = new Date();
+    const logMessage = `${date.toISOString()}|${levelToString(level)}|${message}`;
+
     switch (level) {
     case Level.DEBUG:
-      console.log(chalk.grey(message));
+      console.log(chalk.grey(logMessage));
       break;
     case Level.INFO:
-      console.log(message);
+      console.log(logMessage);
       break;
     case Level.WARNING:
-      console.log(chalk.yellow(message));
+      console.log(chalk.yellow(logMessage));
       break;
     case Level.ERROR:
-      console.log(chalk.red(message));
+      console.log(chalk.red(logMessage));
       break;
     default:
       break;
