@@ -1,5 +1,3 @@
-import chalk from "chalk";
-
 export enum Level {
   SILENT = 0,
   DEBUG = 1,
@@ -33,22 +31,7 @@ class Logger {
     const date = new Date();
     const logMessage = `${date.toISOString()}|${levelToString(level)}|${message}`;
 
-    switch (level) {
-    case Level.DEBUG:
-      console.log(chalk.grey(logMessage));
-      break;
-    case Level.INFO:
-      console.log(logMessage);
-      break;
-    case Level.WARNING:
-      console.log(chalk.yellow(logMessage));
-      break;
-    case Level.ERROR:
-      console.log(chalk.red(logMessage));
-      break;
-    default:
-      break;
-    }
+    console.log(logMessage);
   }
 
   public log(message: string) {
