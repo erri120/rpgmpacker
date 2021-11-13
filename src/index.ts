@@ -15,6 +15,7 @@ import { FileOperation, FolderType, OperationType } from "./fileOperations";
 import { createPathRegistry, createTemplatePathRegistry, TemplatePathRegistry } from "./paths";
 import { filterUnusedFiles } from "./excludeUtils";
 import { parseData, ParsedData } from "./parsedData";
+import { parsePlugins } from "./pluginUtils";
 
 function main() {
   const yargsResult = yargs(hideBin(process.argv))
@@ -138,9 +139,14 @@ function main() {
     }
 
     parsedData = tempParsedData;
-    // fs.writeFileSync("out.json", JSON.stringify(parsedData, undefined, 2));
-    // console.log(parsedData);
-    // return;
+
+    const pluginPaths = parsePlugins(options.Input.join("js"), options.Input);
+    if (pluginPaths === null) {
+      logger.error("Unable to parse plugins!");
+      return;
+    }
+
+    parsedData.pluginPaths = pluginPaths;
   }
 
   const pathRegistry = createPathRegistry(options.Input);

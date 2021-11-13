@@ -25,6 +25,12 @@ function specialInclude(arr: string[], path: Path, topPath: Path): boolean {
 }
 
 export function filterUnusedFiles(path: Path, parsedData: ParsedData, pathRegistry: PathRegistry, version: RPGMakerVersion): boolean {
+  // Plugin files
+  if (parsedData.pluginPaths !== undefined) {
+    if (parsedData.pluginPaths.some(p => p.equals(path)))
+      return false;
+  }
+
   // Audio
   if (path.isInDirectory(pathRegistry.audio_bgm)) {
     return !specialInclude(parsedData.bgmNames, path, pathRegistry.audio_bgm);

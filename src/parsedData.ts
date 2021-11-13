@@ -66,6 +66,8 @@ export interface ParsedData {
   battleback2Names: string[],
   //img/parallaxes/{}.png
   parallaxNames: string[],
+
+  pluginPaths: Path[] | undefined,
 }
 
 export function parseData(dataPath: Path, version: RPGMakerVersion): ParsedData | null {
@@ -90,7 +92,8 @@ export function parseData(dataPath: Path, version: RPGMakerVersion): ParsedData 
     tilesetNames: [],
     title1Names: [],
     title2Names: [],
-    useSideView: false
+    useSideView: false,
+    pluginPaths: undefined,
   };
 
   const items = fs.readdirSync(dataPath.fullPath, { encoding: "utf8" });
