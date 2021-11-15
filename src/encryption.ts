@@ -4,12 +4,13 @@ import { createHash, Hash } from "crypto";
 import logger from "./logging";
 import { RPGMakerVersion } from "./rpgmakerTypes";
 import { Path } from "./ioTypes";
+import { BinaryReader } from "./io/BinaryReader";
+import { BinaryWriter } from "./io/BinaryWriter";
 
 export function getMD5Hash(input: string): Hash {
   const hash = createHash("md5");
   hash.update(input, "utf-8");
   return hash;
-  // return hash.digest("hex");
 }
 
 const extensions = {
@@ -59,31 +60,23 @@ export function encryptFile(from: Path, to: Path, hash: Buffer, useCache: boolea
   to = to.replaceExtension(newExt);
   logger.debug(`Encrypting file from ${from.fullPath} to ${to.fullPath}`);
 
-  const fromFd = fs.openSync(from.fullPath, "r", 0o666);
-  const toFd = fs.openSync(to.fullPath, "w+", 0o666);
+  const br = new BinaryReader(from);
 
-  const stats = fs.fstatSync(fromFd);
+  const stats = br.stats();
+  if (stats === null) return null;
+
   const filesize = stats.size;
 
-  if (filesize < 16) {
-    logger.error(`Input file ${from.fullPath} is less than 16 bytes long!`);
+  const bw = new BinaryWriter(to);
+
+  if (!bw.write(superTopSecretEncryptionHeader)) {
+    br.close();
     return null;
   }
 
-  let bytesWritten = fs.writeSync(toFd, superTopSecretEncryptionHeader, 0, superTopSecretEncryptionHeader.length);
-  if (bytesWritten !== superTopSecretEncryptionHeader.length) {
-    logger.error(`Tried writing ${superTopSecretEncryptionHeader.length} bytes but only wrote ${bytesWritten} to file ${to.fullPath}`);
-    fs.closeSync(fromFd);
-    fs.closeSync(toFd);
-    return null;
-  }
-
-  const buffer = new Uint8Array(16);
-  let bytesRead = fs.readSync(fromFd, buffer, { length: buffer.length });
-  if (bytesRead !== buffer.length) {
-    logger.error(`Tried reading ${buffer.length} bytes but only read ${bytesRead} from file ${from.fullPath}`);
-    fs.closeSync(fromFd);
-    fs.closeSync(toFd);
+  const buffer = br.read(16);
+  if (buffer === null) {
+    bw.close();
     return null;
   }
 
@@ -94,33 +87,30 @@ export function encryptFile(from: Path, to: Path, hash: Buffer, useCache: boolea
     buffer[i] = result;
   }
 
-  bytesWritten = fs.writeSync(toFd, buffer, 0, buffer.length);
-  if (bytesWritten !== buffer.length) {
-    logger.error(`Tried writing ${buffer.length} bytes but only wrote ${bytesWritten} to file ${to.fullPath}`);
-    fs.closeSync(fromFd);
-    fs.closeSync(toFd);
+  if (!bw.write(buffer)) {
+    br.close();
     return null;
   }
 
-  const remaining = new Uint8Array(filesize - 16);
-  bytesRead = fs.readSync(fromFd, remaining, { length: remaining.byteLength });
-  if (bytesRead !== remaining.length) {
-    logger.error(`Tried reading ${buffer.length} bytes but only read ${bytesRead} from file ${from.fullPath}`);
-    fs.closeSync(fromFd);
-    fs.closeSync(toFd);
+  const remaining = br.read(filesize - 16);
+  if (remaining === null) {
+    bw.close();
     return null;
   }
 
-  bytesWritten = fs.writeSync(toFd, remaining, 0, remaining.length);
-  if (bytesWritten !== remaining.length) {
-    logger.error(`Tried writing ${remaining.length} bytes but only wrote ${bytesWritten} to file ${to.fullPath}`);
-    fs.closeSync(fromFd);
-    fs.closeSync(toFd);
+  if (!bw.write(remaining)) {
+    br.close();
     return null;
   }
 
-  fs.closeSync(fromFd);
-  fs.closeSync(toFd);
+  if (!br.isClosed()) {
+    br.close();
+  }
+
+  if (!bw.isClosed()) {
+    bw.close();
+  }
+
   return to;
 }
 
