@@ -13,85 +13,85 @@ export enum BattleSystem {
 export interface ParsedData {
   //Actors.json
   //img/sv_actors/{}.png
-  actorBattlerNames: string[],
+  actorBattlerNames: Set<string>,
 
   //Animations.json
-  animationIds: number[],
+  animationIds: Set<number>,
   //MV only: img/animations/{}.png
-  animationNames: string[],
+  animationNames: Set<string>,
   //MZ only: effects/{}.efkefc
-  effectNames: string[],
+  effectNames: Set<string>,
   //MZ only: effects/{}
   effectResources: Path[],
 
   //Enemies.json
   //img/enemies/{}.png
-  enemyBattlerNames: string[],
+  enemyBattlerNames: Set<string>,
 
   useSideView: boolean,
 
   //Tilesets.json
   //img/tilesets/{}.png+{}.txt
-  tilesetNames: string[],
+  tilesetNames: Set<string>,
 
   //System.json
   //img/titles1/{}.png
-  title1Names: string[],
+  title1Names: Set<string>,
   //img/titles2/{}.png
-  title2Names: string[],
+  title2Names: Set<string>,
 
   //other
   //img/characters/{}.png
-  characterNames: string[],
+  characterNames: Set<string>,
   //img/faces/{}.png
-  faceNames: string[],
+  faceNames: Set<string>,
 
   //audio/bgm/{}.m4a/ogg
-  bgmNames: string[],
+  bgmNames: Set<string>,
   //audio/bgs/{}.m4a/ogg
-  bgsNames: string[],
+  bgsNames: Set<string>,
   //audio/me/{}.m4a/ogg
-  meNames: string[],
+  meNames: Set<string>,
   //audio/se/{}.m4a/ogg
-  seNames: string[],
+  seNames: Set<string>,
 
   //img/pictures/{}.png
-  pictureNames: string[],
+  pictureNames: Set<string>,
   //movies/{}.webm
-  movieNames: string[],
+  movieNames: Set<string>,
 
   //img/battlebacks1/{}.png
-  battleback1Names: string[],
+  battleback1Names: Set<string>,
   //img/battlebacks2/{}.png
-  battleback2Names: string[],
+  battleback2Names: Set<string>,
   //img/parallaxes/{}.png
-  parallaxNames: string[],
+  parallaxNames: Set<string>,
 
   pluginPaths: Path[] | undefined,
 }
 
 export function parseData(dataPath: Path, version: RPGMakerVersion): ParsedData | null {
   const res: ParsedData = {
-    actorBattlerNames: [],
-    animationIds: [],
-    animationNames: [],
-    battleback1Names: [],
-    battleback2Names: [],
-    bgmNames: [],
-    bgsNames: [],
-    characterNames: [],
-    effectNames: [],
+    actorBattlerNames: new Set(),
+    animationIds: new Set(),
+    animationNames: new Set(),
+    battleback1Names: new Set(),
+    battleback2Names: new Set(),
+    bgmNames: new Set(),
+    bgsNames: new Set(),
+    characterNames: new Set(),
+    effectNames: new Set(),
     effectResources: [],
-    enemyBattlerNames: [],
-    faceNames: [],
-    meNames: [],
-    movieNames: [],
-    parallaxNames: [],
-    pictureNames: [],
-    seNames: [],
-    tilesetNames: [],
-    title1Names: [],
-    title2Names: [],
+    enemyBattlerNames: new Set(),
+    faceNames: new Set(),
+    meNames: new Set(),
+    movieNames: new Set(),
+    parallaxNames: new Set(),
+    pictureNames: new Set(),
+    seNames: new Set(),
+    tilesetNames: new Set(),
+    title1Names: new Set(),
+    title2Names: new Set(),
     useSideView: false,
     pluginPaths: undefined,
   };
@@ -150,7 +150,7 @@ export function parseData(dataPath: Path, version: RPGMakerVersion): ParsedData 
       const p = new Path(resolve(effectsPath.fullPath, item));
       if (!p.isFile()) continue;
       if (p.extension !== ".efkefc") continue;
-      if (!res.effectNames.includes(p.baseName)) continue;
+      if (!res.effectNames.has(p.baseName)) continue;
 
       if (!parseEffect(p, effectsPath, res)) {
         logger.error(`Error parsing effect ${p}`);
@@ -228,7 +228,8 @@ function parseEvents(events: Array<Event>, res: ParsedData) {
       specialPush(res.bgmNames, params[1].name);
     } else if (code === 212 || code === 337) {
       const params = event.parameters as number[];
-      res.animationIds.push(params[1]);
+      if (params[1] !== -1)
+        res.animationIds.add(params[1]);
     } else if (code === 231) {
       const params = event.parameters as string[];
       specialPush(res.pictureNames, params[1]);
@@ -352,7 +353,8 @@ function parseItems(path: Path, res: ParsedData) {
       * animationId
     */
 
-    res.animationIds.push(item.animationId);
+    if (item.animationId !== -1)
+      res.animationIds.add(item.animationId);
   }
 }
 
@@ -372,7 +374,8 @@ function parseSkills(path: Path, res: ParsedData) {
       * animationId
     */
 
-    res.animationIds.push(item.animationId);
+    if (item.animationId !== -1)
+      res.animationIds.add(item.animationId);
   }
 }
 
@@ -562,7 +565,8 @@ function parseWeapons(path: Path, res: ParsedData) {
       * animationId
     */
 
-    res.animationIds.push(item.animationId);
+    if (item.animationId !== -1)
+      res.animationIds.add(item.animationId);
   }
 }
 
@@ -672,7 +676,7 @@ function parseAnimations(path: Path, res: ParsedData, version: RPGMakerVersion) 
     if (animation === null) continue;
 
     const id = animation.id;
-    if (!res.animationIds.includes(id)) continue;
+    if (!res.animationIds.has(id)) continue;
 
     if (version === RPGMakerVersion.MV) {
       const mvAnimation = animation as MVAnimation;
@@ -831,11 +835,11 @@ function parseEffect(p: Path, effectsPath: Path, res: ParsedData): boolean {
   return true;
 }
 
-function specialPush(arr: string[], s: string) {
+function specialPush(container: Set<string>, s: string) {
   if (s === undefined) return;
   if (s === null) return;
   if (s.length === 0) return;
-  arr.push(normalizeName(s));
+  container.add(normalizeName(s));
 }
 
 function normalizeName(s: string) {

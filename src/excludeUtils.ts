@@ -3,11 +3,11 @@ import { ParsedData } from "./parsedData";
 import { PathRegistry } from "./paths";
 import { RPGMakerVersion } from "./rpgmakerTypes";
 
-function specialInclude(arr: string[], path: Path, topPath: Path): boolean {
+function specialInclude(container: Set<string>, path: Path, topPath: Path): boolean {
   const name = path.baseName;
 
   if (path.parent.equals(topPath)) {
-    return arr.includes(name);
+    return container.has(name);
   }
 
   // you can actually have sub-directories in various asset folders which makes the above check necessary
@@ -21,7 +21,7 @@ function specialInclude(arr: string[], path: Path, topPath: Path): boolean {
   // making "../img/characters/foo/bar/baz/../abc.png" into "foo/bar/baz/../abc"
   const relative = path.relativeTo(topPath);
   const actualName = relative.slice(0, relative.length - path.extension.length);
-  return arr.includes(actualName);
+  return container.has(actualName);
 }
 
 export function filterUnusedFiles(path: Path, parsedData: ParsedData, pathRegistry: PathRegistry, version: RPGMakerVersion): boolean {
