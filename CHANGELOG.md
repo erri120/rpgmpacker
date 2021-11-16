@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Unreleased]
 
+## [2.0.0] - 2021-11-??
+
+This release features a complete rework of the tool. I decided to move away from C++ and remade the entire thing in TypeScript. You can read more about this decision [here](TODO). This rework carries over all features from the previous version and adds more features on top:
+
+- Plugins can now be parsed for the exclude-unused feature
+- Paths are handled better and multiple filter-related issues have been fixed with it
+- the Side-View and Front-View setting is now used when excluding unused assets
+
 ## [Released]
 
 ## [1.6.2] - 2021-04-07
