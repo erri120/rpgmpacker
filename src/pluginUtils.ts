@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 
 import logger from "./logging";
-import { Path } from "./io/Path";
+import Path from "./io/Path";
 
 export interface PluginOptions {
   name: string,
