@@ -3,7 +3,8 @@ import { createHash, Hash } from "crypto";
 
 import logger from "./logging";
 import { RPGMakerVersion } from "./rpgmakerTypes";
-import { Path } from "./ioTypes";
+import { Path } from "./io/Path";
+import { PathRegistry } from "./paths";
 import { BinaryReader } from "./io/BinaryReader";
 import { BinaryWriter } from "./io/BinaryWriter";
 
@@ -37,11 +38,48 @@ const extensions = {
   },
 };
 
+export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImages: boolean, pathRegistry: PathRegistry, version: RPGMakerVersion): boolean {
+  const ext = from.extension;
+  if (ext !== ".png" && ext !== ".ogg" && ext !== ".m4a") {
+    return false;
+  }
+
+  if (encryptAudio && (ext === ".ogg" || ext === ".m4a")) {
+    return true;
+  }
+
+  if (encryptImages && ext === ".png") {
+    if (version === RPGMakerVersion.MZ) {
+      // effect textures are not encrypted because those are loaded by an external library
+      if (from.getParent().equals(pathRegistry.effects_texture)) {
+        return false;
+      }
+    } else {
+      if (from.getParent().equals(pathRegistry.img_system)) {
+        // these are for some reason not encrypted in MV
+        if (from.fileName === "Loading.png") return false;
+        if (from.fileName === "Window.png") return false;
+        return true;
+      }
+    }
+
+    // game icon for the window
+    if (from.getParent().equals(pathRegistry.icon) && from.fileName === "icon.png") {
+      return false;
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
 const superTopSecretEncryptionHeader = new Uint8Array([0x52, 0x50, 0x47, 0x4D, 0x56, 0x00, 0x00, 0x00, 0x00, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00]);
 
 export function encryptFile(from: Path, to: Path, hash: Buffer, useCache: boolean, useHardlink: boolean, version: RPGMakerVersion): Path | null {
   if (hash.length !== 16) {
-    throw new Error("Hash Buffer does not have a length of 16!");
+    logger.error("Hash Buffer does not have a length of 16!");
+    return null;
   }
 
   let newExt: string | null = null;

@@ -1,8 +1,8 @@
 import fs from "fs";
 import { resolve, sep } from "path";
 
-import { Path } from "./ioTypes";
 import logger from "./logging";
+import { Path } from "./io/Path";
 import { RPGMakerVersion } from "./rpgmakerTypes";
 
 export enum BattleSystem {
@@ -142,7 +142,7 @@ export function parseData(dataPath: Path, version: RPGMakerVersion): ParsedData 
     // MZ uses Effekseer (https://github.com/effekseer/Effekseer) for the effects
     // we have to read and parse all .efkefc to find which files are unused
 
-    const effectsPath = dataPath.parent.join("effects");
+    const effectsPath = dataPath.getParent().join("effects");
     logger.debug(`Parsing effects in ${effectsPath.fullPath}`);
 
     const items = fs.readdirSync(effectsPath.fullPath, { encoding: "utf8" });

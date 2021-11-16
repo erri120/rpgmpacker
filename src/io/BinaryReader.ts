@@ -2,7 +2,7 @@ import fs from "fs";
 
 import logger from "../logging";
 import { BinaryReaderWriter } from "./BinaryReaderWriter";
-import { Path } from "../ioTypes";
+import { Path } from "./Path";
 
 export class BinaryReader extends BinaryReaderWriter {
   constructor(file: Path) {
@@ -30,6 +30,6 @@ export class BinaryReader extends BinaryReaderWriter {
 
   public readUInt32(): number | null {
     const buffer = this.read(4);
-    return buffer === null ? null : buffer.readUInt32BE();
+    return buffer === null ? null : buffer.readUInt32LE();
   }
 }

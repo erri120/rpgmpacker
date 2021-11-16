@@ -1,8 +1,8 @@
 import fs from "fs";
 
 import logger from "./logging";
+import { Path } from "./io/Path";
 import { FolderType } from "./fileOperations";
-import { Path } from "./ioTypes";
 import { RPGMakerInfo, RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
 import { Stack } from "./javascriptDoesNotHaveAFuckingStack";
 import { PathRegistry, TemplatePathRegistry } from "./paths";
@@ -26,14 +26,14 @@ export function shouldFilterFile(from: Path, folder: FolderType, rpgmakerInfo: R
       }
 
       // other chromium related files are also ignored
-      if (from.parent.equals(templatePathRegistry.top)) {
+      if (from.getParent().equals(templatePathRegistry.top)) {
         if (from.fileName === "chromedriver.exe") return true;
         if (from.fileName === "nacl_irt_x86_64.nexe") return true;
         if (from.fileName === "nwjc.exe") return true;
         if (from.fileName === "payload.exe") return true;
       }
     } else if (rpgmakerInfo.Platform === RPGMakerPlatform.OSX) {
-      if (from.parent.equals(templatePathRegistry.top)) {
+      if (from.getParent().equals(templatePathRegistry.top)) {
         if (from.fileName === "chromedriver") return true;
         if (from.fileName === "libffmpeg.dylib") return true;
         if (from.fileName === "minidump_stackwalk") return true;
@@ -63,42 +63,6 @@ export function shouldFilterFile(from: Path, folder: FolderType, rpgmakerInfo: R
       return true;
     }
   }
-  }
-
-  return false;
-}
-
-export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImages: boolean, pathRegistry: PathRegistry, version: RPGMakerVersion): boolean {
-  const ext = from.extension;
-  if (ext !== ".png" && ext !== ".ogg" && ext !== ".m4a") {
-    return false;
-  }
-
-  if (encryptAudio && (ext === ".ogg" || ext === ".m4a")) {
-    return true;
-  }
-
-  if (encryptImages && ext === ".png") {
-    if (version === RPGMakerVersion.MZ) {
-      // effect textures are not encrypted because those are loaded by an external library
-      if (from.parent.equals(pathRegistry.effects_texture)) {
-        return false;
-      }
-    } else {
-      if (from.parent.equals(pathRegistry.img_system)) {
-        // these are for some reason not encrypted in MV
-        if (from.fileName === "Loading.png") return false;
-        if (from.fileName === "Window.png") return false;
-        return true;
-      }
-    }
-
-    // game icon for the window
-    if (from.parent.equals(pathRegistry.icon) && from.fileName === "icon.png") {
-      return false;
-    }
-
-    return true;
   }
 
   return false;

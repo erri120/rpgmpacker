@@ -1,7 +1,7 @@
 import fs from "fs";
 
 import logger from "../logging";
-import { Path } from "../ioTypes";
+import { Path } from "./Path";
 
 export class BinaryReaderWriter {
   protected _file: Path;

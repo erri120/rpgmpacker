@@ -1,4 +1,4 @@
-import { Path } from "./ioTypes";
+import { Path } from "./io/Path";
 import { ParsedData } from "./parsedData";
 import { PathRegistry } from "./paths";
 import { RPGMakerVersion } from "./rpgmakerTypes";
@@ -6,7 +6,7 @@ import { RPGMakerVersion } from "./rpgmakerTypes";
 function specialInclude(container: Set<string>, path: Path, topPath: Path): boolean {
   const name = path.baseName;
 
-  if (path.parent.equals(topPath)) {
+  if (path.getParent().equals(topPath)) {
     return container.has(name);
   }
 

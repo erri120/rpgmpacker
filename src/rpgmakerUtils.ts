@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
 
-import { Path } from "./ioTypes";
 import logger from "./logging";
+import { Path } from "./io/Path";
 import { RPGMakerInfo, RPGMakerPlatform, RPGMakerVersion, TemplateFolderName } from "./rpgmakerTypes";
 
 export function getTemplateFolderName(version: RPGMakerVersion, platform: RPGMakerPlatform): TemplateFolderName | null {

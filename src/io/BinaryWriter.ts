@@ -2,7 +2,7 @@ import fs from "fs";
 
 import logger from "../logging";
 import { BinaryReaderWriter } from "./BinaryReaderWriter";
-import { Path } from "../ioTypes";
+import { Path } from "./Path";
 
 export class BinaryWriter extends BinaryReaderWriter {
   constructor(file: Path) {
@@ -24,5 +24,9 @@ export class BinaryWriter extends BinaryReaderWriter {
     }
 
     return true;
+  }
+
+  public writeUInt32(value: number): boolean {
+    return this.write(new Uint32Array([value]));
   }
 }

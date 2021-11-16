@@ -1,4 +1,4 @@
-import { Path } from "./ioTypes";
+import { Path } from "./io/Path";
 
 export interface PathRegistry {
   audio: Path,

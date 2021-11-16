@@ -4,10 +4,9 @@ import fs from "fs";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
-
-import { encryptFile, getMD5Hash, updateSystemJson } from "./encryption";
-import { isSameDevice, removeEmptyFolders, shouldEncryptFile, shouldFilterFile, transferFile, walkDirectoryRecursively } from "./ioUtils";
 import logger, { Level } from "./logging";
+import { encryptFile, getMD5Hash, updateSystemJson, shouldEncryptFile } from "./encryption";
+import { isSameDevice, removeEmptyFolders, shouldFilterFile, transferFile, walkDirectoryRecursively } from "./ioUtils";
 import { createOptionsFromYargs } from "./options";
 import { RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
 import { getTemplateFolderName, getWWWPath, identifyRPGMakerVersion } from "./rpgmakerUtils";
@@ -187,7 +186,7 @@ function main() {
 
         if (rpgmakerVersion === RPGMakerVersion.MZ) {
           if (p === RPGMakerPlatform.Windows) {
-            if (path.fileName === "nw.exe" && path.parent.equals(templatePathRegistry.top)) {
+            if (path.fileName === "nw.exe" && path.getParent().equals(templatePathRegistry.top)) {
               itemOutputPath = itemOutputPath.replaceFileName("Game.exe");
             }
           } else if (p === RPGMakerPlatform.OSX) {
@@ -196,7 +195,7 @@ function main() {
               itemOutputPath = platformOutputPath.join("Game.app").join(nwjsRelative);
             }
           } else if (p === RPGMakerPlatform.Linux) {
-            if (path.fileName === "nw" && path.parent.equals(templatePathRegistry.top)) {
+            if (path.fileName === "nw" && path.getParent().equals(templatePathRegistry.top)) {
               itemOutputPath = itemOutputPath.replaceFileName("Game");
             }
           }
