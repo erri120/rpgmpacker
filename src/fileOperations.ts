@@ -1,4 +1,4 @@
-import { Path } from "./io/Path";
+import Path from "./io/Path";
 
 export enum FolderType {
   TemplateFolder,

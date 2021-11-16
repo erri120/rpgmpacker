@@ -1,7 +1,77 @@
-import { Path } from "./io/Path";
+import Path from "./io/Path";
+import { FolderType } from "./fileOperations";
+import RPGMakerPlatform from "./rpgmakerTypes/RPGMakerPlatform";
+import { RPGMakerVersion } from "./rpgmakerTypes/RPGMakerVersion";
+import { ProjectPathRegistry } from "./rpgmakerTypes/ProjectPathRegistry";
+import { TemplatePathRegistry } from "./rpgmakerTypes/TemplatePathRegistry";
 import { ParsedData } from "./parsedData";
-import { ProjectPathRegistry } from "./rpgmaker/pathRegistries";
-import { RPGMakerVersion } from "./rpgmakerTypes";
+
+/**
+ * This functions checks if the file should be transfered or not. This has nothing to do with the "exclude unused" feature
+ * and RPG Maker will always ignore these files as well. This includes platform specific audio files and stuff that RPG Maker
+ * simply ignores for whatever reason.
+ * @returns true if the file should be ignored
+ */
+export function isUseless(from: Path, folder: FolderType, platform: RPGMakerPlatform, version: RPGMakerVersion, pathRegistry: ProjectPathRegistry, templatePathRegistry: TemplatePathRegistry | undefined): boolean {
+  switch (folder) {
+  case FolderType.TemplateFolder: {
+    if (version !== RPGMakerVersion.MZ) {
+      return false;
+    }
+
+    if (templatePathRegistry === undefined) {
+      // TODO: error or something
+      return false;
+    }
+
+    if (platform === RPGMakerPlatform.Windows) {
+      // portable native client is apparently not used
+      if (from.isInDirectory(templatePathRegistry.pnacl)) {
+        return true;
+      }
+
+      // other chromium related files are also ignored
+      if (from.getParent().equals(templatePathRegistry.top)) {
+        if (from.fileName === "chromedriver.exe") return true;
+        if (from.fileName === "nacl_irt_x86_64.nexe") return true;
+        if (from.fileName === "nwjc.exe") return true;
+        if (from.fileName === "payload.exe") return true;
+      }
+    } else if (platform === RPGMakerPlatform.OSX) {
+      if (from.getParent().equals(templatePathRegistry.top)) {
+        if (from.fileName === "chromedriver") return true;
+        if (from.fileName === "libffmpeg.dylib") return true;
+        if (from.fileName === "minidump_stackwalk") return true;
+        if (from.fileName === "nwjc") return true;
+        if (from.fileName === "payload") return true;
+        if (from.fileName === "v8_context_snapshot.bin") return true;
+      }
+    }
+
+    return false;
+  }
+  case FolderType.ProjectFolder: {
+    // Desktop: only ogg
+    // Mobile: only m4a
+    // Browser: both
+
+    if (platform === RPGMakerPlatform.Mobile && from.extension === ".ogg") {
+      return true;
+    }
+
+    if (from.extension === ".m4a" && platform !== RPGMakerPlatform.Mobile && platform !== RPGMakerPlatform.Browser) {
+      return true;
+    }
+
+    // skip project files
+    if (from.extension === ".rpgproject" || from.extension === ".rmmzproject") {
+      return true;
+    }
+  }
+  }
+
+  return false;
+}
 
 function specialInclude(container: Set<string>, path: Path, topPath: Path): boolean {
   const name = path.baseName;
@@ -24,7 +94,7 @@ function specialInclude(container: Set<string>, path: Path, topPath: Path): bool
   return container.has(actualName);
 }
 
-export function filterUnusedFiles(path: Path, parsedData: ParsedData, pathRegistry: ProjectPathRegistry, version: RPGMakerVersion): boolean {
+export function isUnused(path: Path, parsedData: ParsedData, pathRegistry: ProjectPathRegistry, version: RPGMakerVersion): boolean {
   // Plugin files
   if (parsedData.pluginPaths !== undefined) {
     if (parsedData.pluginPaths.some(p => p.equals(path)))

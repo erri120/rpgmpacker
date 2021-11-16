@@ -5,16 +5,18 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
 import logger, { Level } from "./logging";
-import { encryptFile, getMD5Hash, updateSystemJson, shouldEncryptFile } from "./encryption";
-import { isSameDevice, removeEmptyFolders, shouldFilterFile, transferFile, walkDirectoryRecursively } from "./ioUtils";
 import { createOptionsFromYargs } from "./options";
-import { RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
-import { getTemplateFolderName, getWWWPath, identifyRPGMakerVersion } from "./rpgmakerUtils";
+import { encryptFile, getMD5Hash, updateSystemJson, shouldEncryptFile } from "./encryption";
+import { isSameDevice, walkDirectoryRecursively, transferFile, removeEmptyFolders } from "./io/ioUtils";
+import RPGMakerPlatform from "./rpgmakerTypes/RPGMakerPlatform";
+import { RPGMakerVersion, identifyRPGMakerVersion } from "./rpgmakerTypes/RPGMakerVersion";
+import { getTemplateFolderName } from "./rpgmakerTypes/TemplateFolderName";
 import { FileOperation, FolderType, OperationType } from "./fileOperations";
-import { createProjectPathRegistry, createTemplatePathRegistry, TemplatePathRegistry } from "./rpgmaker/pathRegistries";
-import { filterUnusedFiles } from "./excludeUtils";
+import { createProjectPathRegistry } from "./rpgmakerTypes/ProjectPathRegistry";
+import { createTemplatePathRegistry, TemplatePathRegistry } from "./rpgmakerTypes/TemplatePathRegistry";
 import { parseData, ParsedData } from "./parsedData";
 import { parsePlugins } from "./pluginUtils";
+import { isUseless, isUnused } from "./filtering";
 
 function main() {
   const yargsResult = yargs(hideBin(process.argv))
@@ -207,7 +209,7 @@ function main() {
           continue;
         }
 
-        if (shouldFilterFile(path, FolderType.TemplateFolder, { Version: rpgmakerVersion, Platform: p }, pathRegistry, templatePathRegistry)) {
+        if (isUseless(path, FolderType.TemplateFolder, p, rpgmakerVersion, pathRegistry, templatePathRegistry)) {
           continue;
         }
 
@@ -221,8 +223,13 @@ function main() {
     }
 
     // MV has a www folder, MZ does not
-    // on OSX the stuff also goes into "Game.app/Contents/Resources/app.nw"
-    const wwwPath = getWWWPath(platformOutputPath, { Platform: p, Version: rpgmakerVersion });
+    // on OSX the stuff always goes into "Game.app/Contents/Resources/app.nw"
+    const wwwPath = p === RPGMakerPlatform.OSX
+      ? platformOutputPath.join("Game.app/Contents/Resources/app.nw")
+      : rpgmakerVersion === RPGMakerVersion.MV
+        ? platformOutputPath.join("www")
+        : platformOutputPath;
+
     logger.debug(`www Path is ${wwwPath.fullPath}`);
     if (!wwwPath.exists())
       fs.mkdirSync(wwwPath.fullPath, { recursive: true });
@@ -238,12 +245,12 @@ function main() {
       }
 
       if (options.ExcludeUnused) {
-        if (filterUnusedFiles(path, parsedData!, pathRegistry, rpgmakerVersion)) {
+        if (isUnused(path, parsedData!, pathRegistry, rpgmakerVersion)) {
           continue;
         }
       }
 
-      if (shouldFilterFile(path, FolderType.ProjectFolder, { Version: rpgmakerVersion, Platform: p }, pathRegistry, templatePathRegistry)) {
+      if (isUseless(path, FolderType.ProjectFolder, p, rpgmakerVersion, pathRegistry, templatePathRegistry)) {
         continue;
       }
 
@@ -268,7 +275,6 @@ function main() {
       fileOperations.push(operation);
     }
 
-    // TODO: make this run in parallel with options.NumThreads
     for (const operation of fileOperations) {
       const canUseHardlinks = operation.Folder === FolderType.TemplateFolder
         ? canHardlinkRPGMakerToOutput

@@ -1,7 +1,7 @@
 import { describe, it } from "mocha";
 import { expect } from "chai";
 
-import { Stack } from "../../src/other/Stack";
+import Stack from "../../src/other/Stack";
 
 describe("Stack", () => {
   it("push peak pop", () => {

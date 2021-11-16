@@ -1,9 +1,9 @@
 import fs from "fs";
 
 import logger from "../logging";
-import { Path } from "./Path";
+import Path from "./Path";
 
-export class BinaryReaderWriter {
+export default class BinaryReaderWriter {
   protected _file: Path;
   protected _fd: number | null;
 

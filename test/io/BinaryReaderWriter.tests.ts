@@ -2,9 +2,9 @@ import { before, it, describe } from "mocha";
 import { expect } from "chai";
 
 import logger, { Level } from "../../src/logging";
-import { Path } from "../../src/ioTypes";
-import { BinaryReader } from "../../src/io/BinaryReader";
-import { BinaryWriter } from "../../src/io/BinaryWriter";
+import Path from "../../src/io/Path";
+import BinaryReader from "../../src/io/BinaryReader";
+import BinaryWriter from "../../src/io/BinaryWriter";
 
 describe("BinaryReaderWriter", () => {
   before(() => {

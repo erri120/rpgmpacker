@@ -1,7 +1,7 @@
 import { dirname, basename, resolve, extname } from "path";
 import { accessSync, constants, statSync } from "fs";
 
-export class Path {
+export default class Path {
   private _fullPath: string;
   private _dirName: string;
   private _baseName: string;

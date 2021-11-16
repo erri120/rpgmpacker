@@ -4,7 +4,7 @@ interface StackItem<T> {
   Value: T
 }
 
-export class Stack<T> {
+export default class Stack<T> {
   private _top: StackItem<T> | null;
   private _size: number;
 

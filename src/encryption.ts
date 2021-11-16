@@ -2,11 +2,11 @@ import fs from "fs";
 import { createHash, Hash } from "crypto";
 
 import logger from "./logging";
-import { RPGMakerVersion } from "./rpgmakerTypes";
-import { Path } from "./io/Path";
-import { ProjectPathRegistry } from "./rpgmaker/pathRegistries";
-import { BinaryReader } from "./io/BinaryReader";
-import { BinaryWriter } from "./io/BinaryWriter";
+import Path from "./io/Path";
+import BinaryReader from "./io/BinaryReader";
+import BinaryWriter from "./io/BinaryWriter";
+import { RPGMakerVersion } from "./rpgmakerTypes/RPGMakerVersion";
+import { ProjectPathRegistry } from "./rpgmakerTypes/ProjectPathRegistry";
 
 export function getMD5Hash(input: string): Hash {
   const hash = createHash("md5");

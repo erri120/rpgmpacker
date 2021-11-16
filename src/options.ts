@@ -1,6 +1,6 @@
 import logger from "./logging";
-import { Path } from "./io/Path";
-import { RPGMakerPlatform } from "./rpgmakerTypes";
+import Path from "./io/Path";
+import RPGMakerPlatform from "./rpgmakerTypes/RPGMakerPlatform";
 
 export interface Options {
   Input: Path;

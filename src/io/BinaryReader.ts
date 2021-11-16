@@ -1,10 +1,10 @@
 import fs from "fs";
 
 import logger from "../logging";
-import { BinaryReaderWriter } from "./BinaryReaderWriter";
-import { Path } from "./Path";
+import BinaryReaderWriter from "./BinaryReaderWriter";
+import Path from "./Path";
 
-export class BinaryReader extends BinaryReaderWriter {
+export default class BinaryReader extends BinaryReaderWriter {
   constructor(file: Path) {
     super(file, "r");
   }

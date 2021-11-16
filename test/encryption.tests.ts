@@ -1,13 +1,20 @@
 import { before, describe } from "mocha";
 import { expect } from "chai";
 
-import { readFileSync } from "fs";
+import fs from "fs";
+import { createHash } from "crypto";
 
-import { encryptFile, getMD5Hash, updateSystemJson } from "../src/encryption";
-import { RPGMakerVersion } from "../src/rpgmakerTypes";
-import { getFileHash } from "./testutils";
 import logger, { Level } from "../src/logging";
-import { Path } from "../src/ioTypes";
+import Path from "../src/io/Path";
+import { encryptFile, getMD5Hash, updateSystemJson } from "../src/encryption";
+import { RPGMakerVersion } from "../src/rpgmakerTypes/RPGMakerVersion";
+
+function getFileHash(file: string): string {
+  const fileHash = createHash("SHA256");
+  const contents = fs.readFileSync(file);
+  fileHash.update(contents);
+  return fileHash.digest("hex");
+}
 
 describe("encryption", () => {
   before(() => {
@@ -62,7 +69,7 @@ describe("encryption", () => {
       const output = new Path("./test-output/System.json");
       updateSystemJson(input, output, true, true, getMD5Hash("1337").digest());
 
-      const json = readFileSync(output.fullPath, { encoding: "utf-8" });
+      const json = fs.readFileSync(output.fullPath, { encoding: "utf-8" });
       const system = JSON.parse(json);
 
       expect(system["encryptionKey"]).to.equal("e48e13207341b6bffb7fb1622282247b");

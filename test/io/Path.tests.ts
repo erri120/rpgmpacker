@@ -1,7 +1,7 @@
-import { it, describe } from "mocha";
+import { describe, it } from "mocha";
 import { expect } from "chai";
 
-import { Path } from "../../src/io/Path";
+import Path from "../../src/io/Path";
 
 describe("Path", () => {
   const readmeFile = new Path("C:\\README.md");

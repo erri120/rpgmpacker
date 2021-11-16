@@ -2,8 +2,8 @@ import fs from "fs";
 import { resolve, sep } from "path";
 
 import logger from "./logging";
-import { Path } from "./io/Path";
-import { RPGMakerVersion } from "./rpgmakerTypes";
+import Path from "./io/Path";
+import { RPGMakerVersion } from "./rpgmakerTypes/RPGMakerVersion";
 
 export enum BattleSystem {
   FrontView,
