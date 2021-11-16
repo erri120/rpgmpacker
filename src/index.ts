@@ -11,7 +11,7 @@ import { createOptionsFromYargs } from "./options";
 import { RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
 import { getTemplateFolderName, getWWWPath, identifyRPGMakerVersion } from "./rpgmakerUtils";
 import { FileOperation, FolderType, OperationType } from "./fileOperations";
-import { createPathRegistry, createTemplatePathRegistry, TemplatePathRegistry } from "./paths";
+import { createProjectPathRegistry, createTemplatePathRegistry, TemplatePathRegistry } from "./rpgmaker/pathRegistries";
 import { filterUnusedFiles } from "./excludeUtils";
 import { parseData, ParsedData } from "./parsedData";
 import { parsePlugins } from "./pluginUtils";
@@ -148,7 +148,7 @@ function main() {
     parsedData.pluginPaths = pluginPaths;
   }
 
-  const pathRegistry = createPathRegistry(options.Input);
+  const pathRegistry = createProjectPathRegistry(options.Input);
 
   logger.log(`Building output for ${options.Platforms.length} targets`);
   for (let i = 0; i < options.Platforms.length; i++) {

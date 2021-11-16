@@ -4,7 +4,7 @@ import { createHash, Hash } from "crypto";
 import logger from "./logging";
 import { RPGMakerVersion } from "./rpgmakerTypes";
 import { Path } from "./io/Path";
-import { PathRegistry } from "./paths";
+import { ProjectPathRegistry } from "./rpgmaker/pathRegistries";
 import { BinaryReader } from "./io/BinaryReader";
 import { BinaryWriter } from "./io/BinaryWriter";
 
@@ -38,7 +38,7 @@ const extensions = {
   },
 };
 
-export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImages: boolean, pathRegistry: PathRegistry, version: RPGMakerVersion): boolean {
+export function shouldEncryptFile(from: Path, encryptAudio: boolean, encryptImages: boolean, pathRegistry: ProjectPathRegistry, version: RPGMakerVersion): boolean {
   const ext = from.extension;
   if (ext !== ".png" && ext !== ".ogg" && ext !== ".m4a") {
     return false;

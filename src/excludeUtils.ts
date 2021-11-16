@@ -1,6 +1,6 @@
 import { Path } from "./io/Path";
 import { ParsedData } from "./parsedData";
-import { PathRegistry } from "./paths";
+import { ProjectPathRegistry } from "./rpgmaker/pathRegistries";
 import { RPGMakerVersion } from "./rpgmakerTypes";
 
 function specialInclude(container: Set<string>, path: Path, topPath: Path): boolean {
@@ -24,7 +24,7 @@ function specialInclude(container: Set<string>, path: Path, topPath: Path): bool
   return container.has(actualName);
 }
 
-export function filterUnusedFiles(path: Path, parsedData: ParsedData, pathRegistry: PathRegistry, version: RPGMakerVersion): boolean {
+export function filterUnusedFiles(path: Path, parsedData: ParsedData, pathRegistry: ProjectPathRegistry, version: RPGMakerVersion): boolean {
   // Plugin files
   if (parsedData.pluginPaths !== undefined) {
     if (parsedData.pluginPaths.some(p => p.equals(path)))

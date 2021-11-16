@@ -5,9 +5,9 @@ import { Path } from "./io/Path";
 import { FolderType } from "./fileOperations";
 import { RPGMakerInfo, RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
 import { Stack } from "./other/Stack";
-import { PathRegistry, TemplatePathRegistry } from "./paths";
+import { ProjectPathRegistry, TemplatePathRegistry } from "./rpgmaker/pathRegistries";
 
-export function shouldFilterFile(from: Path, folder: FolderType, rpgmakerInfo: RPGMakerInfo, pathRegistry: PathRegistry, templatePathRegistry: TemplatePathRegistry | undefined): boolean {
+export function shouldFilterFile(from: Path, folder: FolderType, rpgmakerInfo: RPGMakerInfo, pathRegistry: ProjectPathRegistry, templatePathRegistry: TemplatePathRegistry | undefined): boolean {
   switch (folder) {
   case FolderType.TemplateFolder: {
     if (rpgmakerInfo.Version !== RPGMakerVersion.MZ) {

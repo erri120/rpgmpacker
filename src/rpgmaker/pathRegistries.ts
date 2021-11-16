@@ -1,6 +1,8 @@
-import { Path } from "./io/Path";
+import { Path } from "../io/Path";
 
-export interface PathRegistry {
+export interface ProjectPathRegistry {
+  top: Path,
+
   audio: Path,
   audio_bgm: Path,
   audio_bgs: Path,
@@ -40,21 +42,21 @@ export interface PathRegistry {
 export interface TemplatePathRegistry {
   top: Path,
 
-  // portable native client, Windows only
+  // chromium portable native client, Windows only
   pnacl: Path,
 
   // nwjs.app, OSX only
   nwjs_app: Path
 }
 
-export function createPathRegistry(p: Path): PathRegistry {
-  // TODO: maybe a better solution than this
-
+export function createProjectPathRegistry(p: Path): ProjectPathRegistry {
   const img = p.join("img");
   const audio = p.join("audio");
   const effects = p.join("effects");
 
-  const res: PathRegistry = {
+  const res: ProjectPathRegistry = {
+    top: p,
+
     audio,
     audio_bgm: audio.join("bgm"),
     audio_bgs: audio.join("bgs"),
