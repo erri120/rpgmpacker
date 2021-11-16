@@ -4,7 +4,7 @@ import logger from "./logging";
 import { Path } from "./io/Path";
 import { FolderType } from "./fileOperations";
 import { RPGMakerInfo, RPGMakerPlatform, RPGMakerVersion } from "./rpgmakerTypes";
-import { Stack } from "./javascriptDoesNotHaveAFuckingStack";
+import { Stack } from "./other/Stack";
 import { PathRegistry, TemplatePathRegistry } from "./paths";
 
 export function shouldFilterFile(from: Path, folder: FolderType, rpgmakerInfo: RPGMakerInfo, pathRegistry: PathRegistry, templatePathRegistry: TemplatePathRegistry | undefined): boolean {
@@ -108,8 +108,8 @@ export function* walkDirectoryRecursively(directory: Path) {
     return;
   }
 
-  while (stack.peak) {
-    const dir = stack.pop;
+  while (stack.peak()) {
+    const dir = stack.pop();
     try {
       const items = fs.readdirSync(dir.fullPath, { encoding: "utf8" });
       for (const item of items) {
