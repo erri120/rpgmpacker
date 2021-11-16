@@ -54,7 +54,7 @@ describe("Path", () => {
 
   it("replaceExtension", () => {
     const p = readmeFile.replaceExtension(".txt");
-    expect(p.fullPath).to.equal(isUnix ? "/README.md" : "C:\\README.txt");
+    expect(p.fullPath).to.equal(isUnix ? "/README.txt" : "C:\\README.txt");
     expect(p.fileName).to.equal("README.txt");
     expect(p.baseName).to.equal("README");
     expect(p.extension).to.equal(".txt");
@@ -94,7 +94,7 @@ describe("Path", () => {
   });
 
   it("relativeTo", () => {
-    expect(testFile.relativeTo(testDir)).to.equal("io\\Path.tests.ts");
+    expect(testFile.relativeTo(testDir)).to.equal(isUnix ? "io/Path.tests.ts" : "io\\Path.tests.ts");
   });
 
   it("getParent", () => {
