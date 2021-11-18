@@ -87,7 +87,7 @@ Next up is the encryption key that you provided which is hashed using MD5, an al
 buffer[i] = buffer[i] ^ key[i]
 ```
 
-There is no IV block, there is no block chaining these are just unrelated XOR operations one after another. Finally the unsecure MD5 hash gets written into `data/System.json`:
+There is no IV block, there is no block chaining, these are just unrelated XOR operations. Finally the unsecure MD5 hash gets written into `data/System.json`:
 
 ```json
 "hasEncryptedImages": true,
@@ -95,11 +95,15 @@ There is no IV block, there is no block chaining these are just unrelated XOR op
 "encryptionKey": "e48e13207341b6bffb7fb1622282247b"
 ```
 
-Of course since the engine is entirely written in JavaScript you can just open `js/rpg_core.js` and find the decryption functions. This is not secure, this is no encryption, this is just obfuscating the first 16 bytes of a file and changing the file extension so users can't view the file directly.
+The entire engine is written in JavaScript so you can just open `js/rpg_core.js` and find the decryption functions if you want. This is not secure, this is no encryption, this is just obfuscating the first 16 bytes of a file and changing the file extension so users can't view the file directly.
 
 ## Projects using this tool
 
 - Star Knightess Aura (NSFW): [itch.io](https://aura-dev.itch.io/star-knightess-aura), [gitgud](https://gitgud.io/aura-dev/star_knightess_aura/-/tree/develop/)
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for the entire history.
 
 ## License
 
