@@ -3,9 +3,11 @@
   "version": "2.0.2",
   "description": "Packaging RPG Maker games in an automated pipeline.",
   "keywords": [
+    "RPG Maker",
     "RPG Maker MV",
     "RPG Maker MZ",
-    "CI/CD"
+    "CI/CD",
+    "CLI"
   ],
   "main": "./dist/index.js",
   "bin": {

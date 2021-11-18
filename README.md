@@ -1,4 +1,4 @@
-# RPGMPacker
+# rpgmpacker
 
 Simple CLI program for packaging RPG Maker games to use in an automated build/deploy pipeline.
 
