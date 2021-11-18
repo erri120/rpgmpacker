@@ -2,6 +2,13 @@ name: CI
 
 on:
   push:
+    paths:
+      - 'github/workflows/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'tsconfig.json'
+      - 'src/**'
+      - 'test/**'
     branches: [ master ]
   pull_request:
     branches: [ master ]
