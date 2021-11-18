@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Released]
 
+## [2.0.2] - 2021-11-18
+
+Fixing build problems...
+
 ## [2.0.1] - 2021-11-18
 
 Fixing build problems...
@@ -167,8 +171,9 @@ This change does not change anything for the end-consumer of the tool but is a h
 [Semantic Versioning]: https://semver.org/
 
 <!-- Versions -->
-[Unreleased]: https://github.com/erri120/rpgmpacker/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/erri120/rpgmpacker/compare/v2.0.2...HEAD
 [Released]: https://github.com/erri120/rpgmpacker/releases/
+[2.0.2]: https://github.com/erri120/rpgmpacker/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/erri120/rpgmpacker/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/erri120/rpgmpacker/compare/v1.6.2...v2.0.0
 [1.6.2]: https://github.com/erri120/rpgmpacker/compare/v1.6.1...v1.6.2

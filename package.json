@@ -1,7 +1,12 @@
 {
   "name": "rpgmpacker",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Packaging RPG Maker games in an automated pipeline.",
+  "keywords": [
+    "RPG Maker MV",
+    "RPG Maker MZ",
+    "CI/CD"
+  ],
   "main": "./dist/index.js",
   "bin": {
     "rpgmpacket": "./dist/index.js"

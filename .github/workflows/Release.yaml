@@ -30,14 +30,16 @@ jobs:
       with:
         node-version: 16.13.0
         cache: 'pnpm'
-    
+
     - name: Install dependencies
       run: pnpm install
     - name: Run build
       run: pnpm run build
     - name: Run tests
       run: pnpm run test
-    
+
+    - name: Set version
+      run: npm version ${{ steps.tag_name.outputs.current_version }} --no-commit-hooks --no-git-tag-version
     - name: Pack
       run: pnpm pack
     - name: Publish
@@ -52,7 +54,7 @@ jobs:
       with:
         version: ${{ steps.tag_name.outputs.current_version }}
         path: ./CHANGELOG.md
-        
+
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v1
