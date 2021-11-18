@@ -6,15 +6,29 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Unreleased]
 
-## [2.0.0] - 2021-11-??
+## [Released]
 
-This release features a complete rework of the tool. I decided to move away from C++ and remade the entire thing in TypeScript. You can read more about this decision [here](TODO). This rework carries over all features from the previous version and adds more features on top:
+## [2.0.0] - 2021-11-18
+
+This release features a complete rework of the tool. I decided to move away from C++ and remade the entire thing in TypeScript. You can read more about this decision [here](https://erri120.github.io/posts/2021-11-18/). This rework carries over all features from the previous version and adds more features on top:
 
 - Plugins can now be parsed for the exclude-unused feature
 - Paths are handled better and multiple filter-related issues have been fixed with it
 - the Side-View and Front-View setting is now used when excluding unused assets
 
-## [Released]
+Here is a list of arguments that got removed, changed or added:
+
+- `--config`: removed
+- `--input`: removed `-i`
+- `--output`: removed `-o`
+- `--platforms`: removed `-p`, possible values also changed to `"Windows", "OSX", "Linux", "Browser", "Mobile"`
+- `--cache`: removed
+- `--threads`: removed
+- `--noempty`: added, this will remove all empty folders from the final output
+
+All of the short-hand arguments (single character) have been removed. The names of the platforms have also changed and you need to put the platform argument at the end of your command.
+
+Please open an issue if you have any problems going from 1.x to 2.0.0.
 
 ## [1.6.2] - 2021-04-07
 
@@ -149,9 +163,10 @@ This change does not change anything for the end-consumer of the tool but is a h
 [Semantic Versioning]: https://semver.org/
 
 <!-- Versions -->
-[Unreleased]: https://github.com/erri120/rpgmpacker/compare/v1.6.2...HEAD
+[Unreleased]: https://github.com/erri120/rpgmpacker/compare/v2.0.0...HEAD
 [Released]: https://github.com/erri120/rpgmpacker/releases/
-[1.6.1]: https://github.com/erri120/rpgmpacker/compare/v1.6.1...v1.6.2
+[2.0.0]: https://github.com/erri120/rpgmpacker/compare/v1.6.2...v2.0.0
+[1.6.2]: https://github.com/erri120/rpgmpacker/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/erri120/rpgmpacker/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/erri120/rpgmpacker/compare/v1.5.4...v1.6.0
 [1.5.4]: https://github.com/erri120/rpgmpacker/compare/v1.5.3...v1.5.4
