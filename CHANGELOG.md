@@ -24,6 +24,8 @@ This release features a complete rework of the tool. I decided to move away from
 - Paths are handled better and multiple filter-related issues have been fixed with it
 - the Side-View and Front-View setting is now used when excluding unused assets
 
+Since the tool is now available on [npmjs.com](https://www.npmjs.com/package/rpgmpacker) you don't have to manually download and extract an executables but can just use `npx rpgmpacker@latest --help`.
+
 Here is a list of arguments that got removed, changed or added:
 
 - `--config`: removed
