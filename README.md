@@ -87,7 +87,7 @@ Next up is the encryption key that you provided which is hashed using MD5, an al
 buffer[i] = buffer[i] ^ key[i]
 ```
 
-There is no IV block, there is block chaining these are just unrelated XOR operations one after another. Finally the unsecure MD5 hash gets written into `data/System.json`:
+There is no IV block, there is no block chaining these are just unrelated XOR operations one after another. Finally the unsecure MD5 hash gets written into `data/System.json`:
 
 ```json
 "hasEncryptedImages": true,
