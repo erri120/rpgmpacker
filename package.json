@@ -1,0 +1,47 @@
+{
+  "name": "rpgmpacker",
+  "version": "2.0.0",
+  "description": "Packaging RPG Maker games in an automated pipeline.",
+  "main": "./dist/index.js",
+  "bin": {
+    "rpgmpacket": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p .",
+    "watch": "tsc -p . --watch",
+    "test": "mocha --recursive",
+    "preinstall": "npx only-allow pnpm"
+  },
+  "license": "MIT",
+  "author": "erri120 <erri120@protonmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/erri120/rpgmpacker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/erri120/rpgmpacker/issues"
+  },
+  "homepage": "https://github.com/erri120/rpgmpacker#readme",
+  "devDependencies": {
+    "@types/chai": "^4.2.22",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.11.7",
+    "@types/sinon": "^10.0.6",
+    "@types/yargs": "^17.0.5",
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
+    "chai": "^4.3.4",
+    "eslint": "^8.2.0",
+    "mocha": "^9.1.3",
+    "nodemon": "^2.0.15",
+    "sinon": "^12.0.1",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "yargs": "^17.2.1"
+  }
+}
