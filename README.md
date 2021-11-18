@@ -1,13 +1,8 @@
 # RPGMPacker
 
-[![CI CMake Build](https://github.com/erri120/rpgmpacker/workflows/CI%20CMake%20Build/badge.svg)](https://github.com/erri120/rpgmpacker/actions?query=workflow%3A%22CI+CMake+Build%22)
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/erri120/rpgmpacker)](https://github.com/erri120/rpgmpacker/releases/latest)
-[![Chocolatey Version](https://img.shields.io/chocolatey/v/rpgmpacker)](https://community.chocolatey.org/packages/rpgmpacker)
-[![codecov](https://codecov.io/gh/erri120/rpgmpacker/branch/master/graph/badge.svg?token=42XI32HBFD)](https://codecov.io/gh/erri120/rpgmpacker)
-
 Simple CLI program for packaging RPG Maker games to use in an automated build/deploy pipeline.
 
-- Supported RPG Maker versions:
+- Supported RPG Maker versions and platforms:
   - RPG Maker MV
     - Windows
     - OSX
@@ -20,218 +15,92 @@ Simple CLI program for packaging RPG Maker games to use in an automated build/de
     - Linux: requires manual configuration, see [Linux for MZ](#linux-for-mz)
     - Browser/Mobile
 - Supported deployment features:
-  - audio filtering depending on platform
   - image and audio encryption with an encryption key
-  - using hardlinks instead of creating copies
+  - using hardlinks instead of copying files
   - deploying for multiple platforms at once
   - excluding unused files
-
-## Download
-
-- [GitHub Release](https://github.com/erri120/rpgmpacker/releases)
-- [Chocolatey Build](https://community.chocolatey.org/packages/rpgmpacker) (provided by [deogracia](https://github.com/erri120/rpgmpacker/issues/38))
 
 ## Usage
 
 ```txt
-  RPGMPacker [OPTION...]
-
-      --config arg         Config file location if the config file is not
-                           named config.toml (default: )
-  -i, --input arg          (REQUIRED) Input folder containing the .rpgproj
-                           file
-  -o, --output arg         (REQUIRED) Output folder
-      --rpgmaker arg       (REQUIRED) RPG Maker installation folder
-  -p, --platforms arg      (REQUIRED) Platforms to build for, this can take a
-                           list of platforms delimited with a comma or just
-                           one value. Possible values: win, osx, linux,
-                           browser, mobile
-      --encryptImages      Enable Image Encryption using encryptionKey.
-                           (default: false)
-      --encryptAudio       Enable Audio Encryption using encryptionKey.
-                           (default: false)
-      --encryptionKey arg  Encryption Key for Images or Audio, either
-                           encryptImages or encryptAudio have to be set
-      --exclude            Exclude unused files. (default: false)
-      --hardlinks          Use hardlinks instead of creating copies.
-                           (default: false)
-      --cache              Use a path cache for already encrypted files when
-                           multi-targeting and using hardlinks. (default:
-                           false)
-      --threads arg        Amount of worker threads to use. Min: 1, Max: 10
-                           (default: 2)
-  -d, --debug              Enable debugging output (very noisy). (default:
-                           false)
-  -v, --version            Print version
-  -h, --help               Print usage
+Options:
+      --help           Show help                                       [boolean]
+      --version        Show version number                             [boolean]
+      --input          Path to the input folder              [string] [required]
+      --output         Path to the output folder             [string] [required]
+      --rpgmaker       Path to the RPG Maker installation folder
+                                                             [string] [required]
+      --platforms      Platforms to build for
+    [array] [required] [choices: "Windows", "OSX", "Linux", "Browser", "Mobile"]
+      --encryptAudio   Encrypt audio files with the provided encryption key
+                                                      [boolean] [default: false]
+      --encryptImages  Encrypt images with the provided encryption key
+                                                      [boolean] [default: false]
+      --encryptionKey  Encryption key                                   [string]
+      --exclude        Exclude unused files           [boolean] [default: false]
+      --hardlinks      Use hardlinks instead of copying files          [boolean]
+      --noempty        Remove empty folders after execution            [boolean]
+  -d, --debug          Activate debug mode                             [boolean]
 ```
 
+Example command:
 
-The output directory will be cleaned before execution and each platform will get it's own sub directory:
-
-```txt
-/output
-/output/Windows
-/output/Linux
-/output/Browser
+```bash
+npx rpgmpacker \
+--input "E:\\Projects\\RPGMakerTest\\src\\Template" \
+--output "E:\\Projects\\RPGMakerTest\\out-js\\MV" \
+--rpgmaker "M:\\SteamLibrary\\steamapps\\common\\RPG Maker MV" \
+--hardlinks \
+--noempty \
+--exclude \
+--debug \
+--platforms "Windows" "OSX" "Linux"
 ```
 
-It is recommended to use the hardlink option for faster speeds and less disk usage. You can't hardlink across different drives and the program will check if hardlinks can be used beforehand. If you don't know what hardlinks are then take a look at the [Wikipedia article](https://en.wikipedia.org/wiki/Hard_link), the [Win32 docs](https://docs.microsoft.com/en-us/windows/win32/fileio/hard-links-and-junctions) or an [article from Linux Handbook](https://linuxhandbook.com/hard-link/).
+The `platforms` options has to come last because it accepts an array of strings. I highly recommend you use the hardlinks option for faster speeds. If you don't know what hardlinks are, take a look at the [Wikipedia article](https://en.wikipedia.org/wiki/Hard_link), the [Win32 docs](https://docs.microsoft.com/en-us/windows/win32/fileio/hard-links-and-junctions) or an [article from Linux Handbook](https://linuxhandbook.com/hard-link/).
 
-The cache option is recommend to use when you encrypt your files, use the hardlink option and target multiple platforms. It works by encrypting the files only once, caching the path and subsequently encryption will just hardlink to the already encrypted file reducing operation speed and disk usage.
+The `exclude` option works is the same as the "Exclude Unused Files" option from the Deployment Window in RPG Maker. This was the most tedious feature to implement because it required parsing every JSON file to figure out which assets are in use and which are not. Please report any inaccuracies with this feature enabled.
 
-The exclude option tries to exclude as much files as possible without making the game unplayable. This is the same as the "Exclude Unused Files" feature when deploying using RPG Maker. The picture below is a comparison using the default project:
+## Linux for MZ
 
-![exclude-comparison](assets/WinMerge-exclude.png)
+RPG Maker MZ does not include a Linux build of NW.js. If you want to provide a Linux build of your game you have to manually download the build from [here](https://nwjs.io/downloads/) and extract it to your MZ installation folder:
 
-The left size was the output generated by RPG Maker and the right side was generated by RPGMPacker. The only differences are the extra battlebacks RPG Maker includes (which I can't find a reference to). I recommend testing the output when excluding unused files to make sure nothing important is missing. This feature is still rather experimental so report any problems here.
+![Linux for RPG Maker MZ](assets/linux-for-mz.png)
 
-Since this application is mostly just doing IO stuff, I added parallel execution that you can configure with the threads option which will set the amount of worker threads to use. I recommend something between 2 and 4 as anything above 4 is not having that much of an impact:
+I don't know why they removed this option going from MV to MZ but since this is an unofficial workaround you should play-test the output before shipping it.
 
-| Worker Threads | Time (first platform) | Time (second platform) |
-|----------------|-----------------------|------------------------|
-| 1 | `4.84sec` | `0.16sec` |
-| 2 | `3.28sec` | `0.11sec` |
-| 4 | `1.84sec` | `0.09sec` |
-| 6 | `1.66sec` | `0.10sec` |
-| 8 | `1.31sec` | `0.09sec` |
+## Encryption
 
-For testing I used the following options:
+The "encryption" offered by RPG Maker is a joke. A better word might be "obfuscating". Lets take a look at the top secret highly secure encryption standards that RPG Maker employs to protect your assets:
 
-- Input: `E:\\Projects\\RPGMakerTest\\src\\MZProject1`
-- Output: `E:\\Projects\\RPGMakerTest\\out-c`
-- RPG Maker: `C:\\Program Files\\KADOKAWA\\RPGMZ`
-- Encryption Key: `1337`
-- Encrypt Images: `true`
-- Encrypt Audio: `true`
-- Platforms: `win,browser`
-- Debug: `false`
-- Use Hardlinks: `true`
-- Use Cache: `true`
-- RPGMaker Version: `MZ`
-- Can use hardlinking from RPGMaker Folder to Output: `false`
-- Can use hardlinking from Input Folder to Output: `true`
-
-### Linux for MZ
-
-RPG Maker MZ does not include a Linux build of nwjs. If you want to provide a Linux build of your game you have to manually download the build from [nwjs.io](https://nwjs.io/downloads/) and extract it to your MZ installation folder:
-
-![linux-for-mz](assets/linux-for-mz.png)
-
-You can then add "linux" to the platforms argument and the tool will output a Linux build of your game. Do note that RPG Maker MZ did not include the nwjs Linux build for a reason so you might run into issues with it. Test the build before you ship it.
-
-### TOML Config
-
-Instead of passing everything in the command, you can also create a config file:
-
-```TOML
-[config]
-input="E:/Projects/RPGMakerTest/src/MZProject1"
-output="E:/Projects/RPGMakerTest/out-c"
-rpgmaker="C:/Program Files/KADOKAWA/RPGMZ"
-platforms=["win", "linux", "browser"]
-hardlinks=true
-exclude=true
-cache=true
-encryptImages=true
-encryptAudio=true
-encryptionKey="1337"
-```
-
-The config file must be named `config.toml` or you must supply a path to the config file using the `--config` option. The value names are the same as the CLI options.
-
-### Example
-
-```ps1
-.\RPGMPacker.exe -i "E:\\Projects\\RPGMakerTest\\src\\Project1" -o "E:\\Projects\\RPGMakerTest\\out-c" --rpgmaker "M:\\SteamLibrary\\steamapps\\common\\RPG Maker MV" --platforms win,linux,osx --encryptImages --encryptAudio --encryptionKey="1337" --hardlinks --cache
-```
-
-### Pipeline Example and Guide
-
-See [this](https://erri120.github.io/2021/02/04/CI-CD-for-RPG-Maker-Games/) post I made about CI/CD for RPG Maker Game Development where we build an entire release pipeline.
-
-### GitHub Actions
-
-Using this application in [GitHub Actions](https://github.com/features/actions) can be done by downloading a release using `wget` and then executing with configured arguments. I doubt you have your game on a public repository and should also consider using a self-hosted runner. I recommend using `ubuntu-latest` because everything is faster than on `windows-latest`.
-
-```yml
-- name: RPGMPacker
-    # see https://github.com/erri120/rpgmpacker#usage for all arguments
-    # see https://github.com/erri120/rpgmpacker/releases for all releases
-    # note: using chmod to make sure we set execution permission, not needed on Windows
-    shell: bash
-    env:
-        RPGMPACKER_VERSION: '1.0.0'
-    run: |
-        wget https://github.com/erri120/rpgmpacker/releases/download/v$RPGMPACKER_VERSION/RPGMPacker-Linux
-        chmod +x ./RPGMPacker-Linux
-        ./RPGMPacker-Linux -i path-to-input -o path-to-output --rpgmaker path-to-rpgm --platforms win,lnx
-```
-
-If you are using `windows-latest` for whatever reason change `RPGMPacker-Linux` to `RPGMPacker-Windows.exe`. You don't have to change the shell as `bash` works on all platforms ([GitHub Actions Docs](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#using-a-specific-shell)).
-
-## How it works
-
-RPG Maker has a very _simple_ way of deploying your game due to the fact that the game is in Javascript and no compilation is needed. What the program does is copy your project files as well as the runtime to the output directory. The runtime can be found in the RPG Maker installation folder and some project files are filtered out before copying (eg only `.ogg` audio files on Desktop).
-
-### Encryption
-
-The "encryption" method used by RPG Maker is the opposite of strong and is only useful if you don't want users to simply open the assets folder and look at some images.
-
-Only image (`.png`) and audio (`.ogg` or `.m4a`) files are being encrypted. RPG Maker starts by writing a new header:
+Only image (`.png`) and audio (`.ogg` and `.m4a`) files can be encrypted. RPG Maker starts by writing a new header:
 
 ```txt
 52 50 47 4D 56 00 00 00 00 03 01 00 00 00 00 00
 ```
 
-The file signature is 8 bytes long: `52 50 47 4D 56 00 00 00 00` (`52 50 47 4D 56` = `RPGMV`), then 3 bytes for the version number: `00 03 01` and the rest is just filler (This file signature is the same in MV and MZ for whatever reason).
+The file signature is 8 bytes long: `52 50 47 4D 56 00 00 00 00` with the first 5 bytes standing for `RPGMV`, then we get 3 bytes for the version number: `00 03 01` and the rest is just filler zeroes. This header is the same for MV and MZ.
 
-The provided encryption key will be run through an MD5 algorithm: `1337` -> `e48e13207341b6bffb7fb1622282247b` and the first 16 bytes of the file will be "encrypted" in an iteration with `buffer[i] = buffer[i] ^ key[i]`. This XOR operation is only applied on the first 16 bytes and the rest of the file stays the same.
+Next up is the encryption key that you provided which is hashed using MD5, an algorithm deemed insecure by NIST: `1337` -> `e48e13207341b6bffb7fb1622282247b`. The first **16 bytes** of the input file will now be manipulated using an XOR operation:
 
-Finally the MD5 hash of the encryption key will be put into `data/System.json`:
-
-```JSON
-    "hasEncryptedImages": true,
-    "hasEncryptedAudio": true,
-    "encryptionKey": "e48e13207341b6bffb7fb1622282247b"
+```txt
+buffer[i] = buffer[i] ^ key[i]
 ```
 
-Since the game is in Javascript you can easily just go to `js/rpg_core.js` and find the decryption functions as those are not even minified.
+There is no IV block, there is block chaining these are just unrelated XOR operations one after another. Finally the unsecure MD5 hash gets written into `data/System.json`:
 
-### Exclude Unused Files
-
-This one was very interesting to work on because it required the parsing of the data files in `/data/`. Luckily RPG Maker has a set file system meaning you will always find all sound effects in `/audio/se/`, all movies in `/movies/`, all animations in `/img/animations/` and so on. What I ended up doing was parsing all data files and creating a set (`std::set<std::string>`) for each file type (animations, bgm, se, me, ...) that contains all required file names. After that we simply filter out files by checking if the file is of a specific type and then checking if the file name is in the set:
-
-```cpp
-std::set<std::string>::iterator it;
-if (parent == inputPaths->bgmPath) {
-    it = parsedData->bgmNames.find(name);
-    return it == parsedData->bgmNames.end();
-}
+```json
+"hasEncryptedImages": true,
+"hasEncryptedAudio": true,
+"encryptionKey": "e48e13207341b6bffb7fb1622282247b"
 ```
 
-RPG Maker MZ changed how animations worked and use [Effekseer](https://github.com/effekseer/Effekseer) for particle effects. This also means they changed how those files looked like. Instead of simple pngs they are now `.efkefc` files. The main problem here is that one of those files can also reference textures or models inside `/effects/textures/` or `/effects/models`. RPGMPacker will parse these `.efkefc` files and find what other files it reference.
+Of course since the engine is entirely written in JavaScript you can just open `js/rpg_core.js` and find the decryption functions. This is not secure, this is no encryption, this is just obfuscating the first 16 bytes of a file and changing the file extension so users can't view the file directly.
 
 ## Projects using this tool
 
 - Star Knightess Aura (NSFW): [itch.io](https://aura-dev.itch.io/star-knightess-aura), [gitgud](https://gitgud.io/aura-dev/star_knightess_aura/-/tree/develop/)
 
-## Building from Source
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
-
-## Libraries used
-
-Managed with [CPM](https://github.com/cpm-cmake/CPM.cmake).
-
-- [cxxopts](https://github.com/jarro2783/cxxopts) ([MIT](https://github.com/jarro2783/cxxopts/blob/master/LICENSE))
-- [spdlog](https://github.com/gabime/spdlog) ([MIT](https://github.com/gabime/spdlog/blob/v1.x/LICENSE))
-- [ghc::filesystem](https://github.com/gulrak/filesystem) ([MIT](https://github.com/gulrak/filesystem/blob/master/LICENSE))
-- MD5 hash functions from [stbrumme/hash-library](https://github.com/stbrumme/hash-library) ([zlib](https://github.com/stbrumme/hash-library/blob/master/LICENSE))
-- [Taskflow](https://github.com/taskflow/taskflow) ([MIT](https://github.com/taskflow/taskflow/blob/master/LICENSE))
-- [simdjson](https://github.com/simdjson/simdjson) ([Apache-2.0](https://github.com/simdjson/simdjson/blob/master/LICENSE))
-- [toml11](https://github.com/ToruNiina/toml11) ([MIT](https://github.com/ToruNiina/toml11/blob/master/LICENSE))
-
 ## License
 
-See [LICENSE](LICENSE).
+This project is under the MIT License, see [LICENSE](LICENSE) for more information.
