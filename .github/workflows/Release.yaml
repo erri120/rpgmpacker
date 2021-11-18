@@ -39,7 +39,7 @@ jobs:
       run: pnpm run test
 
     - name: Set version
-      run: npm version ${{ steps.tag_name.outputs.current_version }} --no-commit-hooks --no-git-tag-version
+      run: npm version ${{ steps.tag_name.outputs.current_version }} --no-commit-hooks --no-git-tag-version --allow-same-version
     - name: Pack
       run: pnpm pack
     - name: Publish
