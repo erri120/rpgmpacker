@@ -30,7 +30,7 @@
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.11.7",
     "@types/sinon": "^10.0.6",
-    "@types/yargs": "^17.0.5",
+    "@types/yargs": "^17.0.7",
     "@typescript-eslint/eslint-plugin": "^5.4.0",
     "@typescript-eslint/parser": "^5.4.0",
     "chai": "^4.3.4",
@@ -39,7 +39,7 @@
     "nodemon": "^2.0.15",
     "sinon": "^12.0.1",
     "ts-node": "^10.4.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.5.2"
   },
   "dependencies": {
     "yargs": "^17.2.1"
