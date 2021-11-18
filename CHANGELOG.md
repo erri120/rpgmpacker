@@ -29,9 +29,9 @@ Since the tool is now available on [npmjs.com](https://www.npmjs.com/package/rpg
 Here is a list of arguments that got removed, changed or added:
 
 - `--config`: removed
-- `--input`: removed `-i`
-- `--output`: removed `-o`
-- `--platforms`: removed `-p`, possible values also changed to `"Windows", "OSX", "Linux", "Browser", "Mobile"`
+- `--input`: removed `-i` alias
+- `--output`: removed `-o` alias
+- `--platforms`: removed `-p` alias, possible values also changed to `"Windows", "OSX", "Linux", "Browser", "Mobile"`
 - `--cache`: removed
 - `--threads`: removed
 - `--noempty`: added, this will remove all empty folders from the final output
