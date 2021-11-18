@@ -10,7 +10,6 @@ export interface Options {
   EncryptionOptions?: EncryptionOptions;
   ExcludeUnused: boolean;
   UseHardlinks: boolean;
-  // NumThreads: number;
   RemoveEmpty: boolean,
   Debug: boolean;
 }
@@ -32,8 +31,7 @@ export function createOptionsFromYargs(opt: {
   exclude: boolean;
   debug: boolean | undefined,
   hardlinks: boolean | undefined,
-  noempty: boolean | undefined,
-  // threads: number
+  noempty: boolean | undefined
 }): Options | null {
 
   const inputPath = new Path(opt.input);
@@ -42,21 +40,12 @@ export function createOptionsFromYargs(opt: {
     return null;
   }
 
-  if (!inputPath.isDir) {
+  if (!inputPath.isDir()) {
     logger.error(`Input path ${inputPath.fullPath} is not a folder!`);
     return null;
   }
 
   const outputPath = new Path(opt.output);
-  if (!outputPath.exists()) {
-    logger.error(`Output folder ${outputPath.fullPath} does not exist!`);
-    return null;
-  }
-
-  if (!outputPath.isDir) {
-    logger.error(`Output path ${inputPath.fullPath} is not a folder!`);
-    return null;
-  }
 
   const rpgmakerPath = new Path(opt.rpgmaker);
   if (!rpgmakerPath.exists()) {
@@ -64,7 +53,7 @@ export function createOptionsFromYargs(opt: {
     return null;
   }
 
-  if (!rpgmakerPath.isDir) {
+  if (!rpgmakerPath.isDir()) {
     logger.error(`RPG Maker path ${inputPath.fullPath} is not a folder!`);
     return null;
   }
@@ -120,7 +109,6 @@ export function createOptionsFromYargs(opt: {
     Platforms: platforms,
     EncryptionOptions: encryptionOptions,
     ExcludeUnused: opt.exclude,
-    // NumThreads: opt.threads,
     UseHardlinks: opt.hardlinks === true,
     Debug: opt.debug === true,
     RemoveEmpty: opt.noempty === true

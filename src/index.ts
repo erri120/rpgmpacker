@@ -21,13 +21,11 @@ import { isUseless, isUnused } from "./filtering";
 function main() {
   const yargsResult = yargs(hideBin(process.argv))
     .option("input", {
-      // alias: "i",
       type: "string",
       description: "Path to the input folder",
       demandOption: true
     })
     .option("output", {
-      // alias: "o",
       type: "string",
       description: "Path to the output folder",
       demandOption: true
@@ -67,11 +65,6 @@ function main() {
       type: "boolean",
       description: "Use hardlinks instead of copying files"
     })
-    // .option("threads", {
-    //   type: "number",
-    //   description: "Number of threads to use",
-    //   default: 2
-    // })
     .option("noempty", {
       type: "boolean",
       description: "Remove empty folders after execution"
@@ -95,7 +88,9 @@ function main() {
     logger.setMinLevel(Level.INFO);
   }
 
-  // logger.debug(JSON.stringify(options, undefined, 2));
+  if (!options.Output.exists()) {
+    fs.mkdirSync(options.Output.fullPath, { recursive: true });
+  }
 
   const rpgmakerVersion = identifyRPGMakerVersion(options.Input);
   if (rpgmakerVersion === null) {
