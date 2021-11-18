@@ -43,7 +43,7 @@ jobs:
     - name: Pack
       run: pnpm pack
     - name: Publish
-      run: pnpm publish rpgmpacker-${{ steps.tag_name.outputs.current_version }}.tgz
+      run: pnpm publish rpgmpacker-${{ steps.tag_name.outputs.current_version }}.tgz --no-git-checks
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
