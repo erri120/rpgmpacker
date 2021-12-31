@@ -116,6 +116,8 @@ export interface PluginComment {
   parameters: PluginParameter[]
 }
 
+const mainTypes = ["@plugindesc", "@param", "@help", "@command"];
+
 function parsePluginFile(pluginFile: Path): PluginComment | null {
   if (!pluginFile.exists()) {
     logger.error(`Plugin at ${pluginFile} does not exist!`);
@@ -151,6 +153,7 @@ function parsePluginFile(pluginFile: Path): PluginComment | null {
   let paramRequire = false;
   let paramDir: string | undefined;
   let paramType: PluginParameterType | undefined;
+
   for (let i = 0; i < pluginParamsText.length; i++) {
     const { type, value } = pluginParamsText[i];
 
@@ -159,7 +162,7 @@ function parsePluginFile(pluginFile: Path): PluginComment | null {
       continue;
     }
 
-    if (type === "@param") {
+    if (mainTypes.includes(type)) {
       if (inParam) {
         if (paramName !== undefined) {
           if (paramType !== undefined) {
@@ -182,8 +185,11 @@ function parsePluginFile(pluginFile: Path): PluginComment | null {
         paramType = undefined;
       }
 
-      inParam = true;
-      paramName = value;
+      if (type === "@param") {
+        inParam = true;
+        paramName = value;
+      }
+
       continue;
     }
 
@@ -203,6 +209,23 @@ function parsePluginFile(pluginFile: Path): PluginComment | null {
         paramType = PluginParameterType.Animation;
       } else {
         logger.warn(`Unknown type: ${lowerCaseValue} in ${pluginFile.fullPath}`);
+      }
+    }
+
+    // making sure the last one also goes into the list
+    if (i === pluginParamsText.length - 1 && inParam) {
+      if (paramName !== undefined) {
+        if (paramType !== undefined) {
+          res.parameters.push({
+            name: paramName,
+            default: paramDefault,
+            required: paramRequire,
+            dir: paramDir,
+            type: paramType
+          });
+        }
+      } else {
+        logger.warn(`Parameter has no name in file ${pluginFile.fullPath}`);
       }
     }
   }
