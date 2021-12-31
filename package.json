@@ -1,6 +1,6 @@
 {
   "name": "rpgmpacker",
-  "version": "2.0.2",
+  "version": "2.0.4",
   "description": "Packaging RPG Maker games in an automated pipeline.",
   "keywords": [
     "RPG Maker",
