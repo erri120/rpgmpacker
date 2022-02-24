@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog][Keep a Changelog] and this project adh
 
 ## [Released]
 
+## [2.0.5] - 2022-02-24
+
+Fixed event 322 ("Change Actor Images"), the character image was parsed as a face image and vice versa ([#49](https://github.com/erri120/rpgmpacker/issues/49)).
+
 ## [2.0.4] - 2021-12-31
 
 Parameters for Plugins at the end will no longer be ignored.

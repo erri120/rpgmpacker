@@ -198,7 +198,7 @@ function parseEvents(events: Array<Event>, res: ParsedData) {
       * - 283: change battle back, [0] is battlebacks1 and [1] is battlebacks2
       * - 284: change parallax, [0] is image name
       *
-      * - 322: change actor images, [1] is face name, [3] is character name, [5] is battler name
+      * - 322: change actor images, [1] is character name, [3] is face name, [5] is battler name
       * - 323: change vehicle image, [1] is face name
       *
       * - 337: show battle animation, [1] is index of animation
@@ -246,8 +246,8 @@ function parseEvents(events: Array<Event>, res: ParsedData) {
       specialPush(res.parallaxNames, params[0]);
     } else if (code === 322) {
       const params = event.parameters as string[];
-      specialPush(res.faceNames, params[1]);
-      specialPush(res.characterNames, params[3]);
+      specialPush(res.characterNames, params[1]);
+      specialPush(res.faceNames, params[3]);
       specialPush(res.actorBattlerNames, params[5]);
     } else if (code === 323) {
       const params = event.parameters as string[];
